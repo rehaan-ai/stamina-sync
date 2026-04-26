@@ -321,6 +321,12 @@ def find_customer_for_meeting(invitees: list, email_cache: dict, domain_cache: d
 
 def run_track_b(email_cache: dict, domain_cache: dict) -> tuple:
     log("=== TRACK B: Fathom meetings ===")
+
+    # Load already-synced meeting IDs so we can stop early
+    existing = {r["pylon_meeting_id"] for r in
+                sb.table("meetings").select("pylon_meeting_id").execute().data}
+    log(f"  {len(existing)} meetings already in Supabase")
+
     cursor, synced, errors = None, 0, []
 
     while True:
@@ -330,9 +336,15 @@ def run_track_b(email_cache: dict, domain_cache: dict) -> tuple:
         resp     = fathom_get("meetings", params)
         meetings = resp.get("items", [])
 
+        new_in_page = 0
         for mtg in meetings:
+            mid = str(mtg["recording_id"])
+            if mid in existing:
+                continue  # already synced
+            new_in_page += 1
             try:
                 if mtg.get("calendar_invitees_domains_type") == "only_internal":
+                    existing.add(mid)
                     continue
 
                 invitees        = mtg.get("calendar_invitees", [])
@@ -345,7 +357,7 @@ def run_track_b(email_cache: dict, domain_cache: dict) -> tuple:
 
                 sb_upsert("meetings", {
                     "customer_id":      customer["id"] if customer else None,
-                    "pylon_meeting_id": str(mtg["recording_id"]),
+                    "pylon_meeting_id": mid,
                     "title":            mtg.get("title"),
                     "meeting_date":     mtg.get("scheduled_start_time") or mtg.get("recording_start_time"),
                     "summary_text":     summary or transcript_text,
@@ -355,17 +367,23 @@ def run_track_b(email_cache: dict, domain_cache: dict) -> tuple:
                     "synced_at":        now_utc(),
                 }, on_conflict="pylon_meeting_id")
 
+                existing.add(mid)
                 synced += 1
                 log(f"  ✓ {mtg.get('title')} → {who}")
             except Exception as e:
-                errors.append({"meeting_id": mtg.get("recording_id"), "title": mtg.get("title"), "error": str(e)})
+                errors.append({"meeting_id": mid, "title": mtg.get("title"), "error": str(e)})
                 log(f"  ✗ {mtg.get('title')}: {e}")
+
+        # Fathom returns newest first — if this whole page was already synced, we're caught up
+        if new_in_page == 0:
+            log(f"  Caught up — no new meetings in this page, stopping")
+            break
 
         cursor = resp.get("next_cursor")
         if not cursor:
             break
 
-    log(f"Track B done — {synced} meetings synced")
+    log(f"Track B done — {synced} new meetings synced")
     return synced, errors
 
 

@@ -194,41 +194,103 @@ def upsert_account(account: dict, user_cache: dict) -> str:
     return result.data[0]["id"]
 
 
-def sync_contacts(account_id: str, customer_uuid: str):
-    resp     = pylon_get("contacts", {"account_id": account_id, "limit": 200})
-    contacts = resp if isinstance(resp, list) else resp.get("data", [])
-    if not contacts:
+def sync_all_contacts(account_uuid_map: dict):
+    """
+    Fetch ALL contacts globally with cursor pagination.
+    Each contact object has contact["account"]["id"] — use that to map to the
+    correct customer UUID rather than the account_id filter param (which Pylon ignores).
+    account_uuid_map: { pylon_account_id → supabase customer UUID }
+    """
+    all_contacts, cursor = [], None
+    while True:
+        params = {"limit": 100}
+        if cursor:
+            params["cursor"] = cursor
+        resp     = pylon_get("contacts", params)
+        batch    = resp.get("data", []) if isinstance(resp, dict) else resp
+        all_contacts.extend(batch)
+        pag = resp.get("pagination", {}) if isinstance(resp, dict) else {}
+        if not pag.get("has_next_page"):
+            break
+        cursor = pag.get("cursor")
+
+    log(f"  {len(all_contacts)} contacts fetched globally")
+    if not all_contacts:
         return
-    ts = now_utc()
-    rows = [{
-        "customer_id":      customer_uuid,
-        "pylon_contact_id": c["id"],
-        "name":             c.get("name"),
-        "email":            c.get("email"),
-        "synced_at":        ts,
-    } for c in contacts]
-    if not DRY_RUN:
-        sb.table("contacts").upsert(rows, on_conflict="pylon_contact_id").execute()
-    else:
+
+    ts, rows, skipped = now_utc(), [], 0
+    for c in all_contacts:
+        acct = c.get("account") or {}
+        pylon_acct_id = acct.get("id")
+        customer_uuid = account_uuid_map.get(pylon_acct_id)
+        if not customer_uuid:
+            skipped += 1
+            continue
+        rows.append({
+            "customer_id":      customer_uuid,
+            "pylon_contact_id": c["id"],
+            "name":             c.get("name"),
+            "email":            c.get("email"),
+            "synced_at":        ts,
+        })
+
+    if skipped:
+        log(f"  {skipped} contacts skipped (unknown account)")
+
+    if not rows:
+        return
+
+    if DRY_RUN:
         log(f"  [WOULD UPSERT] contacts: {len(rows)} rows")
+    else:
+        # Batch in chunks of 500 to stay under Supabase limits
+        for i in range(0, len(rows), 500):
+            sb.table("contacts").upsert(rows[i:i+500], on_conflict="pylon_contact_id").execute()
+        log(f"  ✓ {len(rows)} contacts upserted")
 
 
-def sync_issues(account_id: str, customer_uuid: str):
-    """Single 30-day window — avoids rate limits and covers active issues."""
+def sync_all_issues(account_uuid_map: dict):
+    """
+    Fetch ALL issues globally for the last 30 days with cursor pagination.
+    Each issue has issue["account"]["id"] — use that for correct customer mapping.
+    account_uuid_map: { pylon_account_id → supabase customer UUID }
+    """
     end   = datetime.now(timezone.utc)
     start = end - timedelta(days=30)
-    try:
-        resp   = pylon_get("issues", {
-            "account_id": account_id,
+    all_issues, cursor = [], None
+    while True:
+        params = {
             "start_time": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "end_time":   end.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "limit":      500,
-        })
-        issues = resp.get("data", [])
-        if not issues:
-            return
-        ts   = now_utc()
-        rows = [{
+        }
+        if cursor:
+            params["cursor"] = cursor
+        try:
+            resp   = pylon_get("issues", params)
+            batch  = resp.get("data", [])
+            all_issues.extend(batch)
+            pag = resp.get("pagination", {})
+            if not pag.get("has_next_page"):
+                break
+            cursor = pag.get("cursor")
+        except Exception as e:
+            log(f"  Issues fetch error: {e}")
+            break
+
+    log(f"  {len(all_issues)} issues fetched globally")
+    if not all_issues:
+        return
+
+    ts, rows, skipped = now_utc(), [], 0
+    for issue in all_issues:
+        acct = issue.get("account") or {}
+        pylon_acct_id = acct.get("id")
+        customer_uuid = account_uuid_map.get(pylon_acct_id)
+        if not customer_uuid:
+            skipped += 1
+            continue
+        rows.append({
             "customer_id":    customer_uuid,
             "pylon_issue_id": issue["id"],
             "title":          issue.get("title"),
@@ -237,31 +299,59 @@ def sync_issues(account_id: str, customer_uuid: str):
             "created_at":     issue.get("created_at"),
             "resolved_at":    issue.get("resolution_time"),
             "synced_at":      ts,
-        } for issue in issues]
-        if not DRY_RUN:
-            sb.table("issues").upsert(rows, on_conflict="pylon_issue_id").execute()
-        else:
-            log(f"  [WOULD UPSERT] issues: {len(rows)} rows")
-    except Exception as e:
-        log(f"    Issues error for {account_id}: {e}")
+        })
+
+    if skipped:
+        log(f"  {skipped} issues skipped (unknown account)")
+
+    if not rows:
+        return
+
+    if DRY_RUN:
+        log(f"  [WOULD UPSERT] issues: {len(rows)} rows")
+    else:
+        for i in range(0, len(rows), 500):
+            sb.table("issues").upsert(rows[i:i+500], on_conflict="pylon_issue_id").execute()
+        log(f"  ✓ {len(rows)} issues upserted")
 
 
 def run_track_a(user_cache: dict) -> tuple:
     log("=== TRACK A: Pylon sync ===")
     accounts = fetch_all_accounts()
     log(f"  {len(accounts)} accounts found")
+
+    # Step 1: upsert all accounts and build the pylon_account_id → supabase UUID map
+    account_uuid_map = {}  # { pylon_account_id: supabase_uuid }
     synced, errors = 0, []
     for acct in accounts:
         try:
             uuid = upsert_account(acct, user_cache)
-            sync_contacts(acct["id"], uuid)
-            sync_issues(acct["id"], uuid)
+            account_uuid_map[acct["id"]] = uuid
             synced += 1
             log(f"  ✓ {acct.get('name')}")
         except Exception as e:
             errors.append({"account_id": acct.get("id"), "name": acct.get("name"), "error": str(e)})
             log(f"  ✗ {acct.get('name')}: {e}")
-    log(f"Track A done — {synced}/{len(accounts)} synced")
+
+    log(f"  Accounts done — {synced}/{len(accounts)} upserted")
+
+    # Step 2: sync contacts globally (Pylon ignores account_id filter — fetch all, map by embedded account)
+    log("  Syncing contacts globally...")
+    try:
+        sync_all_contacts(account_uuid_map)
+    except Exception as e:
+        errors.append({"stage": "sync_all_contacts", "error": str(e)})
+        log(f"  ✗ contacts sync failed: {e}")
+
+    # Step 3: sync issues globally
+    log("  Syncing issues globally...")
+    try:
+        sync_all_issues(account_uuid_map)
+    except Exception as e:
+        errors.append({"stage": "sync_all_issues", "error": str(e)})
+        log(f"  ✗ issues sync failed: {e}")
+
+    log(f"Track A done — {synced}/{len(accounts)} accounts, contacts + issues synced globally")
     return synced, errors
 
 

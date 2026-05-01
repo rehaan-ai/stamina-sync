@@ -44,6 +44,18 @@ FATHOM_BASE = "https://api.fathom.ai/external/v1"
 TIER_TAGS             = {"Base", "Custom", "Enterprise"}
 FUZZY_MATCH_THRESHOLD = 80
 
+# Personal/free email domains — never use these for account matching
+PERSONAL_EMAIL_DOMAINS = {
+    "gmail.com", "googlemail.com",
+    "hotmail.com", "hotmail.co.uk", "hotmail.fr",
+    "outlook.com", "outlook.co.uk",
+    "yahoo.com", "yahoo.co.uk", "yahoo.fr", "yahoo.ca",
+    "icloud.com", "me.com", "mac.com",
+    "aol.com", "msn.com", "live.com", "live.co.uk",
+    "protonmail.com", "proton.me",
+    "mail.com", "zoho.com",
+}
+
 # ── Clients ───────────────────────────────────────────────────────────────────
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -73,7 +85,11 @@ def now_utc() -> str:
 
 
 def domain_of(email: str) -> "str | None":
-    return email.split("@")[1].lower().strip() if email and "@" in email else None
+    """Return the domain of an email, or None if it's a personal/free email provider."""
+    if not email or "@" not in email:
+        return None
+    d = email.split("@")[1].lower().strip()
+    return None if d in PERSONAL_EMAIL_DOMAINS else d
 
 
 def pylon_get(path: str, params: dict = None) -> dict:
@@ -364,10 +380,19 @@ def build_fathom_lookup_caches() -> tuple[dict, dict]:
       domain_cache → {domain_lower: customer_row}  (from customers.domain)
     """
     customers = sb.table("customers").select("id, pylon_account_id, name, domain").execute().data
-    domain_cache = {r["domain"].lower().strip(): r for r in customers if r.get("domain")}
+
+    # domain_cache: only company domains — never gmail/hotmail/etc.
+    domain_cache = {}
+    for r in customers:
+        d = (r.get("domain") or "").lower().strip()
+        if d and d not in PERSONAL_EMAIL_DOMAINS:
+            domain_cache[d] = r
 
     contacts = sb.table("contacts").select("email, customer_id").execute().data
     cust_by_id = {r["id"]: r for r in customers}
+
+    # email_cache: exact email match is always safe (even gmail), but we skip
+    # adding gmail/etc. to the domain_cache to prevent cross-account pollution
     email_cache = {}
     for c in contacts:
         if c.get("email"):

@@ -485,6 +485,7 @@ def run_track_b(email_cache: dict, domain_cache: dict) -> tuple:
                     "action_items":     mtg.get("action_items"),
                     "attendees":        invitees,
                     "recording_url":    mtg.get("share_url"),
+                    "recorded_by":      mtg.get("recorded_by"),
                     "synced_at":        now_utc(),
                 }, on_conflict="pylon_meeting_id")
 

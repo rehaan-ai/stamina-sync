@@ -44,18 +44,6 @@ FATHOM_BASE = "https://api.fathom.ai/external/v1"
 TIER_TAGS             = {"Base", "Custom", "Enterprise"}
 FUZZY_MATCH_THRESHOLD = 80
 
-# Personal/free email domains — never use these for account matching
-PERSONAL_EMAIL_DOMAINS = {
-    "gmail.com", "googlemail.com",
-    "hotmail.com", "hotmail.co.uk", "hotmail.fr",
-    "outlook.com", "outlook.co.uk",
-    "yahoo.com", "yahoo.co.uk", "yahoo.fr", "yahoo.ca",
-    "icloud.com", "me.com", "mac.com",
-    "aol.com", "msn.com", "live.com", "live.co.uk",
-    "protonmail.com", "proton.me",
-    "mail.com", "zoho.com",
-}
-
 # ── Clients ───────────────────────────────────────────────────────────────────
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -85,11 +73,7 @@ def now_utc() -> str:
 
 
 def domain_of(email: str) -> "str | None":
-    """Return the domain of an email, or None if it's a personal/free email provider."""
-    if not email or "@" not in email:
-        return None
-    d = email.split("@")[1].lower().strip()
-    return None if d in PERSONAL_EMAIL_DOMAINS else d
+    return email.split("@")[1].lower().strip() if email and "@" in email else None
 
 
 def pylon_get(path: str, params: dict = None) -> dict:
@@ -376,29 +360,51 @@ def run_track_a(user_cache: dict) -> tuple:
 def build_fathom_lookup_caches() -> tuple[dict, dict]:
     """
     Returns:
-      email_cache  → {email_lower: customer_row}   (from contacts table)
-      domain_cache → {domain_lower: customer_row}  (from customers.domain)
+      email_cache  → {email_lower: customer_row}
+          Exact match on a meeting attendee's full email address.
+          Always used regardless of email provider.
+
+      domain_cache → {domain_lower: customer_row}
+          Domain-level fallback — but ONLY for domains that map to exactly
+          one customer across all contacts + customer primary domains.
+          If gmail.com (or any shared domain) appears under multiple
+          customers it is automatically excluded — no hardcoded blocklist.
     """
-    customers = sb.table("customers").select("id, pylon_account_id, name, domain").execute().data
-
-    # domain_cache: only company domains — never gmail/hotmail/etc.
-    domain_cache = {}
-    for r in customers:
-        d = (r.get("domain") or "").lower().strip()
-        if d and d not in PERSONAL_EMAIL_DOMAINS:
-            domain_cache[d] = r
-
-    contacts = sb.table("contacts").select("email, customer_id").execute().data
+    customers  = sb.table("customers").select("id, pylon_account_id, name, domain").execute().data
+    contacts   = sb.table("contacts").select("email, customer_id").execute().data
     cust_by_id = {r["id"]: r for r in customers}
 
-    # email_cache: exact email match is always safe (even gmail), but we skip
-    # adding gmail/etc. to the domain_cache to prevent cross-account pollution
+    # ── email_cache: full address → customer (always safe) ───────────────────
     email_cache = {}
     for c in contacts:
         if c.get("email"):
             cust = cust_by_id.get(c["customer_id"])
             if cust:
                 email_cache[c["email"].lower().strip()] = cust
+
+    # ── domain_cache: only unambiguous domains ───────────────────────────────
+    # Collect every domain → set of customer IDs it appears under
+    domain_to_custs: dict[str, set] = {}
+
+    # 1. Customer primary domains (authoritative)
+    for r in customers:
+        d = (r.get("domain") or "").lower().strip()
+        if d:
+            domain_to_custs.setdefault(d, set()).add(r["id"])
+
+    # 2. Contact email domains (may include shared providers like gmail.com)
+    for c in contacts:
+        d = domain_of(c.get("email") or "")
+        if d and c.get("customer_id"):
+            domain_to_custs.setdefault(d, set()).add(c["customer_id"])
+
+    # Only keep domains that belong to exactly ONE customer
+    domain_cache = {}
+    for d, cust_ids in domain_to_custs.items():
+        if len(cust_ids) == 1:
+            cust = cust_by_id.get(next(iter(cust_ids)))
+            if cust:
+                domain_cache[d] = cust
 
     return email_cache, domain_cache
 

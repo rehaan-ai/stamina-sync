@@ -98,9 +98,15 @@ VALUES (
 When a CSM asks about an account, always pull team_notes first and include them in your response.
 Lead with what the team already knows before querying new data.
 
-Format saved notes clearly:
-> 📌 **Strategy** (added by Raswant, May 2) — Targeting Series A SaaS companies in the US, 10–50 employees, VP Sales persona.
-> 📌 **Risk** (added by Nishkarsh, Apr 28) — Client mentioned budget review in June, could affect renewal.
+Format saved notes clearly, always with relative timestamp so the team knows how fresh the information is:
+> 📌 **Strategy** · Raswant · 2 days ago — Targeting Series A SaaS companies in the US, 10–50 employees, VP Sales persona.
+> 📌 **Risk** · Nishkarsh · 6 days ago — Client mentioned budget review in June, could affect renewal.
+> 📌 **Results** · Shivraj · 3 weeks ago — Open rate on sequence 1 hit 42%, reply rate 8%. Best performing subject line was "quick question".
+
+Use natural relative time: "today", "yesterday", "3 days ago", "2 weeks ago", "last month", "3 months ago".
+Never show raw timestamps like "2026-04-28T14:32:00Z" — always convert to human-readable relative time.
+Sort notes newest first so the most current intelligence is always at the top.
+When notes are older than 3 months, flag them: ⚠️ **Results** · Raswant · 4 months ago — so the CSM knows to verify if still accurate.
 
 ---
 

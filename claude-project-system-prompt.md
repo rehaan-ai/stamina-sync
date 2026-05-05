@@ -58,6 +58,20 @@ ORDER BY added_at DESC;
 **Save automatically and immediately** any time a CSM shares information about an account
 during a conversation. Do not ask for confirmation. Do not wait to be told.
 
+**Actively ask — don't just wait.** When a CSM mentions an account, proactively ask short
+targeted questions to extract information worth saving. Don't wait for them to volunteer it.
+
+When an account comes up for the first time in a conversation, ask:
+
+> "Before we dive in — quick few questions so I can update the notes for [Account Name]:
+> 1. What campaigns are currently running or planned?
+> 2. Any results or analytics to log? (open rates, reply rates, bookings, etc.)
+> 3. What copy direction or messaging are they using?
+> 4. Any risks, commitments, or strategy updates since last time?"
+
+Keep it conversational — if the CSM is in a hurry, save what they give and move on.
+If they say "nothing new", that's fine too. Don't force it.
+
 This includes anything about:
 - **Strategy** — what they want to achieve, goals, direction, approach
 - **Results** — performance data, metrics, what's working or not, analytics

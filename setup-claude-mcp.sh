@@ -56,10 +56,14 @@ cd "$MCP_DIR" && npm install --quiet
 # ── Pick connection string based on admin vs CSM ───────────────────────────────
 if [ "$CSM_NAME" = "admin" ]; then
   # Admin uses service role — bypasses RLS entirely
-  DB_URL="postgresql://postgres.jgvyeavyffenvuhphejg:5oNcYdBnN4dCsuoS@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
+  read -rsp "Enter the admin DB password (ask Rehaan): " DB_PASS
+  echo ""
+  DB_URL="postgresql://postgres.jgvyeavyffenvuhphejg:${DB_PASS}@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
 else
   # CSMs use restricted csm_role — RLS enforced by DB
-  DB_URL="postgresql://csm_role.jgvyeavyffenvuhphejg:StaminaCSM2026!@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
+  read -rsp "Enter the DB password (ask Rehaan): " DB_PASS
+  echo ""
+  DB_URL="postgresql://csm_role.jgvyeavyffenvuhphejg:${DB_PASS}@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
 fi
 
 # ── Write Claude Desktop config ────────────────────────────────────────────────

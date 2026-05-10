@@ -1,9 +1,9 @@
 #!/bin/bash
 # Stamina — Claude MCP Setup
 # Run this once on any Mac to connect Claude Desktop to the Stamina database
-# Usage: bash setup-claude-mcp.sh [csm-name]
-#   csm-name must match your account_owner value in Stamina exactly (e.g. "Raswant Ravi")
-#   Omit for admin access (Rehaan only)
+# Usage: bash setup-claude-mcp.sh "Your Name"
+#   Name must match your account_owner value in Stamina exactly
+#   e.g. "Raswant Ravi", "Vijetha", "Nishkarsh Agarwal"
 
 set -e
 
@@ -17,11 +17,11 @@ echo ""
 if [ -n "$1" ]; then
   CSM_NAME="$1"
 else
-  read -rp "Your name (exactly as it appears in Stamina, or 'admin' for Rehaan): " CSM_NAME
+  read -rp "Your name (exactly as assigned in Stamina, e.g. 'Raswant Ravi'): " CSM_NAME
 fi
 
 if [ -z "$CSM_NAME" ]; then
-  echo "Error: CSM name is required."
+  echo "Error: name is required."
   exit 1
 fi
 
@@ -53,18 +53,8 @@ fi
 echo "Installing dependencies..."
 cd "$MCP_DIR" && npm install --quiet
 
-# ── Pick connection string based on admin vs CSM ───────────────────────────────
-if [ "$CSM_NAME" = "admin" ]; then
-  # Admin uses service role — bypasses RLS entirely
-  read -rsp "Enter the admin DB password (ask Rehaan): " DB_PASS
-  echo ""
-  DB_URL="postgresql://postgres.jgvyeavyffenvuhphejg:${DB_PASS}@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
-else
-  # CSMs use restricted csm_role — RLS enforced by DB
-  read -rsp "Enter the DB password (ask Rehaan): " DB_PASS
-  echo ""
-  DB_URL="postgresql://csm_role.jgvyeavyffenvuhphejg:${DB_PASS}@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
-fi
+# ── Connection string (csm_role — RLS enforced by DB) ─────────────────────────
+DB_URL="postgresql://csm_role.jgvyeavyffenvuhphejg:StaminaCSM2026!@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
 
 # ── Write Claude Desktop config ────────────────────────────────────────────────
 mkdir -p "$HOME/Library/Application Support/Claude"
@@ -72,7 +62,6 @@ CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 
 if [ -f "$CONFIG" ]; then
   cp "$CONFIG" "$CONFIG.backup"
-  echo "Backed up existing config."
 fi
 
 cat > "$CONFIG" << ENDOFCONFIG
@@ -91,7 +80,7 @@ cat > "$CONFIG" << ENDOFCONFIG
 ENDOFCONFIG
 
 echo ""
-echo "✓ MCP server installed at $MCP_DIR"
+echo "✓ MCP server installed"
 echo "✓ Scoped to: $CSM_NAME"
 echo "✓ Claude Desktop config written"
 echo ""

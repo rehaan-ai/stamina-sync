@@ -35,7 +35,7 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV
 PYLON_KEY    = os.environ.get("PYLON_KEY",    "pylon_api_85d658281b647d275a1b1e7dfc081e73de9ebfa9de87d563007eb3ab12251301")
 CLOSE_KEY    = os.environ.get("CLOSE_KEY",    "api_0FCex972M1uIx5VuDOWAhQ.2Cb9NFpnEwxdIFdOWKWzFH")
 FATHOM_KEY   = os.environ.get("FATHOM_KEY",   "TsFqHkp3rX_-rj-7xt_sFg.QYh_uE7H8Prn9WjH5bHWX0AcdmRFKFX0bUTVkIvlJIA")
-OPENAI_KEY   = os.environ.get("OPENAI_KEY",   "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")
+OPENAI_KEY   = os.environ.get("OPENAI_KEY")
 
 PYLON_BASE  = "https://api.usepylon.com"
 CLOSE_BASE  = "https://api.close.com/api/v1"

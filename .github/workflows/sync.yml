@@ -23,3 +23,10 @@ jobs:
 
       - name: Run sync
         run: python sync.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          PYLON_KEY:    ${{ secrets.PYLON_KEY }}
+          CLOSE_KEY:    ${{ secrets.CLOSE_KEY }}
+          FATHOM_KEY:   ${{ secrets.FATHOM_KEY }}
+          OPENAI_KEY:   ${{ secrets.OPENAI_KEY }}

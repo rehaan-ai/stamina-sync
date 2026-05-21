@@ -184,6 +184,7 @@ def upsert_account(account: dict, user_cache: dict) -> str:
         "last_meeting_date":     cfv("calendar.last_meeting_date"),
         "next_meeting_date":     cfv("calendar.next_meeting_date"),
         "tier":                  tier,
+        "tags":                  tags,
         "custom_fields":         cf,
         "pylon_synced_at":       now_utc(),
     }

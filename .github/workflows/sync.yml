@@ -2,7 +2,7 @@ name: Stamina Sync
 
 on:
   schedule:
-    - cron: '0 * * * *'   # every hour, 24/7
+    - cron: '0 */3 * * *'  # every 3 hours, 24/7
   workflow_dispatch:        # also allows manual trigger from GitHub UI
 
 jobs:

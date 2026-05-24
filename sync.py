@@ -161,6 +161,52 @@ def fetch_all_accounts() -> list:
     return accounts
 
 
+def _safe_num(val, cast=float):
+    """Convert a Pylon custom field value to a number, return None on failure."""
+    if val is None:
+        return None
+    try:
+        return cast(val)
+    except (ValueError, TypeError):
+        return None
+
+
+def upsert_daily_metrics(customer_id: str, account: dict):
+    """Upsert one row per account per day — updates in place on re-run."""
+    cf = account.get("custom_fields", {})
+
+    def cfv(key):
+        e = cf.get(key)
+        return e["value"] if e else None
+
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    row = {
+        "customer_id":            customer_id,
+        "date":                   today,
+        "active_inboxes":         _safe_num(cfv("active_inboxes"),         int),
+        "disconnected_inboxes":   _safe_num(cfv("disconnected_inboxes"),   int),
+        "avg_warmup_days":        _safe_num(cfv("avg_warmup_days")),
+        "bounce_rate":            _safe_num(cfv("bounce_rate")),
+        "reply_rate":             _safe_num(cfv("reply_rate")),
+        "e_l_ratio":              _safe_num(cfv("e_l_ratio")),
+        "emails_sent_total":      _safe_num(cfv("emails_sent_total"),      int),
+        "number_of_emails_sent":  _safe_num(cfv("number_of_emails_sent"),  int),
+        "total_leads_contacted":  _safe_num(cfv("total_leads_contacted"),  int),
+        "positive_replies":       _safe_num(cfv("positive_replies"),       int),
+        "live_campaigns":         _safe_num(cfv("live_campaigns"),         int),
+        "email_enrichment_rate":  _safe_num(cfv("email_enrichment_rate")),
+        "avg_emails_per_variant": _safe_num(cfv("avg_emails_per_variant")),
+        "total_leads_active":     _safe_num(cfv("total_leads_active"),     int),
+        "daily_sending_limit":    _safe_num(cfv("daily_sending_limit"),    int),
+        "campaign_progress":      _safe_num(cfv("campaign_progress")),
+        "updated_at":             now_utc(),
+    }
+    if DRY_RUN:
+        log(f"  [WOULD UPSERT] account_metrics_daily: {account.get('name')} — {today}")
+        return
+    sb.table("account_metrics_daily").upsert(row, on_conflict="customer_id,date").execute()
+
+
 def upsert_account(account: dict, user_cache: dict) -> str:
     cf = account.get("custom_fields", {})
 
@@ -328,6 +374,7 @@ def run_track_a(user_cache: dict) -> tuple:
         try:
             uuid = upsert_account(acct, user_cache)
             account_uuid_map[acct["id"]] = uuid
+            upsert_daily_metrics(uuid, acct)
             synced += 1
             log(f"  ✓ {acct.get('name')}")
         except Exception as e:

@@ -32,6 +32,7 @@ Open **Terminal** and paste your personal command below. It takes about 30 secon
 | **Ayushi Dassani** | `bash <(curl -fsSL https://raw.githubusercontent.com/rehaan-ai/stamina-sync/main/setup-claude-mcp.sh) "Ayushi Dassani"` |
 | **Bala** | `bash <(curl -fsSL https://raw.githubusercontent.com/rehaan-ai/stamina-sync/main/setup-claude-mcp.sh) "Bala"` |
 | **Shivraj** | `bash <(curl -fsSL https://raw.githubusercontent.com/rehaan-ai/stamina-sync/main/setup-claude-mcp.sh) "Shivraj"` |
+| **Dan** | `bash <(curl -fsSL https://raw.githubusercontent.com/rehaan-ai/stamina-sync/main/setup-claude-mcp.sh) "Dan"` |
 
 ---
 

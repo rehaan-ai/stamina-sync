@@ -572,6 +572,7 @@ def tag_meeting_types():
     Rules (applied in priority order):
       KICKOFF  — earliest meeting by date for each brand_id
       STANDUP  — title contains any pattern from csm_pairs.standup_title_patterns
+                 AND all attendees are @stamina.io (no external attendees)
       CS_CALL  — everything else
 
     Runs after every Track B sync. Safe to re-run (only updates rows
@@ -594,9 +595,9 @@ def tag_meeting_types():
     customers = sb.table("customers").select("id, brand_id").execute().data
     brand_id_map = {c["id"]: c["brand_id"] for c in customers if c.get("brand_id")}
 
-    # 3. All meetings
+    # 3. All meetings (include attendees for standup validation)
     meetings = sb.table("meetings").select(
-        "id, title, meeting_date, customer_id, meeting_type"
+        "id, title, meeting_date, customer_id, meeting_type, attendees"
     ).execute().data
 
     # 4. Find the earliest meeting per brand_id → those are kickoffs
@@ -613,12 +614,19 @@ def tag_meeting_types():
     # 5. Tag each meeting
     counts = {"kickoff": 0, "standup": 0, "cs_call": 0, "unchanged": 0}
     for m in meetings:
-        mid   = m["id"]
-        title = (m.get("title") or "").lower()
+        mid       = m["id"]
+        title     = (m.get("title") or "").lower()
+        attendees = m.get("attendees") or []
+
+        # Standup = title matches a pattern AND all attendees are @stamina.io
+        all_internal = all(
+            (a.get("email_domain") == "stamina.io" or not a.get("email"))
+            for a in attendees
+        ) if attendees else False
 
         if mid in kickoff_ids:
             mtype = "kickoff"
-        elif any(p in title for p in standup_patterns):
+        elif any(p in title for p in standup_patterns) and all_internal:
             mtype = "standup"
         else:
             mtype = "cs_call"

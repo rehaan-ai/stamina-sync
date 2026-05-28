@@ -563,6 +563,80 @@ def run_track_b(email_cache: dict, domain_cache: dict) -> tuple:
     return synced, errors
 
 
+# ── Meeting type tagging (kickoff / standup / cs_call) ───────────────────────
+
+def tag_meeting_types():
+    """
+    Tag every meeting as kickoff, standup, or cs_call.
+
+    Rules (applied in priority order):
+      KICKOFF  — earliest meeting by date for each brand_id
+      STANDUP  — title contains any pattern from csm_pairs.standup_title_patterns
+      CS_CALL  — everything else
+
+    Runs after every Track B sync. Safe to re-run (only updates rows
+    where the tag would change).
+    """
+    if DRY_RUN:
+        log("[DRY RUN] Would tag meeting types — skipping")
+        return
+
+    log("Tagging meeting types...")
+
+    # 1. Standup patterns from csm_pairs (all pairs combined, lowercased)
+    pairs_rows = sb.table("csm_pairs").select("standup_title_patterns").execute().data
+    standup_patterns = []
+    for row in pairs_rows:
+        for p in (row.get("standup_title_patterns") or []):
+            standup_patterns.append(p.lower())
+
+    # 2. customer_id → brand_id map
+    customers = sb.table("customers").select("id, brand_id").execute().data
+    brand_id_map = {c["id"]: c["brand_id"] for c in customers if c.get("brand_id")}
+
+    # 3. All meetings
+    meetings = sb.table("meetings").select(
+        "id, title, meeting_date, customer_id, meeting_type"
+    ).execute().data
+
+    # 4. Find the earliest meeting per brand_id → those are kickoffs
+    brand_earliest: dict = {}  # brand_id → (meeting_id, meeting_date)
+    for m in meetings:
+        brand_id = brand_id_map.get(m["customer_id"])
+        if not brand_id:
+            continue
+        date = m["meeting_date"] or ""
+        if brand_id not in brand_earliest or date < brand_earliest[brand_id][1]:
+            brand_earliest[brand_id] = (m["id"], date)
+    kickoff_ids = {v[0] for v in brand_earliest.values()}
+
+    # 5. Tag each meeting
+    counts = {"kickoff": 0, "standup": 0, "cs_call": 0, "unchanged": 0}
+    for m in meetings:
+        mid   = m["id"]
+        title = (m.get("title") or "").lower()
+
+        if mid in kickoff_ids:
+            mtype = "kickoff"
+        elif any(p in title for p in standup_patterns):
+            mtype = "standup"
+        else:
+            mtype = "cs_call"
+
+        if m.get("meeting_type") == mtype:
+            counts["unchanged"] += 1
+            continue
+
+        sb.table("meetings").update({"meeting_type": mtype}).eq("id", mid).execute()
+        counts[mtype] += 1
+
+    log(
+        f"  Meeting types — kickoff={counts['kickoff']}, "
+        f"standup={counts['standup']}, cs_call={counts['cs_call']}, "
+        f"unchanged={counts['unchanged']}"
+    )
+
+
 # ── Track C: Close CRM matching + SOW generation ──────────────────────────────
 
 def _fetch_close_page(skip: int) -> list:
@@ -946,6 +1020,8 @@ def main():
 
         _, b_errors = run_track_b(email_cache, domain_cache)
         all_errors.extend(b_errors)
+
+        tag_meeting_types()
 
         log("Building Close leads cache...")
         close_cache = build_close_cache()

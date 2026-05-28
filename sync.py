@@ -218,6 +218,8 @@ def upsert_account(account: dict, user_cache: dict) -> str:
     tier     = next((t for t in tags if t in TIER_TAGS), None)
     owner_id = (account.get("owner") or {}).get("id")
 
+    slack_ch = next((c for c in account.get("channels", []) if c.get("source") == "slack"), None)
+
     row = {
         "pylon_account_id":      account["id"],
         "name":                  account.get("name"),
@@ -232,6 +234,10 @@ def upsert_account(account: dict, user_cache: dict) -> str:
         "tier":                  tier,
         "tags":                  tags,
         "custom_fields":         cf,
+        "brand_id":              cfv("brand_id"),
+        "slack_channel_id":      slack_ch.get("channel_id")   if slack_ch else None,
+        "slack_channel_name":    slack_ch.get("channel_name") if slack_ch else None,
+        "slack_channel_url":     slack_ch.get("channel_url")  if slack_ch else None,
         "pylon_synced_at":       now_utc(),
     }
     if DRY_RUN:

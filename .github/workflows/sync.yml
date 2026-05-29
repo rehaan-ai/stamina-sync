@@ -3,12 +3,12 @@ name: Stamina Sync
 on:
   schedule:
     - cron: '0 */3 * * *'  # every 3 hours, 24/7
-  workflow_dispatch:        # also allows manual trigger from GitHub UI
+  workflow_dispatch:        # manual trigger from GitHub UI
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -18,12 +18,13 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: pip install -r requirements.txt
 
       - name: Install weasyprint system dependencies
         run: sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf2.0-0
 
+      # ── Step 1: Pylon + Fathom + Close sync ──────────────────────────────────
       - name: Run sync
         run: python sync.py
         env:
@@ -34,11 +35,25 @@ jobs:
           FATHOM_KEY:   ${{ secrets.FATHOM_KEY }}
           OPENAI_KEY:   ${{ secrets.OPENAI_KEY }}
 
-      # Pass 1 generator — disabled until full system is ready for live launch
-      # - name: Run Pass 1 generator (new accounts only)
-      #   run: python pass1_generator.py
-      #   env:
-      #     SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
-      #     SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
-      #     OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
-      #     RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      # ── Step 2: Pass 1 — pre-kickoff OS for new active accounts ──────────────
+      # Detects new accounts (no Pass 1 yet) with a closing call transcript.
+      # Only fires when a genuinely new account appears — safe to run every sync.
+      - name: Run Pass 1 generator
+        run: python pass1_generator.py
+        env:
+          SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
+          OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+
+      # ── Step 3: Pass 2 — execution plan for accounts with kickoff call done ──
+      # Detects accounts that have real Pass 1 + kickoff meeting + no Pass 2 yet.
+      # Only fires post-kickoff — safe to run every sync.
+      - name: Run Pass 2 generator
+        run: python pass2_generator.py
+        env:
+          SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
+          PYLON_KEY:      ${{ secrets.PYLON_KEY }}
+          OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

@@ -34,10 +34,11 @@ jobs:
           FATHOM_KEY:   ${{ secrets.FATHOM_KEY }}
           OPENAI_KEY:   ${{ secrets.OPENAI_KEY }}
 
-      - name: Run Pass 1 generator (new accounts only)
-        run: python pass1_generator.py
-        env:
-          SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
-          OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      # Pass 1 generator — disabled until full system is ready for live launch
+      # - name: Run Pass 1 generator (new accounts only)
+      #   run: python pass1_generator.py
+      #   env:
+      #     SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
+      #     SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
+      #     OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
+      #     RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

@@ -2,7 +2,7 @@ name: Report Generator
 
 on:
   schedule:
-    - cron: '30 3 * * 1'   # Monday 03:30 UTC = Monday 9am IST (weekly reports)
+    - cron: '0 4 * * 1'    # Monday 04:00 UTC = Monday 9:30am IST (weekly reports)
     - cron: '30 4 1 * *'   # 1st of month 04:30 UTC = 10am IST (monthly reports)
   workflow_dispatch:         # manual trigger — useful for testing and re-runs
 

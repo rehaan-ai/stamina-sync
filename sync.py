@@ -225,7 +225,7 @@ def upsert_account(account: dict, user_cache: dict) -> str:
         "name":                  account.get("name"),
         "domain":                account.get("primary_domain"),
         "account_owner":         user_cache.get(owner_id) if owner_id else None,
-        "status":                cfv("status"),
+        "status":                cfv("customer_status"),
         "csm_owner":             cfv("team_assigned"),
         "active_inboxes":        int(cfv("active_inboxes"))        if cfv("active_inboxes")        is not None else None,
         "disconnected_inboxes":  int(cfv("disconnected_inboxes"))  if cfv("disconnected_inboxes")  is not None else None,

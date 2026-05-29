@@ -171,7 +171,7 @@ def get_accounts_for_pair(pair: dict) -> list:
         "id, name, domain, tier, pylon_account_id, brand_id, "
         "health_score, active_inboxes, disconnected_inboxes, created_at, tags, "
         "csm_owner, account_owner"
-    )
+    ).eq("status", "active")  # Active accounts only
     if ft == "csm_owner":
         q = q.eq("csm_owner", fv)
     elif ft == "account_owner":

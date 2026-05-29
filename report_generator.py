@@ -552,7 +552,7 @@ def get_accounts_for_pair(pair: dict) -> list:
     q = sb.table("customers").select(
         "id, name, domain, tier, pylon_account_id, brand_id, csm_owner, account_owner, "
         "health_score, active_inboxes, disconnected_inboxes, created_at, tags"
-    )
+    ).eq("status", "active")  # Active accounts only
 
     if ft == "csm_owner":
         q = q.eq("csm_owner", fv)

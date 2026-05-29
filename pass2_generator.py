@@ -234,6 +234,7 @@ def find_accounts_needing_pass2() -> list:
         sb.table("customers")
         .select("id, name, domain, tier, csm_owner, account_owner, brand_id, pylon_account_id")
         .in_("id", list(need_pass2))
+        .eq("status", "active")
         .execute()
         .data
     )

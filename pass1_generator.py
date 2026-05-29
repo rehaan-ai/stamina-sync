@@ -127,7 +127,7 @@ def find_new_accounts() -> list:
 
     all_customers = sb.table("customers").select(
         "id, name, domain, tier, csm_owner, account_owner, brand_id, custom_fields"
-    ).execute().data
+    ).eq("status", "active").execute().data
 
     return [c for c in all_customers if c["id"] not in existing_ids]
 

@@ -126,6 +126,7 @@ For each critical account:
 | Metric | This week | Prior week | Threshold | Status |
 |---|---|---|---|---|
 | Emails sent | | | | |
+| Leads contacted | | | | |
 | Reply rate | | | | ✓/✗ |
 | Positive replies | | | | ✓/✗ |
 | Bounce rate | | | | ✓/✗ |
@@ -349,14 +350,13 @@ Use a table. Render the client's primary measurement contract metric first and e
 | Metric | This week | Prior week | Change | Threshold | Status |
 |---|---|---|---|---|---|
 | Emails sent | | | | | |
+| Leads contacted | | | | | |
 | Reply rate | | | | | ✓/✗ |
-| Positive reply rate | | | | | ✓/✗ |
-| Positive replies (count) | | | | | |
+| Positive replies | | | | | ✓/✗ |
 | Bounce rate | | | | | ✓/✗ |
 | Live campaigns | | | | | |
-| Leads contacted | | | | | |
 
-Note: If a metric has been below threshold for 2+ consecutive weeks, flag it explicitly below the table.
+Note: Lead with the metric from the client's measurement contract. Flag below the table if any metric has been below threshold for 2+ consecutive weeks.
 
 ### 2. Audience Visibility
 - Unique contacts emailed this week, broken down by campaign segment
@@ -365,12 +365,12 @@ Note: If a metric has been below threshold for 2+ consecutive weeks, flag it exp
 - Any anomalies the client should know about (bounce spike, deliverability issue, segment with 0 replies, inbox disconnect)
 
 ### 3. What's Working — Performance Insights
-Specific and actionable only. "Variant B drove 22% open rate vs Variant A's 14% — recommend killing A" is good.
+Specific and actionable only. "Variant B drove a 3.2% positive reply rate vs Variant A's 1.1% — recommend killing A" is good.
 "Engagement is up" is not acceptable.
-- Which subject line variants drove highest open rates (name variants, name the %s)
-- Which message variants drove highest positive reply rates (name them, name the %s)
+- Which campaign variants drove the highest positive reply rates (name the variant, name the %s)
 - Which campaign segments outperformed others and by how much (name the segments)
-- Which sequence touch converted best: touch 1 vs follow-up 1 vs follow-up 2 (with counts)
+- Which campaigns have the best reply-to-bounce ratio (most efficient sending)
+- Reply velocity insight: did faster customer responses convert better? (use response delay data)
 - One concrete test to run next week based on this week's data
 
 ### 4. Business Intelligence — What the Data Means Beyond Outbound
@@ -469,21 +469,23 @@ Note partial months explicitly.
 | Metric | This month | Prior month | Change | Threshold | Status |
 |---|---|---|---|---|---|
 | Emails sent | | | | | |
+| Leads contacted | | | | | |
 | Reply rate | | | | | ✓/✗ |
-| Positive reply rate | | | | | ✓/✗ |
-| Positive replies (count) | | | | | |
+| Positive replies | | | | | ✓/✗ |
 | Bounce rate | | | | | ✓/✗ |
 | Live campaigns | | | | | |
-| Leads contacted | | | | | |
+
+Note partial months explicitly. Lead with the client's primary measurement contract metric.
 
 ### 2. Audience Visibility
 Monthly totals by segment plus cumulative figures since launch.
 Sentiment breakdown across the full month. Named positive-reply companies for the month.
 
 ### 3. What's Working — Month-Level Insights
-Subject line learnings across ALL variants tested this month (more data = stronger conclusions).
-Sequence touch analysis across the full month's sample — which touch number drives conversion at what rate.
-Reply velocity correlation: which response times converted at what rate (reply within 2h vs 24h vs 48h+).
+Variant performance across ALL campaigns tested this month (more data = stronger conclusions).
+Which segments consistently outperformed others across the month — name them with %s.
+Reply velocity correlation: did faster customer responses convert better? Show the pattern using response delay data.
+Campaign efficiency: which campaigns generated the best ratio of positive replies to emails sent.
 
 ### 4. Business Intelligence — Month-Level Conclusions
 A month of signal is enough to draw real conclusions — not just signals, but theses.
@@ -713,15 +715,8 @@ def gather_account_data(customer: dict, start_date: str, end_date: str) -> dict:
     }
 
 
-def format_account_for_prompt(data: dict, period: str) -> str:
-    c        = data["customer"]
-    metrics  = data["metrics"]
-    prior    = data["prior_metrics"]
-    meetings = data["meetings"]
-    slack    = data["slack"]
-    issues   = data["issues"]
-
-    # Aggregate metrics
+def _metrics_block(metrics: list, prior: list, period: str) -> str:
+    """Compute and format the core metrics block for an account."""
     def avg(rows, field):
         vals = [r[field] for r in rows if r.get(field) is not None]
         return round(sum(vals) / len(vals), 2) if vals else None
@@ -730,6 +725,11 @@ def format_account_for_prompt(data: dict, period: str) -> str:
         vals = [r[field] for r in rows if r.get(field) is not None]
         return sum(vals) if vals else 0
 
+    def delta(cur, prev):
+        if cur is None or prev is None or prev == 0:
+            return "N/A"
+        return f"{((cur - prev) / prev * 100):+.1f}%"
+
     cur_sent  = total(metrics, "emails_sent_total") or total(metrics, "number_of_emails_sent")
     cur_rr    = avg(metrics, "reply_rate")
     cur_pr    = total(metrics, "positive_replies")
@@ -737,93 +737,250 @@ def format_account_for_prompt(data: dict, period: str) -> str:
     cur_leads = total(metrics, "total_leads_contacted")
     cur_camps = avg(metrics, "live_campaigns")
 
-    prev_sent = total(prior, "emails_sent_total") or total(prior, "number_of_emails_sent")
-    prev_rr   = avg(prior, "reply_rate")
-    prev_pr   = total(prior, "positive_replies")
+    prev_sent  = total(prior, "emails_sent_total") or total(prior, "number_of_emails_sent")
+    prev_rr    = avg(prior, "reply_rate")
+    prev_pr    = total(prior, "positive_replies")
     prev_leads = total(prior, "total_leads_contacted")
 
-    def delta(cur, prev):
-        if cur is None or prev is None or prev == 0:
-            return "N/A"
-        return f"{((cur - prev) / prev * 100):+.1f}%"
+    return (
+        f"  Emails sent:       {cur_sent} vs {prev_sent} ({delta(cur_sent, prev_sent)})\n"
+        f"  Leads contacted:   {cur_leads} vs {prev_leads} ({delta(cur_leads, prev_leads)})\n"
+        f"  Reply rate:        {cur_rr}% vs {prev_rr}% ({delta(cur_rr, prev_rr)})\n"
+        f"  Positive replies:  {cur_pr} vs {prev_pr} ({delta(cur_pr, prev_pr)})\n"
+        f"  Bounce rate:       {cur_br}%\n"
+        f"  Live campaigns:    {cur_camps}"
+    )
 
+
+def format_account_for_internal(data: dict, period: str) -> str:
+    """
+    Compact account block for the internal report (multiple accounts in one GPT call).
+    Budget: ~2000 chars per account to keep total prompt within GPT-4o context.
+    CSMs lived through these meetings — they need highlights and flags, not full transcripts.
+    """
+    c        = data["customer"]
+    meetings = data["meetings"]
+    slack    = data["slack"]
+    issues   = data["issues"]
+    replies  = data["reply_data"]
+
+    onboarding_flag = " ⚠ ONBOARDING RISK" if data["onboarding_risk"] else ""
+
+    # Metrics
+    metrics_text = _metrics_block(data["metrics"], data["prior_metrics"], period)
+
+    # Inboxes summary
+    inboxes = data["inboxes"]
+    inbox_issues = [i for i in inboxes if not i.get("is_active") or (i.get("bounce_rate") or 0) > 2]
+    inbox_summary = f"{c.get('active_inboxes',0)} active / {c.get('disconnected_inboxes',0)} disconnected"
+    if inbox_issues:
+        inbox_summary += " | INBOX ISSUES: " + ", ".join(
+            f"{i['email_account']} (active={i.get('is_active')}, bounce={i.get('bounce_rate')}%)"
+            for i in inbox_issues[:3]
+        )
+
+    # Meetings (200 chars summary each, max 3)
     meetings_text = "\n".join(
-        f"  - {m['meeting_date'][:10]} [{m['meeting_type']}] {m['title']}: "
-        f"{(m.get('summary_text') or '')[:300]}"
-        for m in meetings
-    ) or "  None this period"
+        f"  {m['meeting_date'][:10]} [{m['meeting_type']}] {m['title']}: "
+        f"{(m.get('summary_text') or '')[:200]}"
+        for m in meetings[:3]
+    ) or "  None"
 
+    # Slack (8 messages, 120 chars each — customer messages only for internal)
     slack_text = "\n".join(
-        f"  - {s['message_date'][:10]} ({'internal' if s['is_internal'] else 'customer'}): "
-        f"{s['text'][:150]}"
-        for s in slack[-10:]
+        f"  {s['message_date'][:10]} ({'CSM' if s['is_internal'] else 'customer'}): {s['text'][:120]}"
+        for s in slack[-8:]
     ) or "  No messages"
 
-    # Aggregate reply data by label
-    replies       = data["reply_data"]
-    label_counts  = {}
-    positive_list = []
-    unreplied_pos = []
+    # Reply summary — counts + named positive + unreplied flags
+    label_counts = {}
+    pos_names, unreplied = [], []
     for r in replies:
         lbl = r.get("reply_label", "unknown")
         label_counts[lbl] = label_counts.get(lbl, 0) + 1
         if lbl in ("positive", "interested"):
             name = f"{r.get('prospect_first_name','')} {r.get('prospect_last_name','')}".strip()
             co   = r.get("prospect_company", "")
-            positive_list.append(f"{name} ({co}): {(r.get('reply_body') or '')[:120]}")
+            pos_names.append(f"{name} ({co})")
             if not r.get("customer_responded"):
-                days = round((r.get("customer_response_delay_hrs") or 999) / 24)
-                unreplied_pos.append(f"{name} ({co}) — {days}+ days unreplied")
+                hrs = r.get("customer_response_delay_hrs") or 999
+                unreplied.append(f"{name} ({co}) — {round(hrs/24)}d unreplied")
 
-    reply_summary = "\n".join(f"  {lbl}: {cnt}" for lbl, cnt in label_counts.items()) or "  No replies this period"
-    if positive_list:
-        reply_summary += "\n  Positive replies:\n" + "\n".join(f"    - {p}" for p in positive_list[:10])
-    if unreplied_pos:
-        reply_summary += "\n  ⚠ UNREPLIED POSITIVE LEADS:\n" + "\n".join(f"    - {p}" for p in unreplied_pos)
+    reply_text = " | ".join(f"{lbl}: {cnt}" for lbl, cnt in label_counts.items()) or "none"
+    if pos_names:
+        reply_text += "\n  Positive: " + ", ".join(pos_names[:8])
+    if unreplied:
+        reply_text += "\n  ⚠ UNREPLIED: " + " | ".join(unreplied)
 
+    # Campaigns top 5 by positive reply rate
+    campaigns = sorted(data["campaigns"], key=lambda x: x.get("positive_reply_rate") or 0, reverse=True)
+    camp_text = "\n".join(
+        f"  {camp['campaign_name']} [{camp.get('segment','')}|{camp.get('variant_name','')}]: "
+        f"sent={camp.get('emails_sent',0)}, rr={camp.get('reply_rate',0)}%, "
+        f"+replies={camp.get('positive_replies',0)}, -replies={camp.get('negative_replies',0)}"
+        for camp in campaigns[:5]
+    ) or "  None"
+
+    issues_text = " | ".join(
+        f"[{i['priority']}] {i['title']}" for i in issues
+    ) or "None"
+
+    kickoff = f"\nMeasurement contract: {data['kickoff_context'][:600]}" if data["kickoff_context"] else ""
+
+    return f"""
+━━━ {c['name'].upper()} | {c.get('tier','?')} | Health:{c.get('health_score','?')} | {inbox_summary}{onboarding_flag}
+
+METRICS ({period}):
+{metrics_text}
+
+MEETINGS: {meetings_text}
+
+SLACK: {slack_text}
+
+REPLIES: {reply_text}
+
+CAMPAIGNS:
+{camp_text}
+
+ISSUES: {issues_text}{kickoff}
+"""
+
+
+def format_account_for_external(data: dict, period: str) -> str:
+    """
+    Full account data block for external report (one account per GPT call).
+    Passes all available data — full reply bodies, full meeting summaries, all inboxes, all campaigns.
+    """
+    c        = data["customer"]
+    meetings = data["meetings"]
+    slack    = data["slack"]
+    issues   = data["issues"]
+    replies  = data["reply_data"]
+    inboxes  = data["inboxes"]
+
+    # Metrics
+    metrics_text = _metrics_block(data["metrics"], data["prior_metrics"], period)
+
+    # All inboxes with full health data
+    inbox_text = "\n".join(
+        f"  {i['email_account']}: active={i.get('is_active')}, warming={i.get('is_warming')}, "
+        f"health={i.get('health_score')}, bounce={i.get('bounce_rate')}%"
+        for i in inboxes
+    ) or "  No inbox data"
+
+    # All campaigns with full variant detail
+    campaigns = sorted(data["campaigns"], key=lambda x: x.get("positive_reply_rate") or 0, reverse=True)
+    camp_text = "\n".join(
+        f"  [{camp.get('snapshot_date','')[:10]}] {camp['campaign_name']} "
+        f"[segment: {camp.get('segment','')} | variant: {camp.get('variant_name','')}]\n"
+        f"    sent={camp.get('emails_sent',0)}, reply_rate={camp.get('reply_rate',0)}%, "
+        f"positive_reply_rate={camp.get('positive_reply_rate',0)}%, "
+        f"positive={camp.get('positive_replies',0)}, negative={camp.get('negative_replies',0)}, "
+        f"bounce={camp.get('bounce_rate',0)}%, progress={camp.get('campaign_progress','')}"
+        for camp in campaigns
+    ) or "  No campaign data"
+
+    # Full meeting summaries
+    meetings_text = "\n\n".join(
+        f"  [{m['meeting_date'][:10]}] [{m['meeting_type']}] {m['title']}\n"
+        f"  {(m.get('summary_text') or 'No summary')[:3000]}"
+        for m in meetings
+    ) or "  None this period"
+
+    # Slack — 20 messages at 300 chars each
+    slack_text = "\n".join(
+        f"  {s['message_date'][:16]} ({'CSM/internal' if s['is_internal'] else 'CUSTOMER'}): "
+        f"{s['text'][:300]}"
+        for s in slack[-20:]
+    ) or "  No messages"
+
+    # Full reply coaching data
+    # Separate positive (need coaching) from negative/neutral (need objection analysis)
+    positive_replies = [r for r in replies if r.get("reply_label") in ("positive", "interested")]
+    other_replies    = [r for r in replies if r.get("reply_label") not in ("positive", "interested")]
+
+    label_counts = {}
+    for r in replies:
+        lbl = r.get("reply_label", "unknown")
+        label_counts[lbl] = label_counts.get(lbl, 0) + 1
+
+    reply_counts = " | ".join(f"{lbl}: {cnt}" for lbl, cnt in label_counts.items()) or "none"
+
+    # Positive replies with full coaching context
+    pos_text = ""
+    for r in positive_replies:
+        name = f"{r.get('prospect_first_name','')} {r.get('prospect_last_name','')}".strip()
+        co   = r.get("prospect_company", "unknown company")
+        replied_at = (r.get("replied_at") or "")[:16]
+        delay_hrs  = r.get("customer_response_delay_hrs")
+        responded  = r.get("customer_responded", False)
+        cust_resp  = r.get("customer_response_text") or ""
+        campaign   = r.get("campaign_name", "")
+
+        delay_str = (
+            f"{round(delay_hrs)}hrs to respond" if delay_hrs and responded
+            else "⚠ NO RESPONSE FROM CUSTOMER YET"
+        )
+
+        pos_text += (
+            f"\n  [{replied_at}] {name} | {co} | Campaign: {campaign}\n"
+            f"  PROSPECT REPLIED: \"{r.get('reply_body', '')}\"\n"
+            f"  CUSTOMER RESPONSE ({delay_str}): \"{cust_resp if cust_resp else 'No response sent yet'}\"\n"
+        )
+
+    # Negative/neutral replies for objection analysis (reply body only)
+    neg_text = "\n".join(
+        f"  [{(r.get('replied_at') or '')[:10]}] [{r.get('reply_label','')}] "
+        f"{r.get('prospect_first_name','')} {r.get('prospect_last_name','')} "
+        f"({r.get('prospect_company','')}): \"{(r.get('reply_body') or '')[:300]}\""
+        for r in other_replies[:20]
+    ) or "  None"
+
+    # Issues
     issues_text = "\n".join(
-        f"  - [{i['priority']}] {i['title']} ({i['status']})"
+        f"  [{i['priority']}] {i['title']} — {i['status']} (opened {i.get('created_at','')[:10]})"
         for i in issues
     ) or "  None"
 
-    campaign_text = "\n".join(
-        f"  - {camp['campaign_name']} [{camp.get('segment','')} / {camp.get('variant_name','')}]: "
-        f"sent={camp.get('emails_sent',0)}, reply_rate={camp.get('reply_rate',0)}%, "
-        f"positive={camp.get('positive_replies',0)}, negative={camp.get('negative_replies',0)}"
-        for camp in data["campaigns"][:8]
-    ) or "  No campaign data"
-
-    onboarding_flag = "\n⚠ ONBOARDING RISK: Account added in last 2–7 days with 0 active inboxes or 0 meetings." if data["onboarding_risk"] else ""
-
-    kickoff_snippet = f"\nMeasurement contract context:\n{data['kickoff_context'][:800]}" if data["kickoff_context"] else ""
+    # Full kickoff context
+    kickoff = f"\n{data['kickoff_context'][:2500]}" if data["kickoff_context"] else "\n  No kickoff document available."
 
     return f"""
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ACCOUNT: {c['name']} | Tier: {c.get('tier','?')} | Health: {c.get('health_score','?')} | Inboxes: {c.get('active_inboxes',0)} active / {c.get('disconnected_inboxes',0)} disconnected{onboarding_flag}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCOUNT: {c['name']}
+Tier: {c.get('tier','?')} | Health score: {c.get('health_score','?')} | Tags: {c.get('tags',[])}
+{"⚠ ONBOARDING RISK: Added recently with 0 inboxes or 0 meetings" if data['onboarding_risk'] else ""}
 
-PERFORMANCE (this {period} vs prior {period}):
-  Emails sent:          {cur_sent} vs {prev_sent} ({delta(cur_sent, prev_sent)})
-  Leads contacted:      {cur_leads} vs {prev_leads} ({delta(cur_leads, prev_leads)})
-  Reply rate:           {cur_rr}% vs {prev_rr}% ({delta(cur_rr, prev_rr)})
-  Positive replies:     {cur_pr} vs {prev_pr} ({delta(cur_pr, prev_pr)})
-  Bounce rate:          {cur_br}%
-  Live campaigns:       {cur_camps}
+=== PERFORMANCE METRICS (this {period} vs prior {period}) ===
+{metrics_text}
 
-MEETINGS:
+=== EMAIL INBOXES ===
+{inbox_text}
+
+=== CAMPAIGNS & VARIANTS ===
+{camp_text}
+
+=== MEETINGS ===
 {meetings_text}
 
-SLACK MESSAGES:
+=== SLACK MESSAGES (last 20) ===
 {slack_text}
 
-REPLY DATA:
-{reply_summary}
+=== REPLY SUMMARY ===
+Counts: {reply_counts}
 
-CAMPAIGNS:
-{campaign_text}
+POSITIVE REPLIES — full coaching context:
+(prospect reply = what the prospect wrote; customer response = what our customer wrote back)
+{pos_text if pos_text else "  None this period"}
 
-OPEN ISSUES:
+NEGATIVE / NEUTRAL REPLIES — for objection analysis:
+{neg_text}
+
+=== OPEN ISSUES ===
 {issues_text}
-{kickoff_snippet}
+
+=== KICKOFF CONTEXT (measurement contract, forward commitment, expansion paths) ===
+{kickoff}
 """
 
 
@@ -835,7 +992,7 @@ def generate_internal_report(pair: dict, accounts_data: list, period: str,
     system = INTERNAL_WEEKLY_PROMPT if period == "weekly" else INTERNAL_MONTHLY_PROMPT
 
     accounts_block = "\n".join(
-        format_account_for_prompt(d, period_label) for d in accounts_data
+        format_account_for_internal(d, period_label) for d in accounts_data
     )
 
     report_type = "weekly sprint document" if period == "weekly" else "monthly strategic review"
@@ -865,7 +1022,7 @@ def generate_external_report(account_data: dict, period: str,
     period_label = "week" if period == "weekly" else "month"
     system = EXTERNAL_WEEKLY_PROMPT if period == "weekly" else EXTERNAL_MONTHLY_PROMPT
 
-    account_block = format_account_for_prompt(account_data, period_label)
+    account_block = format_account_for_external(account_data, period_label)
     name          = account_data["customer"]["name"]
 
     user = f"""Generate the external {period_label} report for {name}.

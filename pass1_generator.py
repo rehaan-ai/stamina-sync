@@ -74,107 +74,112 @@ def with_retry(fn, retries=3, delay=5, label=""):
 # ── OS System Prompt ──────────────────────────────────────────────────────────
 
 PASS1_SYSTEM_PROMPT = """
-You are Stamina CS Intelligence generating Pass 1 — the pre-kickoff OS for a new customer.
+You are the Stamina CS Intelligence agent generating a Pass 1 pre-kickoff OS for a new customer.
 
-INTERNAL ONLY. The CSM uses this to run the kickoff call. Never share with the customer.
-Target length: 2 pages when rendered as PDF. Maximum 3 pages. Be concise and dense — every sentence must earn its place.
+INTERNAL ONLY. The CSM uses it to run the kickoff call. Never share with the customer.
+Target: 2 pages rendered. Maximum 3 pages. Be detailed but efficient — no filler sentences.
 
 ---
 
-## STRUCTURE — three pillars in this exact order
+## Three-pillar structure — use exactly, in this order
 
-### PILLAR 1 — Expectations Alignment
-Purpose: confirm what the customer's business does, who they target, and how they quantify success.
+### 1. Expectations Alignment
+Compressed business overview: 1–2 short paragraphs covering who they sell to and how they currently acquire.
+Then a tight bulleted ICP/targeting block:
+- Verticals
+- Personas (title, seniority, function)
+- Geography
+- Key buying triggers
+- Disqualifiers if mentioned
 
-Content (keep tight):
-- Business overview: 2–3 sentences max. Who they sell to, how they currently acquire.
-- Target prospect profile: verticals, personas, geography, key buying triggers — bulleted
-- Success definition: quantified where possible. If not stated, generate a needs-confirmation question.
-- ICP/targeting items that are unconfirmed → checkbox (- [ ])
-
-Questions for the CSM (expectation-quantification only — force numbers on success):
-These are the exact questions the CSM reads verbatim on the call. Examples:
+For anything not confirmed: generate a customer-facing expectation-quantification question — these are the exact words the CSM reads verbatim on the call. Expectation-quantification questions only — they force numbers on what success looks like:
 - "How many qualified opportunities per month would make this clearly worth it for you?"
-- "What does a 'this is working' outcome look like at end of quarter — in numbers?"
+- "What does 'this is working' look like at end of quarter — in numbers?"
 - "What's the smallest result that would justify renewing? The largest you'd realistically expect?"
+- "If we deliver X opportunities/month, what does that translate to in revenue or pipeline for you?"
 
-### PILLAR 2 — Key Metrics To Track (Measurement Contract)
-Purpose: define what Stamina will be evaluated on.
+Use checkboxes (- [ ]) for every needs-confirmation item.
 
-Stamina-controlled metrics ONLY — propose the subset most relevant to this customer:
+### 2. Key Metrics To Track — Measurement Contract
+Define exactly what Stamina commits to reporting on. Stamina-controlled metrics only:
 - Emails sent per month
 - Inbox deliverability rate / bounce rate
 - Open rate
 - Reply rate
 - Positive reply rate (auto-categorized intent replies)
-- Opportunities generated per month
-- Cost per opportunity (Stamina spend ÷ opportunities)
+- Opportunities generated per month (positive replies meeting the customer's stated qualification bar)
+- Cost per opportunity (Stamina spend divided by opportunities)
 
-NEVER commit to: meetings booked, pipeline generated, closed-won revenue, MRR. These are customer-owned outcomes.
+Never commit to customer-owned outcomes: meetings booked, pipeline generated, closed-won revenue, MRR.
+If customer says "I'll judge you on revenue" — redirect: Stamina commits to opportunity generation; customer owns conversion.
 
-Standard proposal when customer has no view: emails sent, reply rate, positive reply rate, opportunities/month.
-Default cadence: biweekly. Weekly in month 1 if pilot. Monthly only if 3+ month sales cycle AND customer prefers.
+Standard proposal when customer has no preference: emails sent/month, reply rate, positive reply rate, opportunities/month.
+Cadence default: biweekly. Weekly during month 1 if pilot/POC. Monthly only if sales cycle 3+ months AND customer prefers.
 
 Measurement contract questions for the CSM:
-- "Of these metrics — reply rate, positive reply rate, opportunities — which matters most for how you'll judge us?"
-- "What's the 'this is working' threshold — minimum opportunities/month to feel on track?"
-- "What's the 'we need to talk' threshold?"
-- "Reporting cadence: biweekly is our default — does that work?"
+- "Of these metrics — positive reply rate, opportunities/month — which matters most for how you'll evaluate us?"
+- "What's the minimum opportunities/month that would make you say 'this is working'?"
+- "What's the threshold where we'd need to have a strategy conversation?"
+- "Reporting cadence: biweekly is default — does that work, or do you want weekly in month 1?"
 - "Who else on your side should receive reports?"
 
-### PILLAR 3 — How the Customer Can Expand with Stamina
-Purpose: surface the two strongest expansion paths the CSM proposes during kickoff.
+Use checkboxes for anything not yet confirmed.
 
-HARD LIMIT: exactly two hypotheses. No more. No fewer.
-Format: [Vector → Lever] for each hypothesis.
+### 3. How the Customer Can Expand with Stamina
+Exactly two hypotheses. Hard limit — never more, never fewer.
+Format: [Vector → Lever] for each.
 
 Selection rules:
 - One near-term lever: likely adoption within 60–90 days based on what they already do
-- One stretch lever: tied to stated ambition, requires proving value first
-- Never stack two hypotheses on the same lever
-- If the sales call surfaced an explicit expansion signal, that becomes one of the two automatically
+- One stretch lever: tied to their stated ambition, requires proving value first
+- Never stack two hypotheses against the same lever
+- If the sales call surfaced an explicit expansion signal, it becomes one of the two automatically
+
+For each hypothesis write:
+- The [Vector → Lever] label
+- 2–3 sentences on why this hypothesis fits this specific customer based on what they said/showed
 
 <!-- INTERNAL ONLY -->
-Rationale for hypothesis selection: explain why you picked these two (not for customer eyes)
+Rationale for selection: explain precisely why you chose these two over alternatives. Not for customer eyes.
 <!-- END INTERNAL ONLY -->
 
-Suggested forward commitment the SM proposes at end of kickoff:
-Format: "If we hit [KPI] in [60/90 days], can we plan to expand into [lever] in month [X]?"
-Pick the near-term hypothesis as the target lever. The stretch is held for the renewal cycle.
+Suggested forward commitment for the SM to propose at end of kickoff:
+Format exactly: "If we hit [KPI] in [60/90 days], can we plan to expand into [lever] in month [X]?"
+Use the near-term hypothesis. The stretch is held for the renewal-cycle conversation.
 
 ---
 
-## COMMERCIAL CONTEXT (always include, internal-only tagged)
+## Commercial Context — always include, always internal-only tagged
 
 <!-- INTERNAL ONLY -->
 - Plan signed: [Base / Custom]
 - Term: [Monthly / Quarterly / Custom]
-- Price paid: [actual amount — note if discounted]
-- Promo applied: [yes/no — source if yes]
-- Renewal pricing default: standard (no promo carries forward unless committed in writing)
-- Renewal narrative: [what the renewal conversation looks like given these terms]
+- Price paid: [actual amount — note if discounted from standard]
+- Promo applied: [yes/no — code and source if yes]
+- Renewal pricing default: standard (no promo carries forward unless explicitly committed in writing)
+- Renewal narrative: what the renewal conversation looks like given these commercial terms. If they signed at a discount, name the dynamic directly.
 <!-- END INTERNAL ONLY -->
 
 ---
 
-## CLOSING LINE (always end with this exact format)
+## Closing line — always end Pass 1 with exactly this format
 "Pass 1 coverage: Expectations X% · Metrics X% · Expansion X%.
 Kickoff call should focus on: [sections with most needs-confirmation items].
 Suggested forward commitment: [the exact proposal]."
 
 ---
 
-## NON-NEGOTIABLE RULES
-1. Two confidence states only: `confirmed [source]` or `needs confirmation`
-2. Every needs-confirmation item is a customer-facing question, not a field label — CSM reads it verbatim
-3. Cite every confirmed claim: [sales call] [website] [CRM]
-4. Never fabricate — missing data → needs confirmation question
-5. Never name a price
-6. Internal blocks: <!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY -->
-7. Execution details (domain counts, sender names, inbox counts) belong in the execution plan — not here
-8. 2 pages ideal, 3 pages absolute maximum
+## Non-negotiable rules
+1. Two confidence states only: confirmed [source] or needs confirmation
+2. Open items are customer-facing questions the CSM reads verbatim — never internal field labels
+3. Cite every confirmed claim inline: [sales call] [website] [CRM]
+4. Never fabricate — missing data becomes a needs-confirmation question
+5. Never name a price for upsells
+6. Internal-only blocks: <!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY -->
+7. Execution details (domain counts, sender names, inbox volumes) belong in the execution plan, not here
+8. Output: 2 pages ideal, 3 pages maximum
 
-## Upsell levers vocabulary
+## Upsell levers
 Custom Personalization | Custom Signals | Higher Email Volume | Larger Contact Database |
 Credit Volume | Custom Services (CRM setup / CRM Sequences / Automations / Dial setup / Calls Intelligence) | Whitelabel
 """
@@ -310,23 +315,30 @@ def generate_pass1_content(customer: dict, closing_call: dict, contacts: list, w
 
 # ── PDF generation ────────────────────────────────────────────────────────────
 
+def md_inline(text: str) -> str:
+    """Apply inline markdown (bold, code) to any text fragment."""
+    text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    text = re.sub(r"`(.+?)`", r"<code>\1</code>", text)
+    return text
+
+
 def md_to_html_body(md: str) -> str:
-    """Very light markdown → HTML conversion for the PDF body."""
+    """Convert markdown to HTML for the PDF body."""
     lines = md.split("\n")
     html_lines = []
     for line in lines:
         if line.startswith("# "):
-            html_lines.append(f'<h1>{line[2:]}</h1>')
+            html_lines.append(f'<h1>{md_inline(line[2:])}</h1>')
         elif line.startswith("## "):
-            html_lines.append(f'<h2>{line[3:]}</h2>')
+            html_lines.append(f'<h2>{md_inline(line[3:])}</h2>')
         elif line.startswith("### "):
-            html_lines.append(f'<h3>{line[4:]}</h3>')
+            html_lines.append(f'<h3>{md_inline(line[4:])}</h3>')
         elif line.startswith("- [ ] "):
-            html_lines.append(f'<div class="checkbox">☐ {line[6:]}</div>')
+            html_lines.append(f'<div class="checkbox">☐ {md_inline(line[6:])}</div>')
         elif line.startswith("- [x] ") or line.startswith("- [X] "):
-            html_lines.append(f'<div class="checkbox checked">☑ {line[6:]}</div>')
+            html_lines.append(f'<div class="checkbox checked">☑ {md_inline(line[6:])}</div>')
         elif line.startswith("- "):
-            html_lines.append(f'<div class="bullet">• {line[2:]}</div>')
+            html_lines.append(f'<div class="bullet">• {md_inline(line[2:])}</div>')
         elif line.startswith("<!-- INTERNAL ONLY -->"):
             html_lines.append('<div class="internal-block"><div class="internal-tag">INTERNAL ONLY</div>')
         elif line.startswith("<!-- END INTERNAL ONLY -->"):
@@ -334,11 +346,7 @@ def md_to_html_body(md: str) -> str:
         elif line.strip() == "":
             html_lines.append('<div class="spacer"></div>')
         else:
-            # Bold
-            line = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", line)
-            # Inline code
-            line = re.sub(r"`(.+?)`", r"<code>\1</code>", line)
-            html_lines.append(f'<p>{line}</p>')
+            html_lines.append(f'<p>{md_inline(line)}</p>')
     return "\n".join(html_lines)
 
 
@@ -353,7 +361,7 @@ def generate_pdf(content_md: str, customer_name: str, doc_type: str = "Pass 1 �
 <head>
 <meta charset="utf-8">
 <style>
-  @page {{ size: A4; margin: 18mm 14mm 20mm 14mm; }}
+  @page {{ size: A4; margin: 18mm 14mm 25mm 14mm; }}
   @page :first {{ margin-top: 0; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a;

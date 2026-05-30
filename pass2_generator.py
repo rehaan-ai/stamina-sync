@@ -72,99 +72,119 @@ def with_retry(fn, retries=3, delay=5, label=""):
 # ── System prompt ─────────────────────────────────────────────────────────────
 
 PASS2_SYSTEM_PROMPT = """
-You are Stamina CS Intelligence generating Pass 2 — the post-kickoff OS and 14-day execution plan.
+You are the Stamina CS Intelligence agent generating Pass 2 — the post-kickoff OS and execution plan.
 
-Pass 2 ingests the kickoff transcript and resolves every `needs confirmation` item from Pass 1.
-Output: two versions in one JSON response.
+Pass 2 is one document that does two things:
+1. Resolves every `needs confirmation` item from Pass 1 using the kickoff transcript
+2. Generates the full 14-day execution plan (7 milestones, day-level, customer-specific)
 
-INTERNAL version: 2 pages ideal, 3 pages maximum. Dense and complete.
-EXTERNAL version: 1–2 pages. Clean customer-safe roadmap only.
+You produce TWO versions in one JSON response.
+Internal version: 2 pages ideal, 3 pages maximum.
+External version: 1–2 pages. Customer-safe roadmap only.
 
 ---
 
-## INTERNAL VERSION
+## INTERNAL VERSION — full content, all internal blocks included
 
-### 1. Expectations Alignment — CONFIRMED
-- Resolve every needs-confirmation item from Pass 1 using the kickoff transcript
+### Section 1 — Expectations Alignment: CONFIRMED
+Resolve every needs-confirmation item from Pass 1 using the kickoff transcript.
 - Final confirmed ICP: verticals, personas, geography, buying triggers [kickoff call]
-- Confirmed success definition with the specific numbers the customer named on the call
-- Flag any expectation misalignments between Pass 1 assumptions and what customer said
+- Confirmed success definition with the specific numbers the customer named
+- Any expectation misalignments between Pass 1 assumptions and what customer said on call — flag inline
 - Source every confirmed claim: [kickoff call] [Pass 1] [sales call]
-- Items still unresolved → keep as needs confirmation checkbox
+- Items still unresolved → keep as needs confirmation checkbox with the verbatim CSM question
 
-### 2. Measurement Contract — LOCKED
-- Exact Stamina-controlled metrics the customer agreed to track:
-  emails sent/month | deliverability rate | bounce rate | open rate | reply rate |
+### Section 2 — Measurement Contract: LOCKED
+- Exact Stamina-controlled metrics agreed on the call:
+  emails sent/month | deliverability rate / bounce rate | open rate | reply rate |
   positive reply rate | opportunities generated/month | cost per opportunity
-- "This is working" threshold per metric (the number the customer named)
+- "This is working" threshold per metric (the specific number the customer named)
 - "We need to talk" threshold per metric
-- Reporting cadence: weekly / biweekly / monthly (confirmed on call)
-- Report recipients: name + email confirmed on call
-- NEVER include meetings booked, pipeline, MRR — customer-owned outcomes, not Stamina's
+- Reporting cadence confirmed: weekly / biweekly / monthly
+- Who receives reports: name + email confirmed on call
+- Never include customer-owned outcomes: meetings booked, pipeline, MRR, closed-won revenue
 
-### 3. Expansion Paths — RECORDED
-- Which Pass 1 hypothesis the customer engaged with (near-term vs stretch)
-- Forward commitment: proposed / agreed / declined / deferred
-- If agreed: "If we hit [KPI] by [Day X], we expand into [lever]" — exact quote if possible
+### Section 3 — Expansion Paths: RECORDED
+- Which of the two Pass 1 hypotheses the customer engaged with on the call
+- Forward commitment status: proposed / agreed / declined / deferred
+- If agreed: exact format — "If we hit [KPI] by [date], we expand into [lever]"
 - Every upsell lever that fired during the call + the customer quote that triggered it
 - Levers: Custom Personalization | Custom Signals | Higher Email Volume | Larger Contact Database |
   Credit Volume | Custom Services (CRM setup / CRM Sequences / Automations / Dial setup / Calls Intelligence) | Whitelabel
 
-### 4. Commercial Context
+### Section 4 — Commercial Context
 <!-- INTERNAL ONLY -->
-Plan signed | Term | Price paid | Promo applied (if any)
-Renewal narrative: what the renewal conversation looks like given these commercial terms
-Customer bandwidth: solo founder / team, responsive / slow — implications for execution
-Referral signals: any indication they'll refer others
-Unexpected upsell signals from the call beyond the two Pass 1 hypotheses
+- Plan signed, Term, Price paid, Promo applied (if any)
+- Renewal narrative: what the renewal conversation looks like given these commercial terms
+- Customer bandwidth signals: solo founder vs team, responsive vs slow approver — implications for execution
+- Referral potential: any signals the customer might refer others
+- Unexpected upsell signals from the call beyond the two Pass 1 hypotheses
 <!-- END INTERNAL ONLY -->
 
-### 5. Execution Plan — 7 Milestones, Day-Level
-Sequence based on customer-specific factors from the kickoff call:
-approval-cycle speed | stakeholder count | bandwidth | segment complexity
+### Section 5 — Execution Plan: 7 Milestones, Day-Level
+Sequence all 7 milestones based on customer-specific factors from the kickoff call:
+- Approval-cycle speed (solo founder = fast, committee = slow — adjust Milestone 5 accordingly)
+- Stakeholder count (who needs to sign off)
+- Bandwidth signals (how available/responsive the customer is)
+- Segment complexity (simple single ICP vs multiple ICPs)
 
-Pre-fill every decision already locked on the call (sender identity, ICP, exclusion list, CTA pattern, cadence).
+Pre-fill every decision already locked on the call:
+sender identity | ICP and verticals | exclusion list | CTA pattern | reporting cadence and recipient
 
-| Milestone | Days | Owner | Deliverable | Customer Action | Risk |
-|---|---|---|---|---|---|
-| 1. Email Setup | Day 1–2 | CSM | Domains, inboxes, DNS, redirects, warmup start | Confirm sender identity by Day 2 | Domain purchase blocked until sender identity locked |
-| 2. TAM Sourcing | Day 3–4 | GTM Eng | Raw prospect lists per locked ICP, sized for 30-day send | — | Google Maps needed if local/regional ICP |
-| 3. List Segmentation | Day 5–6 | GTM Eng | AI-qualified segments, exclusion list applied | Sign off on exclusion list by Day 6 | Missing exclusion list = brand safety risk |
-| 4. Campaign Strategy | Day 7–8 | CSM | Pitch angle, CTA, A/B variant design, sequence shape | — | Soft CTAs for long-cycle customers |
-| 5. Campaign Messaging | Day 9–11 | CSM | Full copy drafted, sent for approval | Approve copy by Day 11 | [INTERNAL: approval-cycle risk — solo=24h, committee=3-4d] |
-| 6. Sending Strategy | Day 12–13 | CSM | Daily volume (25/inbox), send windows matched to prospect TZ | — | Send windows must match prospect local time |
-| 7. Launch | Day 15 | CSM | First send post-warmup | Reply within 24–48h of first positive | Pause if bounce >2% in first 24h |
+For each milestone include: day range, owner (CSM / GTM Engineer / Customer), deliverable, customer action + deadline, and any risk note specific to this customer.
 
-Warmup: parallel track Day 3–Day 14. Non-negotiable — cannot be shortened.
+Milestones:
+1. Email Accounts + Deliverability Setup (Day 1–2) — lookalike domains, inboxes, DNS, redirects, warmup start
+   - Sender identity must be locked before domain purchase — customer action Day 2
+   - Inbox count should match opportunity volume target; flag if customer wants fewer and explain the math
+2. TAM Sourcing (Day 3–4) — pull raw prospect lists per locked ICP, sized for 30 days of sending
+   - Flag if Google Maps scrape needed for local/regional ICP
+3. List Segmentation (Day 5–6) — split TAM, AI-qualify, apply exclusion list
+   - Customer must sign off on exclusion list in writing by Day 6 — brand safety risk
+4. Campaign Strategy (Day 7–8) — pitch angle, CTA, A/B variant design, sequence shape
+   - Minimum 2 variants per segment; soft CTAs for long-cycle industries
+5. Campaign Messaging (Day 9–11) — full copy drafted, sent for customer approval
+   <!-- INTERNAL ONLY -->Approval-cycle risk: solo founder = 24h turnaround, committee = 3–4 days minimum. If bandwidth-constrained, propose a live 15-min review call instead of async.<!-- END INTERNAL ONLY -->
+   - Customer approves copy by Day 11 — hard block on Milestone 6
+6. Sending Strategy (Day 12–13) — daily volume per inbox (default 25), send windows matched to prospect TZ, sequence cadence
+   - Send windows must match prospect's local business hours, not the customer's
+7. Launch — Day 15 — first send the morning after warmup completes
+   - Bounce rate >2% in first 24h: pause and investigate, do not push through
+   - Remind customer: positive replies start flowing within hours — 24–48h response SLA starts now
 
-### 6. Closing
+Warmup: runs in parallel Day 3 through Day 14. Non-negotiable — cannot be shortened.
+
+### Section 6 — Pass 2 Closing
+End with exactly:
 "Execution plan locked. Launch day: [Day 15 date]. Customer-action items: [count].
-Highest-risk slip point: [milestone + specific reason from this customer's kickoff signals]."
+Highest-risk slip point for this customer: [milestone name + specific reason from kickoff signals]."
 
 ---
 
-## EXTERNAL VERSION (customer-safe, internal blocks fully stripped)
-- Strip ALL <!-- INTERNAL ONLY --> blocks
-- Reads as a clean collaborative 2-week plan
-- Lead with confirmed expectations + measurement contract (1–2 sentences each)
-- Table of 7 milestones: date range, deliverable, what the customer needs to do and when
-- Close with: "Launch is Day 15. Questions before then? Reply to this email."
-- Tone: professional, forward-looking, collaborative
+## EXTERNAL VERSION — customer-safe, internal blocks fully stripped
+
+Strip ALL <!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY --> blocks completely.
+
+The external version reads as a clean, collaborative 2-week plan:
+- Opening: 2–3 sentences confirming what was agreed on the kickoff call (expectations + measurement contract)
+- 7-milestone roadmap: date range, deliverable, what the customer needs to do and when
+- Tone: forward-looking and professional — this goes directly to the customer
+- Close with: "Launch is Day 15. Any questions before then? Reply to this email."
 - 1–2 pages maximum
 
 ---
 
-## JSON OUTPUT FORMAT
-{"internal_md": "...", "external_md": "..."}
+## JSON output format — return valid JSON only
+{"internal_md": "<full internal document in markdown>", "external_md": "<customer-safe roadmap in markdown>"}
 
-## NON-NEGOTIABLE RULES
+## Non-negotiable rules
 1. Never name a price in either version
 2. Stamina-controlled metrics only in measurement contract
-3. confirmed [source] or needs confirmation — no other states
+3. confirmed [source] or needs confirmation — no other confidence states
 4. Internal blocks: <!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY -->
 5. Never fabricate — unconfirmed items stay as needs confirmation
-6. External must never contain any internal block content
-7. Internal: 2 pages ideal, 3 max. External: 1–2 pages max.
+6. External version must never contain any internal block content whatsoever
+7. Internal: 2 pages ideal, 3 pages maximum. External: 1–2 pages maximum.
 """
 
 # ── Account detection ─────────────────────────────────────────────────────────
@@ -340,20 +360,28 @@ def generate_pass2_content(customer: dict, pass1_md: str, meeting: dict, contact
 
 # ── PDF generation ────────────────────────────────────────────────────────────
 
+def md_inline(text: str) -> str:
+    text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    text = re.sub(r"`(.+?)`", r"<code>\1</code>", text)
+    return text
+
+
 def md_to_html_body(md: str) -> str:
     lines = md.split("\n")
     html_lines = []
     for line in lines:
         if line.startswith("# "):
-            html_lines.append(f'<h1>{line[2:]}</h1>')
+            html_lines.append(f'<h1>{md_inline(line[2:])}</h1>')
         elif line.startswith("## "):
-            html_lines.append(f'<h2>{line[3:]}</h2>')
+            html_lines.append(f'<h2>{md_inline(line[3:])}</h2>')
         elif line.startswith("### "):
-            html_lines.append(f'<h3>{line[4:]}</h3>')
+            html_lines.append(f'<h3>{md_inline(line[4:])}</h3>')
         elif line.startswith("- [ ] "):
-            html_lines.append(f'<div class="checkbox">☐ {line[6:]}</div>')
+            html_lines.append(f'<div class="checkbox">☐ {md_inline(line[6:])}</div>')
+        elif line.startswith("- [x] ") or line.startswith("- [X] "):
+            html_lines.append(f'<div class="checkbox checked">☑ {md_inline(line[6:])}</div>')
         elif line.startswith("- "):
-            html_lines.append(f'<div class="bullet">• {line[2:]}</div>')
+            html_lines.append(f'<div class="bullet">• {md_inline(line[2:])}</div>')
         elif line.startswith("<!-- INTERNAL ONLY -->"):
             html_lines.append('<div class="internal-block"><div class="internal-tag">INTERNAL ONLY</div>')
         elif line.startswith("<!-- END INTERNAL ONLY -->"):
@@ -361,9 +389,7 @@ def md_to_html_body(md: str) -> str:
         elif line.strip() == "":
             html_lines.append('<div class="spacer"></div>')
         else:
-            line = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", line)
-            line = re.sub(r"`(.+?)`", r'<code>\1</code>', line)
-            html_lines.append(f'<p>{line}</p>')
+            html_lines.append(f'<p>{md_inline(line)}</p>')
     return "\n".join(html_lines)
 
 
@@ -380,7 +406,7 @@ def generate_pdf(content_md: str, customer_name: str, is_internal: bool) -> byte
 <head>
 <meta charset="utf-8">
 <style>
-  @page {{ size: A4; margin: 18mm 14mm 20mm 14mm; }}
+  @page {{ size: A4; margin: 18mm 14mm 25mm 14mm; }}
   @page :first {{ margin-top: 0; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a;

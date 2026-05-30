@@ -375,75 +375,136 @@ def gather_account_signals(customer: dict) -> dict:
     }
 
 
+def flag(val, threshold, label, higher_is_bad=True, fmt=lambda v: f"{v}") -> str:
+    """Return a pre-flagged string if val breaches threshold."""
+    if val is None:
+        return f"{label}: no data"
+    breached = (val > threshold) if higher_is_bad else (val < threshold)
+    icon = "🚨 ALERT" if breached else "✓"
+    return f"{icon} {label}: {fmt(val)} (threshold: {fmt(threshold)})"
+
+
 def format_signals_for_prompt(data: dict) -> str:
-    """Format one account's signals for the GPT-4o prompt."""
+    """
+    Format one account's signals for the GPT-4o prompt.
+    Values are PRE-FLAGGED against thresholds so the model knows what is actionable.
+    """
     c = data["customer"]
 
-    # Onboarding flag
+    # ── Customer-level inbox summary (from customers table, always available) ──
+    active_inboxes      = c.get("active_inboxes") or 0
+    disconnected_inboxes = c.get("disconnected_inboxes") or 0
+    inbox_summary = f"{active_inboxes} active / {disconnected_inboxes} disconnected"
+    if disconnected_inboxes >= 3:
+        inbox_summary += f"  🚨 CRITICAL: {disconnected_inboxes} INBOXES DISCONNECTED"
+    elif disconnected_inboxes > 0:
+        inbox_summary += f"  ⚠ WARNING: {disconnected_inboxes} inbox(es) disconnected"
+
+    # ── Onboarding flag ──
     onboarding_flag = ""
     if data["onboarding_risk"]:
         days_old = (now.date() - datetime.fromisoformat(
             c.get("created_at","").replace("Z","+00:00")).date()).days
         onboarding_flag = (
-            f"\n⚠ ONBOARDING RISK: Added {days_old} days ago. "
-            f"Active inboxes: {c.get('active_inboxes',0)}. "
-            f"Recent calls: {len(data['recent_calls'])}"
+            f"\n🚨 ONBOARDING RISK: Added {days_old} days ago — "
+            f"Active inboxes: {active_inboxes}, Recent calls: {len(data['recent_calls'])}"
         )
 
-    # Metrics trend (last 7 days)
+    # ── Metrics — show all 7 days + pre-flag bad values ──
     metrics = data["metrics"]
-    metrics_text = ""
+    metrics_lines = []
     if metrics:
-        latest = metrics[-1] if metrics else {}
-        prev   = metrics[-8] if len(metrics) >= 8 else (metrics[0] if metrics else {})
-        def chg(a, b, field):
-            av = a.get(field); bv = b.get(field)
-            if av is None or bv is None or bv == 0: return "N/A"
-            return f"{((av-bv)/bv*100):+.1f}%"
-        metrics_text = (
-            f"  Latest ({latest.get('date','?')}): "
-            f"emails={latest.get('emails_sent_total') or latest.get('number_of_emails_sent',0)}, "
-            f"reply_rate={latest.get('reply_rate')}%, "
-            f"positive_replies={latest.get('positive_replies',0)}, "
-            f"bounce={latest.get('bounce_rate')}%, "
-            f"live_campaigns={latest.get('live_campaigns',0)}\n"
-            f"  vs 7 days ago: reply_rate {chg(latest,prev,'reply_rate')}, "
-            f"positive_replies {chg(latest,prev,'positive_replies')}"
+        # Show each day
+        for m in metrics:
+            rr  = m.get("reply_rate")
+            pr  = m.get("positive_replies", 0)
+            br  = m.get("bounce_rate")
+            sent = m.get("emails_sent_total") or m.get("number_of_emails_sent", 0)
+            rr_flag = " 🚨 BELOW 1%" if (rr is not None and rr < 1) else ""
+            br_flag = " 🚨 ABOVE 2% THRESHOLD" if (br is not None and br > 2) else ""
+            metrics_lines.append(
+                f"  {m.get('date','?')}: sent={sent}, "
+                f"reply_rate={rr}%{rr_flag}, "
+                f"positive_replies={pr}, "
+                f"bounce={br}%{br_flag}, "
+                f"live_campaigns={m.get('live_campaigns',0)}"
+            )
+        # Aggregate flags
+        avg_rr = sum(m.get("reply_rate") or 0 for m in metrics) / len(metrics)
+        avg_br = sum(m.get("bounce_rate") or 0 for m in metrics) / len(metrics)
+        total_pr = sum(m.get("positive_replies") or 0 for m in metrics)
+        metrics_lines.append(
+            f"\n  7-day averages: avg_reply_rate={round(avg_rr,2)}%, "
+            f"avg_bounce={round(avg_br,2)}%, total_positive_replies={total_pr}"
         )
+        if avg_rr < 1:
+            metrics_lines.append(f"  🚨 ITERATION SIGNAL: avg reply rate {round(avg_rr,2)}% is BELOW 1% threshold")
+        if avg_br > 2:
+            metrics_lines.append(f"  🚨 ITERATION SIGNAL: avg bounce rate {round(avg_br,2)}% is ABOVE 2% threshold")
+        if total_pr == 0:
+            metrics_lines.append(f"  🚨 ITERATION SIGNAL: ZERO positive replies in 7 days")
     else:
-        metrics_text = "  No metrics data"
+        metrics_lines = ["  No account metrics data"]
+    metrics_text = "\n".join(metrics_lines)
 
-    # Inbox health (real-time alert source)
-    inbox_alerts = []
+    # ── Email inboxes — pre-flag every unhealthy inbox ──
+    inbox_detail_lines = []
     for inbox in data["inboxes"]:
-        if not inbox.get("is_active"):
-            inbox_alerts.append(f"  INACTIVE: {inbox['email_account']}")
-        elif (inbox.get("bounce_rate") or 0) > 2:
-            inbox_alerts.append(
-                f"  BOUNCE SPIKE: {inbox['email_account']} "
-                f"bounce={inbox['bounce_rate']}% (threshold: 2%)"
+        br = inbox.get("bounce_rate") or 0
+        hs = inbox.get("health_score") or 100
+        active = inbox.get("is_active")
+        flags = []
+        if not active:
+            flags.append("🚨 INACTIVE")
+        if br > 4:
+            flags.append(f"🚨 BOUNCE {br}% — FAR ABOVE 2% THRESHOLD")
+        elif br > 2:
+            flags.append(f"⚠ BOUNCE {br}% — ABOVE 2% THRESHOLD")
+        if hs < 90:
+            flags.append(f"⚠ HEALTH {hs}% — BELOW 90%")
+        flag_str = " | ".join(flags) if flags else "✓ healthy"
+        inbox_detail_lines.append(
+            f"  {inbox['email_account']}: active={active}, health={hs}, bounce={br}% — {flag_str}"
+        )
+    # Also use customers.disconnected_inboxes if no inbox detail available
+    if not inbox_detail_lines:
+        if disconnected_inboxes > 0:
+            inbox_detail_lines.append(
+                f"  🚨 {disconnected_inboxes} DISCONNECTED INBOXES (from Pylon — no inbox detail in DB)"
             )
-        elif inbox.get("is_warming") and (inbox.get("health_score") or 100) < 90:
-            inbox_alerts.append(
-                f"  WARMUP HEALTH LOW: {inbox['email_account']} "
-                f"health={inbox.get('health_score')}% (threshold: 90%)"
-            )
-    inbox_text = "\n".join(inbox_alerts) if inbox_alerts else "  All inboxes healthy"
+        else:
+            inbox_detail_lines.append("  No inbox detail available")
+    inbox_detail_text = "\n".join(inbox_detail_lines)
 
-    # Campaign performance (variant comparison)
-    campaigns = sorted(
-        data["campaigns"],
-        key=lambda x: x.get("positive_reply_rate") or 0,
-        reverse=True
-    )
-    camp_text = "\n".join(
-        f"  [{c['snapshot_date'][:10]}] {c['campaign_name']} "
-        f"[{c.get('segment','')}|{c.get('variant_name','')}]: "
-        f"sent={c.get('emails_sent',0)}, rr={c.get('reply_rate',0)}%, "
-        f"prr={c.get('positive_reply_rate',0)}%, "
-        f"+replies={c.get('positive_replies',0)}, -replies={c.get('negative_replies',0)}"
-        for c in campaigns[:10]
-    ) or "  None"
+    # ── Campaign performance — pre-flag poor campaigns ──
+    campaigns = sorted(data["campaigns"], key=lambda x: x.get("positive_reply_rate") or 0, reverse=True)
+    camp_lines = []
+    for camp in campaigns[:15]:
+        rr   = camp.get("reply_rate") or 0
+        prr  = camp.get("positive_reply_rate") or 0
+        br   = camp.get("bounce_rate") or 0
+        pr   = camp.get("positive_replies") or 0
+        nr   = camp.get("negative_replies") or 0
+        flags = []
+        if rr < 1:
+            flags.append(f"🚨 reply_rate {rr}% BELOW 1%")
+        if prr == 0 and camp.get("emails_sent", 0) > 100:
+            flags.append("🚨 ZERO positive replies")
+        if br > 2:
+            flags.append(f"🚨 bounce {br}% ABOVE 2%")
+        if prr > 1.5:
+            flags.append(f"✅ STRONG prr {prr}% — upsell signal")
+        if rr > 3:
+            flags.append(f"✅ STRONG reply_rate {rr}%")
+        flag_str = " | ".join(flags) if flags else ""
+        camp_lines.append(
+            f"  [{camp.get('snapshot_date','')[:10]}] {camp['campaign_name']} "
+            f"[{camp.get('segment','')}|{camp.get('variant_name','')}]: "
+            f"sent={camp.get('emails_sent',0)}, rr={rr}%, prr={prr}%, "
+            f"+replies={pr}, -replies={nr}, bounce={br}%"
+            + (f"\n    → {flag_str}" if flag_str else "")
+        )
+    camp_text = "\n".join(camp_lines) or "  None"
 
     # Last 24h Slack (with full text for customer messages)
     slack_text = "\n".join(
@@ -479,15 +540,15 @@ def format_signals_for_prompt(data: dict) -> str:
     ) or "  None"
 
     return f"""
-━━━ {c['name']} | {c.get('tier','?')} | Health:{c.get('health_score','?')} | Inboxes:{c.get('active_inboxes',0)} active/{c.get('disconnected_inboxes',0)} disconnected{onboarding_flag}
+━━━ {c['name']} | {c.get('tier','?')} | Health:{c.get('health_score','?')} | Inboxes: {inbox_summary}{onboarding_flag}
 
-METRICS (last 7 days trend):
+ACCOUNT METRICS (last 7 days — pre-flagged against thresholds):
 {metrics_text}
 
-INBOX HEALTH ALERTS:
-{inbox_text}
+EMAIL INBOX DETAIL (pre-flagged):
+{inbox_detail_text}
 
-CAMPAIGN PERFORMANCE (last 14 days):
+CAMPAIGN PERFORMANCE (last 14 days — pre-flagged):
 {camp_text}
 
 SLACK MESSAGES (last 24h):

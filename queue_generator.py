@@ -203,11 +203,11 @@ Grey zone: customer asks to change campaign AND data shows it's underperforming 
   "notes": "Context with actual numbers the CSM needs to understand why this ticket exists",
   "dependencies": "",
   "low_confidence": false,
-  "issue": "iteration: specific problem with numeric evidence — cite campaign name, metric, value, trend",
-  "action": "iteration: what to do, who does it, by when",
-  "lever": "upsell: exact lever name",
-  "signal": "upsell: specific data point with numbers — cite campaign, metric, value",
-  "upsell_action": "upsell: specific next step for the CSM",
+  "issue": "Specific problem with numeric evidence — e.g. 'Reply rate 0.48% (threshold 1%) for 7 days; 14 inboxes disconnected'",
+  "action": "What to do, who does it, by when — e.g. 'Reconnect inboxes and rebuild messaging — GTM Engineer by June 3'",
+  "lever": "Exact lever name from the list above",
+  "signal": "Specific data point — e.g. 'Positive reply rate 2.3% on SaaS segment, above 1.5% threshold'",
+  "upsell_action": "Specific next step for the CSM",
   "request": "customer-request: one-line description of what was asked",
   "blocker": ""
 }
@@ -225,7 +225,8 @@ Grey zone: customer asks to change campaign AND data shows it's underperforming 
 5. Inbox issues: cite exact inbox email, health_score, bounce_rate
 6. Campaign issues: cite exact campaign name, variant, and specific metric value
 7. When uncertain: low_confidence=true, still open
-8. Multiple severe issues for one account = one high-priority iteration ticket covering all of them
+8. ONE iteration ticket per account maximum — combine ALL issues for that account into one ticket's issue and action fields
+9. ONE upsell ticket per account maximum — combine all upsell signals into one ticket
 9. Return ONLY this exact JSON structure — a wrapper object with a "tickets" array:
    {"tickets": [ticket1, ticket2, ticket3, ...]}
    Every 🚨 line in the data must produce at least one ticket in this array.
@@ -434,6 +435,8 @@ def format_signals_for_prompt(data: dict) -> str:
     # ── Metrics — show all 7 days + pre-flag against thresholds ──
     metrics = data["metrics"]
     metrics_lines = []
+    def pct(v): return f"{round(float(v),2)}%" if v is not None else "N/A"
+
     if metrics:
         for m in metrics:
             rr   = m.get("reply_rate")
@@ -449,9 +452,9 @@ def format_signals_for_prompt(data: dict) -> str:
                         if (br is not None and br > THRESH_BOUNCE_ALERT) else ""))
             metrics_lines.append(
                 f"  {m.get('date','?')}: sent={sent}, "
-                f"reply_rate={rr}%{rr_flag}, "
+                f"reply_rate={pct(rr)}{rr_flag}, "
                 f"positive_replies={pr}, "
-                f"bounce={br}%{br_flag}, "
+                f"bounce={pct(br)}{br_flag}, "
                 f"live_campaigns={m.get('live_campaigns',0)}"
             )
         # Aggregate summary + flags
@@ -519,12 +522,13 @@ def format_signals_for_prompt(data: dict) -> str:
     # ── Email inboxes — pre-flag every unhealthy inbox ──
     inbox_detail_lines = []
     for inbox in data["inboxes"]:
-        br = inbox.get("bounce_rate") or 0
-        hs = inbox.get("health_score") or 100
+        br_raw = inbox.get("bounce_rate") or 0
+        br  = round(float(br_raw), 2)
+        hs  = inbox.get("health_score") or 100
         active = inbox.get("is_active")
         flags = []
         if not active:
-            flags.append(f"🚨 DISCONNECTED — threshold is 0 disconnected inboxes")
+            flags.append("🚨 DISCONNECTED — threshold is 0 disconnected inboxes")
         if br > THRESH_BOUNCE_CRITICAL:
             flags.append(f"🚨 BOUNCE {br}% — CRITICAL (threshold: {THRESH_BOUNCE_ALERT}%)")
         elif br > THRESH_BOUNCE_ALERT:
@@ -552,9 +556,9 @@ def format_signals_for_prompt(data: dict) -> str:
     campaigns = sorted(data["campaigns"], key=lambda x: x.get("positive_reply_rate") or 0, reverse=True)
     camp_lines = []
     for camp in campaigns[:15]:
-        rr   = camp.get("reply_rate") or 0
-        prr  = camp.get("positive_reply_rate") or 0
-        br   = camp.get("bounce_rate") or 0
+        rr   = round(float(camp.get("reply_rate") or 0), 2)
+        prr  = round(float(camp.get("positive_reply_rate") or 0), 2)
+        br   = round(float(camp.get("bounce_rate") or 0), 2)
         pr   = camp.get("positive_replies") or 0
         nr   = camp.get("negative_replies") or 0
         sent = camp.get("emails_sent", 0) or 0
@@ -814,64 +818,89 @@ def render_queue_pdf(
         c = colors.get(s, "#6b7280")
         return f'<span style="background:{c};color:white;padding:2px 8px;border-radius:12px;font-size:10px;text-transform:uppercase;">{s}</span>'
 
-    def iteration_card(t) -> str:
-        border = "#dc2626" if t.get("status") == "blocked" or t.get("priority") == "urgent" else "#dc2626"
-        lc = ' <span style="color:#f59e0b;font-size:10px;">[low confidence]</span>' if t.get("low_confidence") else ""
-        return f"""
-        <div style="border-left:4px solid {border};background:#fff5f5;border-radius:0 8px 8px 0;
-                    padding:14px 16px;margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span style="font-weight:700;font-size:13px;">{t.get('customer_name','')}</span>
-            <span>{priority_pill(t.get('priority','this_week'))} {status_pill(t.get('status','open'))}</span>
-          </div>
-          <div style="font-size:11px;color:#666;margin-bottom:8px;">{t.get('ticket_id','')} · {t.get('title','')}{lc}</div>
-          <div style="margin-bottom:6px;"><span style="color:#dc2626;font-weight:700;font-size:11px;">↓ ISSUE</span>
-            <div style="font-size:12px;color:#333;margin-top:3px;">{t.get('issue','')}</div></div>
-          <div style="margin-bottom:6px;"><span style="color:#dc2626;font-weight:700;font-size:11px;">→ ACTION</span>
-            <div style="font-size:12px;color:#333;margin-top:3px;">{t.get('action','')}</div></div>
-          <div style="font-size:10px;color:#999;border-top:1px solid #fecaca;padding-top:6px;margin-top:8px;">
-            Owner: {t.get('owner','CSM')} · Due: {t.get('due_date','TBD')} · Source: {t.get('source_detail','')}</div>
-        </div>"""
+    from collections import defaultdict
 
-    def upsell_card(t) -> str:
-        border = "#dc2626" if t.get("priority") == "urgent" else "#7c3aed"
-        lc = ' <span style="color:#f59e0b;font-size:10px;">[low confidence]</span>' if t.get("low_confidence") else ""
-        return f"""
-        <div style="border-left:4px solid {border};background:#faf5ff;border-radius:0 8px 8px 0;
-                    padding:14px 16px;margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span style="font-weight:700;font-size:13px;">{t.get('customer_name','')}</span>
-            <span>{priority_pill(t.get('priority','this_week'))} {status_pill(t.get('status','open'))}</span>
+    def render_grouped_cards(tickets: list, accent: str, bg: str, border_color: str,
+                              label1: str, field1: str, label2: str, field2: str,
+                              label3: str = None, field3: str = None) -> str:
+        """Render tickets grouped by account — one card per account."""
+        grouped = defaultdict(list)
+        for t in tickets:
+            grouped[t["customer_name"]].append(t)
+
+        html_parts = []
+        for account_name, account_tickets in grouped.items():
+            # Use highest priority across all tickets for this account
+            priorities = [t.get("priority","this_week") for t in account_tickets]
+            top_priority = "urgent" if "urgent" in priorities else ("this_week" if "this_week" in priorities else "this_month")
+            top_status   = account_tickets[0].get("status","open")
+            is_urgent    = top_priority == "urgent"
+            card_border  = "#dc2626" if is_urgent else accent
+
+            # Build combined issue/action/signal text
+            parts1 = [t.get(field1,"") for t in account_tickets if t.get(field1)]
+            parts2 = [t.get(field2,"") for t in account_tickets if t.get(field2)]
+            combined1 = "<br>".join(f"• {p}" for p in parts1) if len(parts1) > 1 else (parts1[0] if parts1 else "—")
+            combined2 = "<br>".join(f"• {p}" for p in parts2) if len(parts2) > 1 else (parts2[0] if parts2 else "—")
+
+            owners   = list(dict.fromkeys(t.get("owner","CSM") for t in account_tickets))
+            due_date = min((t.get("due_date","") for t in account_tickets if t.get("due_date")), default="TBD")
+            ticket_ids = ", ".join(t.get("ticket_id","") for t in account_tickets[:3])
+
+            extra_block = ""
+            if label3 and field3:
+                parts3 = [t.get(field3,"") for t in account_tickets if t.get(field3)]
+                combined3 = "<br>".join(f"• {p}" for p in parts3) if len(parts3) > 1 else (parts3[0] if parts3 else "")
+                if combined3:
+                    extra_block = f'''<div style="margin-bottom:6px;">
+                      <span style="color:{accent};font-weight:700;font-size:11px;">{label3}</span>
+                      <div style="font-size:11px;color:#333;margin-top:3px;line-height:1.5;">{combined3}</div></div>'''
+
+            html_parts.append(f"""
+        <div style="border-left:4px solid {card_border};background:{bg};border-radius:0 8px 8px 0;
+                    padding:12px 14px;margin-bottom:10px;page-break-inside:avoid;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-weight:700;font-size:12px;">{account_name}</span>
+            <span>{priority_pill(top_priority)} {status_pill(top_status)}</span>
           </div>
-          <div style="font-size:11px;color:#666;margin-bottom:8px;">{t.get('ticket_id','')} · {t.get('title','')}{lc}</div>
-          <div style="margin-bottom:6px;"><span style="color:#7c3aed;font-weight:700;font-size:11px;">↑ LEVER</span>
-            <div style="font-size:12px;color:#333;margin-top:3px;">{t.get('lever','')}</div></div>
-          <div style="margin-bottom:6px;"><span style="color:#7c3aed;font-weight:700;font-size:11px;">⚡ SIGNAL</span>
-            <div style="font-size:12px;color:#333;margin-top:3px;">{t.get('signal','')}</div></div>
-          <div style="margin-bottom:6px;"><span style="color:#7c3aed;font-weight:700;font-size:11px;">→ ACTION</span>
-            <div style="font-size:12px;color:#333;margin-top:3px;">{t.get('upsell_action','')}</div></div>
-          <div style="font-size:10px;color:#999;border-top:1px solid #e9d5ff;padding-top:6px;margin-top:8px;">
-            Owner: {t.get('owner','CSM')} · Due: {t.get('due_date','TBD')} · Source: {t.get('source_detail','')}</div>
-        </div>"""
+          <div style="margin-bottom:6px;">
+            <span style="color:{accent};font-weight:700;font-size:11px;">{label1}</span>
+            <div style="font-size:11px;color:#333;margin-top:3px;line-height:1.5;">{combined1}</div></div>
+          <div style="margin-bottom:6px;">
+            <span style="color:{accent};font-weight:700;font-size:11px;">{label2}</span>
+            <div style="font-size:11px;color:#333;margin-top:3px;line-height:1.5;">{combined2}</div></div>
+          {extra_block}
+          <div style="font-size:9px;color:#aaa;border-top:1px solid {border_color};padding-top:5px;margin-top:6px;">
+            Owner: {", ".join(owners)} · Due: {due_date} · {ticket_ids}</div>
+        </div>""")
+        return "".join(html_parts)
 
     def ticketing_item(t, closed=False) -> str:
-        checkbox = "☑" if closed else "☐"
-        style = "text-decoration:line-through;color:#9ca3af;" if closed else "color:#1a1a1a;"
+        checkbox  = "☑" if closed else "☐"
+        style     = "text-decoration:line-through;color:#9ca3af;" if closed else "color:#1a1a1a;"
         urgent_dot = '<span style="color:#dc2626;font-weight:700;">● </span>' if t.get("priority") == "urgent" and not closed else ""
-        blocked_note = f' <span style="color:#dc2626;font-size:10px;">[BLOCKED: {t.get("blocker","")}]</span>' if t.get("status") == "blocked" else ""
-        lc = ' <span style="color:#f59e0b;font-size:10px;">[low confidence]</span>' if t.get("low_confidence") else ""
+        blocked   = f' <span style="color:#dc2626;font-size:10px;">[BLOCKED: {t.get("blocker","")}]</span>' if t.get("status") == "blocked" else ""
+        lc        = ' <span style="color:#f59e0b;font-size:10px;">[low confidence]</span>' if t.get("low_confidence") else ""
         return f"""
-        <div style="padding:8px 12px;border-bottom:1px solid #f0f9ff;font-size:12px;">
-          <span style="font-size:14px;">{checkbox}</span>
+        <div style="padding:7px 12px;border-bottom:1px solid #f0f9ff;font-size:11.5px;page-break-inside:avoid;">
+          <span style="font-size:13px;">{checkbox}</span>
           {urgent_dot}<strong style="{style}">{t.get('customer_name','')}</strong>
-          <span style="{style}"> — {t.get('request') or t.get('title','')}</span>{blocked_note}{lc}
-          <div style="font-size:10px;color:#9ca3af;margin-top:2px;">
-            {t.get('ticket_id','')} · Source: {t.get('source_detail','')} · Owner: {t.get('owner','CSM')} · Due: {t.get('due_date','TBD')}</div>
+          <span style="{style}"> — {t.get('request') or t.get('title','')}</span>{blocked}{lc}
+          <div style="font-size:9.5px;color:#aaa;margin-top:2px;">
+            Owner: {t.get('owner','CSM')} · Due: {t.get('due_date','TBD')} · {t.get('source_detail','')}</div>
         </div>"""
 
-    # Build sections HTML
-    iter_html   = "".join(iteration_card(t) for t in iteration) or '<p style="color:#9ca3af;font-size:12px;padding:12px;">No iteration tickets today.</p>'
-    upsell_html = "".join(upsell_card(t) for t in upsell)       or '<p style="color:#9ca3af;font-size:12px;padding:12px;">No upsell opportunities today.</p>'
+    # Build sections HTML — iteration and upsell grouped by account
+    iter_html = render_grouped_cards(
+        iteration, "#dc2626", "#fff5f5", "#fecaca",
+        "↓ ISSUE", "issue", "→ ACTION", "action"
+    ) or '<p style="color:#9ca3af;font-size:12px;padding:12px;">No iteration tickets today.</p>'
+
+    upsell_html = render_grouped_cards(
+        upsell, "#7c3aed", "#faf5ff", "#e9d5ff",
+        "↑ LEVER", "lever", "⚡ SIGNAL", "signal", "→ ACTION", "upsell_action"
+    ) or '<p style="color:#9ca3af;font-size:12px;padding:12px;">No upsell opportunities today.</p>'
+
     ticket_html = "".join(ticketing_item(t) for t in ticketing) or '<p style="color:#9ca3af;font-size:12px;padding:12px;">No open requests.</p>'
     closed_html = "".join(ticketing_item(t, closed=True) for t in closed_yesterday)
 

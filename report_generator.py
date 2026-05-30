@@ -945,23 +945,28 @@ def format_account_for_internal(data: dict, period: str) -> str:
     ) or "  No messages"
 
     # ── Replies ────────────────────────────────────────────────────────────────
-    label_counts, pos_names, unreplied = {}, [], []
+    label_counts, pos_names, unreplied, slow = {}, [], [], []
     for r in replies:
         lbl = r.get("reply_label", "unknown")
         label_counts[lbl] = label_counts.get(lbl, 0) + 1
         if lbl in ("positive", "interested"):
-            name = f"{r.get('prospect_first_name','')} {r.get('prospect_last_name','')}".strip()
-            co   = r.get("prospect_company", "")
+            name      = f"{r.get('prospect_first_name','')} {r.get('prospect_last_name','')}".strip()
+            co        = r.get("prospect_company", "")
+            hrs       = round(r.get("customer_response_delay_hrs") or 0, 1)
+            responded = r.get("customer_responded", False)
             pos_names.append(f"{name} ({co})")
-            if not r.get("customer_responded"):
-                hrs = r.get("customer_response_delay_hrs") or 999
-                unreplied.append(f"🚨 {name} ({co}) — {round(hrs/24)}d unreplied")
+            if not responded:
+                unreplied.append(f"🚨 NO RESPONSE: {name} ({co})")
+            elif hrs > 2:
+                slow.append(f"⚠ SLOW ({hrs}h > 2h threshold): {name} ({co})")
 
     reply_text = " | ".join(f"{lbl}: {cnt}" for lbl, cnt in label_counts.items()) or "none"
     if pos_names:
         reply_text += "\n  Positive: " + ", ".join(pos_names[:6])
     if unreplied:
         reply_text += "\n  " + " | ".join(unreplied[:5])
+    if slow:
+        reply_text += "\n  " + " | ".join(slow[:5])
 
     # ── Issues ─────────────────────────────────────────────────────────────────
     issues_text = " | ".join(f"[{i['priority']}] {i['title']}" for i in issues) or "None"

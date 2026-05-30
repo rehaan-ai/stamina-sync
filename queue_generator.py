@@ -678,7 +678,8 @@ def render_queue_pdf(
 <head>
 <meta charset="utf-8">
 <style>
-  @page {{ size: A4; margin: 0; }}
+  @page {{ size: A4; margin: 10mm 10mm 22mm 10mm; }}
+  @page :first {{ margin-top: 0; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a; font-size: 13px; }}
   .header {{ background: #1a2035; padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; }}
@@ -700,7 +701,7 @@ def render_queue_pdf(
   .section-body {{ padding: 16px 40px; }}
   .closed-group {{ background: #f9fafb; border-radius: 6px; margin-top: 12px; padding: 4px 0; }}
   .closed-label {{ font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; }}
-  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 40px; border-top: 1px solid #e8eaed; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; background: white; }}
+  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 7px 40px; border-top: 1px solid #e8eaed; display: flex; justify-content: space-between; font-size: 9px; color: #bbb; background: white; }}
 </style>
 </head>
 <body>

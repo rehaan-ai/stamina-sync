@@ -34,10 +34,13 @@ from supabase import create_client
 
 # ── Mode detection ────────────────────────────────────────────────────────────
 
-DRY_RUN    = "--dry-run" in sys.argv
-FORCE_WEEKLY  = "--weekly"  in sys.argv
-FORCE_MONTHLY = "--monthly" in sys.argv
-PAIR_FILTER   = next((sys.argv[i+1] for i, a in enumerate(sys.argv) if a == "--pair"), None)
+DRY_RUN         = "--dry-run"       in sys.argv
+FORCE_WEEKLY    = "--weekly"        in sys.argv
+FORCE_MONTHLY   = "--monthly"       in sys.argv
+INTERNAL_ONLY   = "--internal-only" in sys.argv  # skip external PDFs
+EXTERNAL_ONLY   = "--external-only" in sys.argv  # skip internal email
+PAIR_FILTER     = next((sys.argv[i+1] for i, a in enumerate(sys.argv) if a == "--pair"),    None)
+ACCOUNT_FILTER  = next((sys.argv[i+1] for i, a in enumerate(sys.argv) if a == "--account"), None)
 
 now    = datetime.now(timezone.utc)
 is_weekly  = FORCE_WEEKLY  or (not FORCE_MONTHLY and now.weekday() == 0)
@@ -1060,82 +1063,162 @@ Period: {start_date} to {end_date}
 
 # ── PDF generation ────────────────────────────────────────────────────────────
 
+def md_inline(text: str) -> str:
+    """Apply inline markdown (bold, code, internal tag) to any text fragment."""
+    text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    text = re.sub(r"`(.+?)`", r"<code>\1</code>", text)
+    text = re.sub(r"\[internal review only\]",
+                  r'<span class="internal-tag">[internal review only]</span>', text)
+    return text
+
+
 def md_to_html_body(md: str) -> str:
     lines = md.split("\n")
     html_lines = []
     for line in lines:
         if line.startswith("# "):
-            html_lines.append(f'<h1>{line[2:]}</h1>')
+            html_lines.append(f'<h1>{md_inline(line[2:])}</h1>')
         elif line.startswith("## "):
-            html_lines.append(f'<h2>{line[3:]}</h2>')
+            html_lines.append(f'<h2>{md_inline(line[3:])}</h2>')
         elif line.startswith("### "):
-            html_lines.append(f'<h3>{line[4:]}</h3>')
+            html_lines.append(f'<h3>{md_inline(line[4:])}</h3>')
         elif line.startswith("- "):
-            html_lines.append(f'<div class="bullet">• {line[2:]}</div>')
+            html_lines.append(f'<div class="bullet">• {md_inline(line[2:])}</div>')
         elif line.startswith("━") or line.startswith("---"):
             html_lines.append('<hr class="divider">')
         elif line.strip() == "":
             html_lines.append('<div class="spacer"></div>')
         else:
-            line = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", line)
-            line = re.sub(r"\[internal review only\]", r'<span class="internal-tag">[internal review only]</span>', line)
-            html_lines.append(f'<p>{line}</p>')
+            html_lines.append(f'<p>{md_inline(line)}</p>')
     return "\n".join(html_lines)
 
 
 def generate_pdf(content_md: str, title: str, subtitle: str, is_internal: bool) -> bytes:
+    """Route to internal or external PDF renderer based on is_internal flag."""
+    if is_internal:
+        return _generate_internal_pdf(content_md, title, subtitle)
+    else:
+        return _generate_external_pdf(content_md, title, subtitle)
+
+
+def _generate_internal_pdf(content_md: str, title: str, subtitle: str) -> bytes:
     from weasyprint import HTML as WP_HTML
-
     body_html = md_to_html_body(content_md)
-    today     = datetime.now().strftime("%B %d, %Y")
-    banner    = '<div class="internal-banner">⚠ INTERNAL ONLY — DO NOT SHARE WITH CLIENTS</div>' if is_internal else ""
-
+    today = datetime.now().strftime("%B %d, %Y")
     html = f"""<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
-  @page {{ size: A4; margin: 0; }}
+<html><head><meta charset="utf-8"><style>
+  @page {{ size: A4; margin: 18mm 14mm 25mm 14mm; }}
+  @page :first {{ margin-top: 0; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a; font-size: 12px; line-height: 1.6; }}
-  .header {{ background: #1a2035; padding: 28px 48px; display: flex; align-items: center; justify-content: space-between; }}
-  .header img {{ height: 24px; filter: brightness(0) invert(1); }}
+  body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a;
+          font-size: 11px; line-height: 1.55; orphans: 3; widows: 3; }}
+  .header {{ background: #1a2035; padding: 22px 36px; display: flex; align-items: center;
+             justify-content: space-between; }}
+  .header img {{ height: 22px; filter: brightness(0) invert(1); }}
   .header-right {{ text-align: right; }}
-  .header-right .label {{ color: #8892a4; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }}
-  .header-right .title {{ color: white; font-size: 15px; font-weight: 700; margin-top: 4px; }}
-  .header-right .sub {{ color: #8892a4; font-size: 11px; margin-top: 2px; }}
-  .internal-banner {{ background: #b91c1c; color: white; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px; }}
-  .body {{ padding: 32px 48px 72px; }}
-  h1 {{ font-size: 16px; font-weight: 700; color: #1a2035; margin: 20px 0 8px; border-bottom: 2px solid #1a2035; padding-bottom: 5px; }}
-  h2 {{ font-size: 14px; font-weight: 700; color: #1a2035; margin: 16px 0 6px; }}
-  h3 {{ font-size: 12px; font-weight: 700; color: #444; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: 0.5px; }}
-  p {{ margin-bottom: 6px; color: #333; font-size: 12px; }}
-  .bullet {{ margin: 2px 0 2px 14px; color: #333; font-size: 12px; }}
-  .spacer {{ height: 6px; }}
-  hr.divider {{ border: none; border-top: 1px solid #e8eaed; margin: 12px 0; }}
-  .internal-tag {{ color: #dc2626; font-weight: 700; font-size: 10px; }}
-  strong {{ color: #1a1a1a; }}
-  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 48px; border-top: 1px solid #e8eaed; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; background: white; }}
-</style>
-</head>
+  .header-right .label {{ color: #8892a4; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; }}
+  .header-right .title {{ color: white; font-size: 14px; font-weight: 700; margin-top: 3px; }}
+  .header-right .sub {{ color: #8892a4; font-size: 10px; margin-top: 2px; }}
+  .internal-banner {{ background: #b91c1c; color: white; text-align: center; font-size: 9px;
+                      font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px; }}
+  .body {{ padding: 16px 0 0; }}
+  h1 {{ font-size: 13px; font-weight: 700; color: #1a2035; margin: 16px 0 6px;
+        border-bottom: 2px solid #1a2035; padding-bottom: 4px; page-break-after: avoid; }}
+  h2 {{ font-size: 11.5px; font-weight: 700; color: #1a2035; margin: 12px 0 4px;
+        page-break-after: avoid; }}
+  h3 {{ font-size: 10px; font-weight: 700; color: #555; margin: 10px 0 3px;
+        text-transform: uppercase; letter-spacing: 0.5px; page-break-after: avoid; }}
+  p {{ margin-bottom: 4px; color: #333; page-break-inside: avoid; }}
+  .bullet {{ margin: 2px 0 2px 12px; color: #333; page-break-inside: avoid; }}
+  .spacer {{ height: 5px; }}
+  hr.divider {{ border: none; border-top: 1px solid #e8eaed; margin: 10px 0; }}
+  .internal-tag {{ color: #dc2626; font-weight: 700; font-size: 9px; }}
+  strong {{ color: #111; }}
+  code {{ background: #f4f4f4; padding: 1px 3px; border-radius: 3px; font-size: 9px; font-family: monospace; }}
+  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 6px 36px;
+             border-top: 1px solid #e8eaed; display: flex; justify-content: space-between;
+             font-size: 9px; color: #bbb; background: white; }}
+</style></head>
 <body>
 <div class="header">
   <img src="data:image/png;base64,{LOGO_B64}">
   <div class="header-right">
-    <div class="label">{'Internal' if is_internal else 'Client'} Report</div>
+    <div class="label">Internal Report</div>
     <div class="title">{title}</div>
     <div class="sub">{subtitle}</div>
   </div>
 </div>
-{banner}
+<div class="internal-banner">⚠ INTERNAL ONLY — DO NOT SHARE WITH CLIENTS</div>
 <div class="body">{body_html}</div>
 <div class="footer">
   <span>Stamina CS Intelligence · {today}</span>
-  <span>{'INTERNAL' if is_internal else 'CONFIDENTIAL'} — {title}</span>
+  <span>INTERNAL — {title}</span>
 </div>
-</body>
-</html>"""
+</body></html>"""
+    return WP_HTML(string=html).write_pdf()
 
+
+def _generate_external_pdf(content_md: str, title: str, subtitle: str) -> bytes:
+    """Enterprise-grade external PDF — customer-ready."""
+    from weasyprint import HTML as WP_HTML
+    body_html = md_to_html_body(content_md)
+    today = datetime.now().strftime("%B %d, %Y")
+    html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  @page {{ size: A4; margin: 22mm 16mm 26mm 16mm; }}
+  @page :first {{ margin-top: 0; }}
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a;
+          font-size: 11.5px; line-height: 1.6; orphans: 3; widows: 3; }}
+
+  /* ── Clean professional header ── */
+  .header {{ background: #1a2035; padding: 24px 40px; display: flex;
+             align-items: center; justify-content: space-between; }}
+  .header img {{ height: 24px; filter: brightness(0) invert(1); }}
+  .header-meta {{ text-align: right; }}
+  .header-meta .company {{ color: white; font-size: 15px; font-weight: 700; }}
+  .header-meta .period {{ color: #8892a4; font-size: 10px; margin-top: 3px; letter-spacing: 0.5px; }}
+
+  /* ── Body ── */
+  .body {{ padding: 20px 0 0; }}
+
+  /* ── Section headings ── */
+  h1 {{ font-size: 14px; font-weight: 700; color: #1a2035; margin: 22px 0 8px;
+        padding-bottom: 5px; border-bottom: 2px solid #1a2035; page-break-after: avoid; }}
+  h2 {{ font-size: 12px; font-weight: 700; color: #1a2035; margin: 16px 0 6px;
+        page-break-after: avoid; }}
+  h3 {{ font-size: 11px; font-weight: 700; color: #2d3a5e; margin: 12px 0 5px;
+        page-break-after: avoid; }}
+
+  /* ── Body text ── */
+  p {{ margin-bottom: 6px; color: #2d2d2d; page-break-inside: avoid; line-height: 1.65; }}
+  .bullet {{ margin: 3px 0 3px 16px; color: #2d2d2d; page-break-inside: avoid; }}
+  .spacer {{ height: 8px; }}
+  hr.divider {{ border: none; border-top: 1px solid #e8eaed; margin: 14px 0; }}
+  strong {{ color: #111; font-weight: 600; }}
+  code {{ background: #f5f6f8; padding: 1px 4px; border-radius: 3px;
+          font-size: 10px; font-family: monospace; color: #333; }}
+
+  /* ── Footer ── */
+  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 40px;
+             border-top: 1px solid #e8eaed; display: flex; justify-content: space-between;
+             font-size: 9.5px; color: #999; background: white; }}
+  .footer .brand {{ font-weight: 600; color: #1a2035; }}
+</style></head>
+<body>
+<div class="header">
+  <img src="data:image/png;base64,{LOGO_B64}">
+  <div class="header-meta">
+    <div class="company">{title}</div>
+    <div class="period">{subtitle}</div>
+  </div>
+</div>
+<div class="body">{body_html}</div>
+<div class="footer">
+  <span class="brand">Stamina</span>
+  <span>{subtitle} · Prepared {today}</span>
+</div>
+</body></html>"""
     return WP_HTML(string=html).write_pdf()
 
 
@@ -1239,29 +1322,39 @@ def run_reports(period: str):
             continue
 
         # ── Internal report (one per pair) ────────────────────────────────────
-        log(f"  Generating internal {period} report...")
-        if not DRY_RUN:
-            try:
-                internal_md  = with_retry(
-                    lambda: generate_internal_report(pair, accounts_data, period, start_str, end_str),
-                    retries=3, delay=10, label=f"internal report {pair_name}"
-                )
-                internal_pdf = generate_pdf(
-                    internal_md,
-                    title    = f"{pair_name} — All Accounts",
-                    subtitle = label,
-                    is_internal = True,
-                )
-                filename = f"{pair_name.replace(' ', '_')}_{period}_{start_str}_internal.pdf"
-                send_internal_email(pair, internal_pdf, period, label, filename)
-                log(f"  ✓ Internal report sent")
-            except Exception as e:
-                log(f"  ERROR internal report: {e}")
-        else:
-            log(f"  [DRY RUN] Would generate internal report for {len(accounts_data)} accounts")
+        if not EXTERNAL_ONLY:
+            log(f"  Generating internal {period} report...")
+            if not DRY_RUN:
+                try:
+                    internal_md  = with_retry(
+                        lambda: generate_internal_report(pair, accounts_data, period, start_str, end_str),
+                        retries=3, delay=10, label=f"internal report {pair_name}"
+                    )
+                    internal_pdf = generate_pdf(
+                        internal_md,
+                        title    = f"{pair_name} — All Accounts",
+                        subtitle = label,
+                        is_internal = True,
+                    )
+                    filename = f"{pair_name.replace(' ', '_')}_{period}_{start_str}_internal.pdf"
+                    send_internal_email(pair, internal_pdf, period, label, filename)
+                    log(f"  ✓ Internal report sent")
+                except Exception as e:
+                    log(f"  ERROR internal report: {e}")
+            else:
+                log(f"  [DRY RUN] Would generate internal report for {len(accounts_data)} accounts")
 
         # ── External reports (one per account, parallelised) ──────────────────
-        log(f"  Generating {len(accounts_data)} external reports...")
+        if INTERNAL_ONLY:
+            log(f"  Skipping external reports (--internal-only)")
+        else:
+            # Apply account filter if set
+            external_data = accounts_data
+            if ACCOUNT_FILTER:
+                external_data = [d for d in accounts_data
+                                 if d["customer"]["name"].lower() == ACCOUNT_FILTER.lower()]
+                log(f"  Filtered to account: {ACCOUNT_FILTER} ({len(external_data)} match)")
+            log(f"  Generating {len(external_data)} external reports...")
 
         def process_external(data: dict):
             name      = data["customer"]["name"]
@@ -1294,14 +1387,14 @@ def run_reports(period: str):
             except Exception as e:
                 return name, f"ERROR: {e}"
 
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = {executor.submit(process_external, d): d for d in accounts_data}
-            for future in as_completed(futures):
-                name, result = future.result()
-                if "ERROR" in str(result):
-                    log(f"    ✗ {name}: {result}")
-                else:
-                    log(f"    ✓ {name}: uploaded" if result != "dry-run" else f"    [DRY RUN] {name}")
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                futures = {executor.submit(process_external, d): d for d in external_data}
+                for future in as_completed(futures):
+                    name, result = future.result()
+                    if "ERROR" in str(result):
+                        log(f"    ✗ {name}: {result}")
+                    else:
+                        log(f"    ✓ {name}: uploaded" if result != "dry-run" else f"    [DRY RUN] {name}")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

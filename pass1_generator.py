@@ -386,7 +386,7 @@ def send_email(pair: dict, pdf_bytes: bytes, customer_name: str):
         "from":     RESEND_FROM,
         "to":       to_emails,
         "reply_to": reply_to,
-        "template": {"id": "prekickoff-context", "variables": {}},
+        "template": {"id": "prekickoff-context", "variables": {"newaccountpylon": customer_name}},
         "attachments": [{"filename": filename,
                           "content": base64.b64encode(pdf_bytes).decode()}],
     }

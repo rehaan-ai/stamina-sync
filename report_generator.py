@@ -1497,10 +1497,9 @@ def _generate_external_pdf(content_md: str, title: str, subtitle: str) -> bytes:
 
 def upload_to_pylon(pdf_bytes: bytes, filename: str, pylon_account_id: str) -> str:
     resp = requests.post(
-        f"{PYLON_BASE}/attachments",
+        f"{PYLON_BASE}/accounts/{pylon_account_id}/files",
         headers={"Authorization": f"Bearer {PYLON_KEY}"},
         files={"file": (filename, pdf_bytes, "application/pdf")},
-        data={"account_id": pylon_account_id},
         timeout=30,
     )
     resp.raise_for_status()

@@ -55,6 +55,7 @@ PYLON_BASE    = "https://api.usepylon.com"
 RESEND_FROM   = "Stamina <stamina@reports.stamina.io>"
 AMARTYA_EMAIL = "amartya@stamina.io"
 BCC_EMAILS    = ["arjun@stamina.io", "rehaan@stamina.io"]
+TEST_EMAIL    = os.environ.get("TEST_EMAIL")
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
 openai = OpenAI(api_key=OPENAI_KEY)
@@ -1163,15 +1164,28 @@ def send_internal_email(pair: dict, pdf_bytes: bytes, period: str,
 
     template_alias = "weekly-internal-report" if period == "weekly" else "monthly-internal-report"
 
+    if TEST_EMAIL:
+        to_emails = [TEST_EMAIL]
+        cc_list   = []
+        bcc_list  = []
+        reply_to  = TEST_EMAIL
+        log(f"  [TEST MODE] Sending to {TEST_EMAIL} only")
+    else:
+        cc_list  = [AMARTYA_EMAIL]
+        bcc_list = BCC_EMAILS
+        reply_to = AMARTYA_EMAIL
+
     payload = {
-        "from":    RESEND_FROM,
-        "to":      to_emails,
-        "cc":      [AMARTYA_EMAIL],
-        "bcc":     BCC_EMAILS,
-        "reply_to": AMARTYA_EMAIL,
+        "from":     RESEND_FROM,
+        "to":       to_emails,
+        "reply_to": reply_to,
         "template": {"id": template_alias, "variables": {}},
         "attachments": [{"filename": filename, "content": base64.b64encode(pdf_bytes).decode()}],
     }
+    if cc_list:
+        payload["cc"] = cc_list
+    if bcc_list:
+        payload["bcc"] = bcc_list
 
     resp = requests.post(
         "https://api.resend.com/emails",

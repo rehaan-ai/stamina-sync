@@ -490,22 +490,17 @@ def send_email(pair: dict, pdf_bytes: bytes, customer_name: str):
         reply_to = AMARTYA_EMAIL
 
     payload = {
-        "from":    RESEND_FROM,
-        "to":      to_emails,
-        "cc":      cc_list,
-        "bcc":     bcc_list,
+        "from":     RESEND_FROM,
+        "to":       to_emails,
         "reply_to": reply_to,
-        "template": {
-            "id":        "execution-plan",
-            "variables": {},
-        },
-        "attachments": [
-            {
-                "filename": filename,
-                "content":  base64.b64encode(pdf_bytes).decode(),
-            }
-        ],
+        "template": {"id": "execution-plan", "variables": {}},
+        "attachments": [{"filename": filename,
+                          "content": base64.b64encode(pdf_bytes).decode()}],
     }
+    if cc_list:
+        payload["cc"] = cc_list
+    if bcc_list:
+        payload["bcc"] = bcc_list
 
     resp = requests.post(
         "https://api.resend.com/emails",

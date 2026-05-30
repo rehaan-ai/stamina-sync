@@ -54,6 +54,7 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
 RESEND_FROM   = "Stamina <stamina@reports.stamina.io>"
 AMARTYA_EMAIL = "amartya@stamina.io"
+TEST_EMAIL    = os.environ.get("TEST_EMAIL")
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
 openai = OpenAI(api_key=OPENAI_KEY)
@@ -761,15 +762,25 @@ def send_queue_email(pair: dict, pdf_bytes: bytes):
 
     filename = f"{pair['pair_name'].replace(' ', '_')}_Queue_{today_str}.pdf"
 
+    if TEST_EMAIL:
+        to_emails = [TEST_EMAIL]
+        cc_list   = []
+        reply_to  = TEST_EMAIL
+        log(f"  [TEST MODE] Sending to {TEST_EMAIL} only")
+    else:
+        cc_list  = [AMARTYA_EMAIL]
+        reply_to = AMARTYA_EMAIL
+
     payload = {
-        "from":    RESEND_FROM,
-        "to":      to_emails,
-        "cc":      [AMARTYA_EMAIL],
-        "reply_to": AMARTYA_EMAIL,
+        "from":     RESEND_FROM,
+        "to":       to_emails,
+        "reply_to": reply_to,
         "template": {"id": "daily-ticket-queue", "variables": {}},
         "attachments": [{"filename": filename,
-                         "content":  base64.b64encode(pdf_bytes).decode()}],
+                         "content": base64.b64encode(pdf_bytes).decode()}],
     }
+    if cc_list:
+        payload["cc"] = cc_list
 
     resp = requests.post(
         "https://api.resend.com/emails",

@@ -35,3 +35,4 @@ jobs:
           PYLON_KEY:      ${{ secrets.PYLON_KEY }}
           OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          TEST_EMAIL:     ${{ secrets.TEST_EMAIL }}

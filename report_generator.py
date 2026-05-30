@@ -974,6 +974,91 @@ def format_account_for_internal(data: dict, period: str) -> str:
     # ── Kickoff context ────────────────────────────────────────────────────────
     kickoff = f"\nMeasurement contract: {data['kickoff_context'][:600]}" if data["kickoff_context"] else ""
 
+    # ── 1. Customer Slack silence (>10 days in reports) ───────────────────────
+    SILENCE_THRESH = 10  # days (>5 for queue, >10 for reports)
+    silence_flag = ""
+    cust_msgs = [s for s in slack if not s.get("is_internal")]
+    if cust_msgs:
+        try:
+            last_msg_date = max(s["message_date"] for s in cust_msgs)
+            days_silent   = (now.date() - datetime.fromisoformat(
+                last_msg_date.replace("Z","+00:00")).date()).days
+            if days_silent > SILENCE_THRESH:
+                silence_flag = (f"🚨 CUSTOMER SLACK SILENCE: {days_silent} days since last customer "
+                                f"message (threshold: {SILENCE_THRESH} days). Last: {last_msg_date[:10]}")
+        except Exception:
+            pass
+    else:
+        silence_flag = f"🚨 CUSTOMER SLACK SILENCE: No customer messages in Slack channel this {period}"
+
+    # ── 2. No CS call in >14 days ─────────────────────────────────────────────
+    MEETING_THRESH = 14  # days (CS call expected every 2 weeks)
+    meeting_flag = ""
+    cs_calls = [m for m in meetings if m.get("meeting_type") == "cs_call"]
+    if cs_calls:
+        try:
+            last_call = max(m["meeting_date"] for m in cs_calls)
+            days_no_call = (now.date() - datetime.fromisoformat(
+                last_call.replace("Z","+00:00")).date()).days
+            if days_no_call > MEETING_THRESH:
+                meeting_flag = (f"🚨 NO CS CALL IN {days_no_call} DAYS (threshold: {MEETING_THRESH} days). "
+                                f"Last call: {last_call[:10]}")
+        except Exception:
+            pass
+    else:
+        # No CS call found in the report period — check last_meeting_date from Pylon
+        last_meeting = c.get("last_meeting_date")
+        if last_meeting:
+            try:
+                days_no_call = (now.date() - datetime.fromisoformat(
+                    last_meeting.replace("Z","+00:00")).date()).days
+                if days_no_call > MEETING_THRESH:
+                    meeting_flag = (f"🚨 NO CS CALL IN {days_no_call} DAYS (threshold: {MEETING_THRESH} days). "
+                                    f"Last call on record: {last_meeting[:10]}")
+            except Exception:
+                pass
+        else:
+            meeting_flag = "🚨 NO CS CALL ON RECORD for this account"
+
+    # ── 3. Negative to positive reply ratio (>3:1, min 200 sent) ─────────────
+    neg_pos_flag = ""
+    total_pos_r = sum(camp.get("positive_replies") or 0 for camp in data["campaigns"])
+    total_neg_r = sum(camp.get("negative_replies") or 0 for camp in data["campaigns"])
+    total_sent_r = sum(camp.get("emails_sent") or 0 for camp in data["campaigns"])
+    if total_sent_r >= 200 and total_pos_r > 0 and total_neg_r > 3 * total_pos_r:
+        neg_pos_flag = (f"🚨 NEG/POS RATIO: {total_neg_r} negative vs {total_pos_r} positive "
+                        f"({round(total_neg_r/total_pos_r,1)}:1 — threshold 3:1) — messaging/positioning review needed")
+    elif total_sent_r >= 200 and total_pos_r == 0 and total_neg_r > 0:
+        neg_pos_flag = (f"🚨 ZERO positive replies, {total_neg_r} negatives across all campaigns — "
+                        f"positioning problem")
+
+    # ── 4. A/B variant performance gap (best prr > 2x worst, min 200 sent) ───
+    ab_flags = []
+    camp_by_name_r: dict = {}
+    for camp in data["campaigns"]:
+        nm = camp.get("campaign_name","")
+        if nm not in camp_by_name_r:
+            camp_by_name_r[nm] = []
+        camp_by_name_r[nm].append(camp)
+    for camp_name, variants in camp_by_name_r.items():
+        eligible = [v for v in variants if (v.get("emails_sent") or 0) >= 200]
+        if len(eligible) < 2:
+            continue
+        prrs = [(v.get("variant_name","?"), round(float(v.get("positive_reply_rate") or 0), 2))
+                for v in eligible]
+        best_v, best_prr   = max(prrs, key=lambda x: x[1])
+        worst_v, worst_prr = min(prrs, key=lambda x: x[1])
+        if worst_prr > 0 and best_prr > 2 * worst_prr:
+            ab_flags.append(
+                f"🚨 A/B GAP '{camp_name}': '{best_v}' {best_prr}% vs '{worst_v}' {worst_prr}% "
+                f"({round(best_prr/worst_prr,1)}x — threshold 2x). Kill '{worst_v}'")
+        elif best_prr > 0 and worst_prr == 0:
+            ab_flags.append(
+                f"🚨 A/B GAP '{camp_name}': '{best_v}' {best_prr}% vs '{worst_v}' 0% — kill '{worst_v}'")
+
+    engagement_lines = [f for f in [silence_flag, meeting_flag, neg_pos_flag] + ab_flags if f]
+    engagement_text  = "\n  ".join(engagement_lines) if engagement_lines else "No engagement flags"
+
     return f"""
 ━━━ {c['name'].upper()} | {c.get('tier','?')} | Health:{c.get('health_score','?')} | {inbox_summary}{onboarding_flag}
 
@@ -982,6 +1067,9 @@ METRICS ({period}):
 
 CAMPAIGNS:
 {camp_text}
+
+ENGAGEMENT FLAGS:
+  {engagement_text}
 
 MEETINGS: {meetings_text}
 

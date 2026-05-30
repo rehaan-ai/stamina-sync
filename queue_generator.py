@@ -269,6 +269,19 @@ def gather_account_signals(customer: dict) -> dict:
         .data
     )
 
+    # Last customer Slack message (for silence detection — separate from 24h window)
+    last_customer_slack = (
+        sb.table("slack_messages")
+        .select("message_date")
+        .eq("customer_id", cid)
+        .eq("is_internal", False)
+        .order("message_date", desc=True)
+        .limit(1)
+        .execute()
+        .data
+    )
+    last_customer_slack_date = last_customer_slack[0]["message_date"] if last_customer_slack else None
+
     # Meetings in last 24h (Fathom calls — extract commitments and concerns)
     recent_calls = (
         sb.table("meetings")
@@ -377,16 +390,17 @@ def gather_account_signals(customer: dict) -> dict:
                 onboarding_risk = True
 
     return {
-        "customer":        customer,
-        "slack":           slack,
-        "recent_calls":    recent_calls,
-        "metrics":         metrics,
-        "inboxes":         inboxes,
-        "campaigns":       campaigns,
-        "unreplied_leads": unreplied_leads,
-        "issues":          issues,
-        "kickoff_context": kickoff_context,
-        "onboarding_risk": onboarding_risk,
+        "customer":               customer,
+        "slack":                  slack,
+        "last_customer_slack_date": last_customer_slack_date,
+        "recent_calls":           recent_calls,
+        "metrics":                metrics,
+        "inboxes":                inboxes,
+        "campaigns":              campaigns,
+        "unreplied_leads":        unreplied_leads,
+        "issues":                 issues,
+        "kickoff_context":        kickoff_context,
+        "onboarding_risk":        onboarding_risk,
     }
 
 
@@ -645,6 +659,78 @@ def format_signals_for_prompt(data: dict) -> str:
         for i in data["issues"]
     ) or "  None"
 
+    # ── 1. Customer Slack silence (>5 days) ──────────────────────────────────
+    silence_flag = ""
+    last_slack_date = data.get("last_customer_slack_date")
+    if last_slack_date:
+        try:
+            days_silent = (now.date() - datetime.fromisoformat(
+                last_slack_date.replace("Z","+00:00")).date()).days
+            if days_silent > 5:
+                silence_flag = (f"🚨 CUSTOMER SLACK SILENCE: {days_silent} days since last customer "
+                                f"message (threshold: 5 days). Last message: {last_slack_date[:10]}")
+        except Exception:
+            pass
+    else:
+        silence_flag = "🚨 CUSTOMER SLACK SILENCE: No customer messages on record in Slack channel"
+
+    # ── 2. No CS call in >14 days ─────────────────────────────────────────────
+    meeting_flag = ""
+    last_meeting = c.get("last_meeting_date")
+    if last_meeting:
+        try:
+            days_no_call = (now.date() - datetime.fromisoformat(
+                last_meeting.replace("Z","+00:00")).date()).days
+            if days_no_call > 14:
+                meeting_flag = (f"🚨 NO CS CALL IN {days_no_call} DAYS (threshold: 14 days = every 2 weeks). "
+                                f"Last call: {last_meeting[:10]}")
+        except Exception:
+            pass
+    else:
+        meeting_flag = "🚨 NO CS CALL ON RECORD for this account"
+
+    # ── 3. Negative to positive reply ratio (>3:1, min 200 sent) ─────────────
+    neg_pos_flag = ""
+    total_pos_camp = sum(camp.get("positive_replies") or 0 for camp in data["campaigns"])
+    total_neg_camp = sum(camp.get("negative_replies") or 0 for camp in data["campaigns"])
+    total_sent_camp = sum(camp.get("emails_sent") or 0 for camp in data["campaigns"])
+    if total_sent_camp >= 200 and total_pos_camp > 0 and total_neg_camp > 3 * total_pos_camp:
+        neg_pos_flag = (f"🚨 NEGATIVE/POSITIVE RATIO: {total_neg_camp} negative vs {total_pos_camp} positive "
+                        f"({round(total_neg_camp/total_pos_camp,1)}:1 — threshold: 3:1). "
+                        f"Positioning issue — messaging needs review.")
+    elif total_sent_camp >= 200 and total_pos_camp == 0 and total_neg_camp > 0:
+        neg_pos_flag = (f"🚨 ZERO positive replies but {total_neg_camp} negatives across all campaigns "
+                        f"({total_sent_camp} sent) — positioning problem")
+
+    # ── 4. A/B variant performance gap (best prr > 2x worst, min 200 sent each) ──
+    ab_flags = []
+    camp_by_name: dict = {}
+    for camp in data["campaigns"]:
+        nm = camp.get("campaign_name", "")
+        if nm not in camp_by_name:
+            camp_by_name[nm] = []
+        camp_by_name[nm].append(camp)
+    for camp_name, variants in camp_by_name.items():
+        eligible = [v for v in variants if (v.get("emails_sent") or 0) >= 200]
+        if len(eligible) < 2:
+            continue
+        prrs = [(v.get("variant_name","?"), round(float(v.get("positive_reply_rate") or 0), 2))
+                for v in eligible]
+        best_v, best_prr   = max(prrs, key=lambda x: x[1])
+        worst_v, worst_prr = min(prrs, key=lambda x: x[1])
+        if worst_prr > 0 and best_prr > 2 * worst_prr:
+            ab_flags.append(
+                f"🚨 A/B GAP in '{camp_name}': '{best_v}' prr={best_prr}% vs '{worst_v}' prr={worst_prr}% "
+                f"({round(best_prr/worst_prr,1)}x gap — threshold: 2x). Kill '{worst_v}'.")
+        elif best_prr > 0 and worst_prr == 0:
+            ab_flags.append(
+                f"🚨 A/B GAP in '{camp_name}': '{best_v}' prr={best_prr}% vs '{worst_v}' prr=0% — kill '{worst_v}'")
+    ab_flag = "\n  ".join(ab_flags) if ab_flags else ""
+
+    # Combine engagement flags
+    engagement_flags = "\n  ".join(f for f in [silence_flag, meeting_flag, neg_pos_flag, ab_flag] if f)
+    engagement_text  = f"  {engagement_flags}" if engagement_flags else "  No engagement flags"
+
     return f"""
 ━━━ {c['name']} | {c.get('tier','?')} | Health:{c.get('health_score','?')} | Inboxes: {inbox_summary}{onboarding_flag}
 
@@ -656,6 +742,9 @@ EMAIL INBOX DETAIL (pre-flagged):
 
 CAMPAIGN PERFORMANCE (last 14 days — pre-flagged):
 {camp_text}
+
+ENGAGEMENT SIGNALS:
+{engagement_text}
 
 SLACK MESSAGES (last 24h):
 {slack_text}

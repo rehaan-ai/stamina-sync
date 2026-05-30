@@ -320,7 +320,7 @@ def gather_account_signals(customer: dict) -> dict:
             .data
         )
 
-    # Unreplied positive leads (reply_data) — SLA breach check
+    # Positive leads — fetch ALL (unreplied + slow response > 2h)
     unreplied_leads = []
     if brand_id:
         all_positive = (
@@ -330,13 +330,17 @@ def gather_account_signals(customer: dict) -> dict:
                     "customer_responded, customer_response_delay_hrs")
             .eq("brand_id", brand_id)
             .in_("reply_label", ["positive", "interested"])
-            .eq("customer_responded", False)
             .order("replied_at", desc=True)
-            .limit(20)
+            .limit(30)
             .execute()
             .data
         )
-        unreplied_leads = all_positive
+        # Flag: not responded at all OR responded but took > 2 hours
+        unreplied_leads = [
+            r for r in all_positive
+            if not r.get("customer_responded")
+            or (r.get("customer_response_delay_hrs") or 0) > 2
+        ]
 
     # Open issues (Pylon)
     issues = (
@@ -611,18 +615,29 @@ def format_signals_for_prompt(data: dict) -> str:
         for m in data["recent_calls"]
     ) or "  No calls in last 24h"
 
-    # Unreplied positive leads (SLA breach)
-    unreplied_text = ""
+    # Positive lead SLA flags — no response OR response took > 2 hours
+    unreplied_lines = []
     for r in data["unreplied_leads"]:
-        name = f"{r.get('prospect_first_name','')} {r.get('prospect_last_name','')}".strip()
-        co   = r.get("prospect_company", "")
-        hrs  = r.get("customer_response_delay_hrs") or 0
-        unreplied_text += (
-            f"  {name} ({co}) — replied {(r.get('replied_at') or '')[:10]}, "
-            f"{round(hrs)}hrs ago still unreplied\n"
-            f"  Their reply: \"{(r.get('reply_body') or '')[:300]}\"\n"
-        )
-    unreplied_text = unreplied_text or "  None"
+        name      = f"{r.get('prospect_first_name','')} {r.get('prospect_last_name','')}".strip()
+        co        = r.get("prospect_company", "")
+        hrs       = round(r.get("customer_response_delay_hrs") or 0, 1)
+        responded = r.get("customer_responded", False)
+        replied_at = (r.get("replied_at") or "")[:10]
+        snippet   = (r.get("reply_body") or "")[:200]
+
+        if not responded:
+            unreplied_lines.append(
+                f"  🚨 NO RESPONSE: {name} ({co}) — prospect replied {replied_at}, "
+                f"customer has NOT responded\n"
+                f"    Prospect said: \"{snippet}\""
+            )
+        elif hrs > 2:
+            unreplied_lines.append(
+                f"  ⚠ SLOW RESPONSE ({hrs}h — threshold: 2h): {name} ({co}) — "
+                f"prospect replied {replied_at}\n"
+                f"    Prospect said: \"{snippet}\""
+            )
+    unreplied_text = "\n".join(unreplied_lines) or "  None"
 
     # Open issues
     issues_text = "\n".join(

@@ -74,61 +74,109 @@ def with_retry(fn, retries=3, delay=5, label=""):
 # ── OS System Prompt ──────────────────────────────────────────────────────────
 
 PASS1_SYSTEM_PROMPT = """
-You are the Stamina CS Intelligence agent generating a Pass 1 pre-kickoff OS for a new customer.
+You are Stamina CS Intelligence generating Pass 1 — the pre-kickoff OS for a new customer.
 
-## Your role
-Generate a complete Pass 1 kickoff OS using the three-pillar structure below. This document is
-INTERNAL ONLY — the CSM uses it to run the kickoff call. It will never be shared with the customer
-in this form.
+INTERNAL ONLY. The CSM uses this to run the kickoff call. Never share with the customer.
+Target length: 2 pages when rendered as PDF. Maximum 3 pages. Be concise and dense — every sentence must earn its place.
 
-## Three-pillar structure (use exactly, in this order)
+---
 
-### 1. Expectations Alignment
-- Compressed business overview (1–2 short paragraphs): who they sell to, how they currently acquire
-- Target prospect profile: verticals, personas, geography, key buying triggers
-- Stated definition of success (quantified where possible)
-- Customer-facing expectation-quantification questions the CSM will ask on the kickoff call
+## STRUCTURE — three pillars in this exact order
 
-### 2. Key Metrics To Track
-- Propose the measurement contract: which Stamina-controlled metrics to report on and at what thresholds
-- Stamina-controlled metrics ONLY: emails sent, deliverability rate, bounce rate, open rate, reply rate,
-  positive reply rate, opportunities generated, cost per opportunity
-- NEVER commit to customer-owned outcomes: meetings booked, pipeline, MRR, closed-won revenue
-- Measurement contract questions for the CSM to ask on the kickoff call
+### PILLAR 1 — Expectations Alignment
+Purpose: confirm what the customer's business does, who they target, and how they quantify success.
 
-### 3. How the Customer Can Expand with Stamina
-- Exactly TWO expansion hypotheses using [Vector → Lever] format
-- One near-term lever (likely adoption within 60–90 days)
-- One stretch lever (tied to stated ambition, requires Stamina to prove value first)
+Content (keep tight):
+- Business overview: 2–3 sentences max. Who they sell to, how they currently acquire.
+- Target prospect profile: verticals, personas, geography, key buying triggers — bulleted
+- Success definition: quantified where possible. If not stated, generate a needs-confirmation question.
+- ICP/targeting items that are unconfirmed → checkbox (- [ ])
+
+Questions for the CSM (expectation-quantification only — force numbers on success):
+These are the exact questions the CSM reads verbatim on the call. Examples:
+- "How many qualified opportunities per month would make this clearly worth it for you?"
+- "What does a 'this is working' outcome look like at end of quarter — in numbers?"
+- "What's the smallest result that would justify renewing? The largest you'd realistically expect?"
+
+### PILLAR 2 — Key Metrics To Track (Measurement Contract)
+Purpose: define what Stamina will be evaluated on.
+
+Stamina-controlled metrics ONLY — propose the subset most relevant to this customer:
+- Emails sent per month
+- Inbox deliverability rate / bounce rate
+- Open rate
+- Reply rate
+- Positive reply rate (auto-categorized intent replies)
+- Opportunities generated per month
+- Cost per opportunity (Stamina spend ÷ opportunities)
+
+NEVER commit to: meetings booked, pipeline generated, closed-won revenue, MRR. These are customer-owned outcomes.
+
+Standard proposal when customer has no view: emails sent, reply rate, positive reply rate, opportunities/month.
+Default cadence: biweekly. Weekly in month 1 if pilot. Monthly only if 3+ month sales cycle AND customer prefers.
+
+Measurement contract questions for the CSM:
+- "Of these metrics — reply rate, positive reply rate, opportunities — which matters most for how you'll judge us?"
+- "What's the 'this is working' threshold — minimum opportunities/month to feel on track?"
+- "What's the 'we need to talk' threshold?"
+- "Reporting cadence: biweekly is our default — does that work?"
+- "Who else on your side should receive reports?"
+
+### PILLAR 3 — How the Customer Can Expand with Stamina
+Purpose: surface the two strongest expansion paths the CSM proposes during kickoff.
+
+HARD LIMIT: exactly two hypotheses. No more. No fewer.
+Format: [Vector → Lever] for each hypothesis.
+
+Selection rules:
+- One near-term lever: likely adoption within 60–90 days based on what they already do
+- One stretch lever: tied to stated ambition, requires proving value first
 - Never stack two hypotheses on the same lever
-- Suggested forward commitment for the SM to propose at end of kickoff:
-  "If we hit [KPI] in [60/90 days], can we plan to expand into [lever] in month [X]?"
+- If the sales call surfaced an explicit expansion signal, that becomes one of the two automatically
 
-## Rules you must follow
+<!-- INTERNAL ONLY -->
+Rationale for hypothesis selection: explain why you picked these two (not for customer eyes)
+<!-- END INTERNAL ONLY -->
 
-1. Two confidence states only: `confirmed` (from a source) or `needs confirmation` (CSM should ask)
-2. Phrase open items as customer-facing questions the CSM reads verbatim on the call
-3. Cite sources inline: [sales call], [CRM], [website], [kickoff call]
-4. Never fabricate. If data isn't available, generate a `needs confirmation` question instead
-5. Tag internal-only blocks with <!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY -->
-   Use for: Commercial Context, forward-commitment rationale, hypothesis rationale
-6. Never name a price for upsells
-7. End Pass 1 with: "Pass 1 coverage: Expectations X%, Metrics X%, Expansion X%.
-   Kickoff call should focus on: [sections]. Suggested forward commitment: [proposal]."
+Suggested forward commitment the SM proposes at end of kickoff:
+Format: "If we hit [KPI] in [60/90 days], can we plan to expand into [lever] in month [X]?"
+Pick the near-term hypothesis as the target lever. The stretch is held for the renewal cycle.
 
-## Upsell levers (reference vocabulary)
-Custom Personalization, Custom Signals, Higher Email Volume, Larger Contact Database,
-Credit Volume, Custom Services (CRM setup / CRM Sequences / Automations / Dial setup /
-Calls Intelligence), Whitelabel
+---
 
-## Commercial Context block (always include, tagged internal-only)
-Fields: Plan signed, Term, Price paid, Promo applied, Renewal pricing default, Renewal narrative implication
+## COMMERCIAL CONTEXT (always include, internal-only tagged)
 
-## Output format
-- Markdown
-- Tight prose, bias toward bullets
-- Use checkboxes (- [ ]) for every `needs confirmation` item
-- Use [Vector → Lever] tag format for expansion hypotheses
+<!-- INTERNAL ONLY -->
+- Plan signed: [Base / Custom]
+- Term: [Monthly / Quarterly / Custom]
+- Price paid: [actual amount — note if discounted]
+- Promo applied: [yes/no — source if yes]
+- Renewal pricing default: standard (no promo carries forward unless committed in writing)
+- Renewal narrative: [what the renewal conversation looks like given these terms]
+<!-- END INTERNAL ONLY -->
+
+---
+
+## CLOSING LINE (always end with this exact format)
+"Pass 1 coverage: Expectations X% · Metrics X% · Expansion X%.
+Kickoff call should focus on: [sections with most needs-confirmation items].
+Suggested forward commitment: [the exact proposal]."
+
+---
+
+## NON-NEGOTIABLE RULES
+1. Two confidence states only: `confirmed [source]` or `needs confirmation`
+2. Every needs-confirmation item is a customer-facing question, not a field label — CSM reads it verbatim
+3. Cite every confirmed claim: [sales call] [website] [CRM]
+4. Never fabricate — missing data → needs confirmation question
+5. Never name a price
+6. Internal blocks: <!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY -->
+7. Execution details (domain counts, sender names, inbox counts) belong in the execution plan — not here
+8. 2 pages ideal, 3 pages absolute maximum
+
+## Upsell levers vocabulary
+Custom Personalization | Custom Signals | Higher Email Volume | Larger Contact Database |
+Credit Volume | Custom Services (CRM setup / CRM Sequences / Automations / Dial setup / Calls Intelligence) | Whitelabel
 """
 
 # ── Data fetching ─────────────────────────────────────────────────────────────
@@ -305,38 +353,53 @@ def generate_pdf(content_md: str, customer_name: str, doc_type: str = "Pass 1 �
 <head>
 <meta charset="utf-8">
 <style>
-  @page {{ size: A4; margin: 0; }}
+  @page {{ size: A4; margin: 18mm 14mm 20mm 14mm; }}
+  @page :first {{ margin-top: 0; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a; font-size: 13px; line-height: 1.6; }}
+  body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a;
+          font-size: 11px; line-height: 1.55; orphans: 3; widows: 3; }}
 
-  .header {{ background: #1a2035; padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; }}
-  .header img {{ height: 26px; filter: brightness(0) invert(1); }}
+  /* ── Header (first page only, fixed height) ── */
+  .header {{ background: #1a2035; padding: 22px 36px; display: flex; align-items: center;
+             justify-content: space-between; }}
+  .header img {{ height: 22px; filter: brightness(0) invert(1); }}
   .header-right {{ text-align: right; }}
-  .header-right .label {{ color: #8892a4; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }}
-  .header-right .title {{ color: white; font-size: 16px; font-weight: 700; margin-top: 4px; }}
-  .header-right .sub {{ color: #8892a4; font-size: 11px; margin-top: 2px; }}
+  .header-right .label {{ color: #8892a4; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; }}
+  .header-right .title {{ color: white; font-size: 14px; font-weight: 700; margin-top: 3px; }}
+  .header-right .sub {{ color: #8892a4; font-size: 10px; margin-top: 2px; }}
+  .internal-banner {{ background: #b91c1c; color: white; text-align: center; font-size: 9px;
+                      font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px; }}
 
-  .internal-banner {{ background: #b91c1c; color: white; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px; }}
+  /* ── Body ── */
+  .body {{ padding: 18px 0 60px; }}
 
-  .body {{ padding: 36px 48px 80px; }}
+  /* ── Typography ── */
+  h1 {{ font-size: 14px; font-weight: 700; color: #1a2035; margin: 18px 0 7px;
+        border-bottom: 2px solid #1a2035; padding-bottom: 4px;
+        page-break-after: avoid; }}
+  h2 {{ font-size: 12px; font-weight: 700; color: #1a2035; margin: 14px 0 5px;
+        page-break-after: avoid; }}
+  h3 {{ font-size: 10.5px; font-weight: 700; color: #555; margin: 10px 0 4px;
+        text-transform: uppercase; letter-spacing: 0.5px; page-break-after: avoid; }}
 
-  h1 {{ font-size: 18px; font-weight: 700; color: #1a2035; margin: 24px 0 10px; border-bottom: 2px solid #1a2035; padding-bottom: 6px; }}
-  h2 {{ font-size: 15px; font-weight: 700; color: #1a2035; margin: 20px 0 8px; }}
-  h3 {{ font-size: 13px; font-weight: 700; color: #444; margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.5px; }}
+  p {{ margin-bottom: 5px; color: #333; page-break-inside: avoid; }}
+  .bullet {{ margin: 2px 0 2px 14px; color: #333; page-break-inside: avoid; }}
+  .spacer {{ height: 5px; }}
+  .checkbox {{ margin: 3px 0 3px 14px; color: #333; page-break-inside: avoid; }}
+  .checkbox.checked {{ color: #888; text-decoration: line-through; }}
+  code {{ background: #f4f4f4; padding: 1px 4px; border-radius: 3px;
+          font-size: 10px; font-family: monospace; }}
 
-  p {{ margin-bottom: 8px; color: #333; }}
-  .bullet {{ margin: 3px 0 3px 16px; color: #333; }}
-  .spacer {{ height: 8px; }}
+  /* ── Internal block ── */
+  .internal-block {{ background: #fff8f8; border: 1px solid #fecaca; border-radius: 5px;
+                     padding: 10px 14px; margin: 10px 0; page-break-inside: avoid; }}
+  .internal-tag {{ font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
+                   text-transform: uppercase; color: #dc2626; margin-bottom: 5px; }}
 
-  .checkbox {{ margin: 4px 0 4px 16px; color: #333; }}
-  .checkbox.checked {{ color: #666; text-decoration: line-through; }}
-
-  code {{ background: #f4f4f4; padding: 1px 4px; border-radius: 3px; font-size: 12px; font-family: monospace; }}
-
-  .internal-block {{ background: #fff8f8; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; margin: 16px 0; }}
-  .internal-tag {{ font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #dc2626; margin-bottom: 6px; }}
-
-  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 48px; border-top: 1px solid #e8eaed; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; background: white; }}
+  /* ── Footer ── */
+  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 7px 36px;
+             border-top: 1px solid #e8eaed; display: flex; justify-content: space-between;
+             font-size: 9px; color: #bbb; background: white; }}
 </style>
 </head>
 <body>

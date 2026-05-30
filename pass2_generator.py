@@ -72,126 +72,99 @@ def with_retry(fn, retries=3, delay=5, label=""):
 # ── System prompt ─────────────────────────────────────────────────────────────
 
 PASS2_SYSTEM_PROMPT = """
-You are the Stamina CS Intelligence agent generating Pass 2 — the post-kickoff OS and execution plan.
+You are Stamina CS Intelligence generating Pass 2 — the post-kickoff OS and 14-day execution plan.
 
-## What Pass 2 is
-Pass 2 is one document that does two things:
-  1. Resolves every `needs confirmation` item from Pass 1 using the kickoff transcript
-  2. Generates the full execution plan (7 milestones, day-level, customer-specific)
+Pass 2 ingests the kickoff transcript and resolves every `needs confirmation` item from Pass 1.
+Output: two versions in one JSON response.
 
-You produce TWO versions — internal and external — in one JSON response.
+INTERNAL version: 2 pages ideal, 3 pages maximum. Dense and complete.
+EXTERNAL version: 1–2 pages. Clean customer-safe roadmap only.
 
 ---
 
-## INTERNAL version (full content, all internal blocks included)
+## INTERNAL VERSION
 
-### Section 1 — Expectations Alignment: CONFIRMED
-Resolve all `needs confirmation` items from Pass 1 using the kickoff transcript.
-  - Final confirmed ICP: verticals, personas, geography, buying triggers [kickoff call]
-  - Confirmed success definition with specific numbers the customer named
-  - Any expectation misalignments between Pass 1 assumptions and what customer said on call
-  - Source every confirmed claim: [kickoff call], [Pass 1], [sales call]
+### 1. Expectations Alignment — CONFIRMED
+- Resolve every needs-confirmation item from Pass 1 using the kickoff transcript
+- Final confirmed ICP: verticals, personas, geography, buying triggers [kickoff call]
+- Confirmed success definition with the specific numbers the customer named on the call
+- Flag any expectation misalignments between Pass 1 assumptions and what customer said
+- Source every confirmed claim: [kickoff call] [Pass 1] [sales call]
+- Items still unresolved → keep as needs confirmation checkbox
 
-### Section 2 — Measurement Contract: LOCKED
-  - Exact Stamina-controlled metrics agreed on the call (emails sent, reply rate, positive reply rate,
-    opportunities generated, cost per opportunity — only what Stamina controls)
-  - "This is working" threshold per metric (the number the customer named)
-  - "We need to talk" threshold per metric
-  - Reporting cadence confirmed (weekly / biweekly / monthly)
-  - Who on the customer side receives reports (name + email)
-  - Never include customer-owned outcomes (meetings, pipeline, MRR) as committed metrics
+### 2. Measurement Contract — LOCKED
+- Exact Stamina-controlled metrics the customer agreed to track:
+  emails sent/month | deliverability rate | bounce rate | open rate | reply rate |
+  positive reply rate | opportunities generated/month | cost per opportunity
+- "This is working" threshold per metric (the number the customer named)
+- "We need to talk" threshold per metric
+- Reporting cadence: weekly / biweekly / monthly (confirmed on call)
+- Report recipients: name + email confirmed on call
+- NEVER include meetings booked, pipeline, MRR — customer-owned outcomes, not Stamina's
 
-### Section 3 — Expansion Paths: RECORDED
-  - Which of the two Pass 1 hypotheses the customer engaged with on the call
-  - Forward commitment status: proposed / agreed / declined / deferred
-  - If agreed: exact format — "If we hit [KPI] by [date], we expand into [lever]"
-  - All upsell levers that fired during the call, each with the customer quote that triggered it
-  - Levers: Custom Personalization, Custom Signals, Higher Email Volume, Larger Contact Database,
-    Credit Volume, Custom Services (CRM setup / CRM Sequences / Automations / Dial setup /
-    Calls Intelligence), Whitelabel
+### 3. Expansion Paths — RECORDED
+- Which Pass 1 hypothesis the customer engaged with (near-term vs stretch)
+- Forward commitment: proposed / agreed / declined / deferred
+- If agreed: "If we hit [KPI] by [Day X], we expand into [lever]" — exact quote if possible
+- Every upsell lever that fired during the call + the customer quote that triggered it
+- Levers: Custom Personalization | Custom Signals | Higher Email Volume | Larger Contact Database |
+  Credit Volume | Custom Services (CRM setup / CRM Sequences / Automations / Dial setup / Calls Intelligence) | Whitelabel
 
-### Section 4 — Commercial Context
+### 4. Commercial Context
 <!-- INTERNAL ONLY -->
-  - Plan signed, Term, Price paid, Promo applied (if any)
-  - Renewal narrative: what the renewal conversation looks like given these commercial terms
-  - Customer bandwidth signals: solo founder vs team, responsive vs slow approver
-  - Referral potential: any signals the customer might refer others
-  - Upsell signals beyond the two Pass 1 hypotheses — anything that fired unexpectedly
+Plan signed | Term | Price paid | Promo applied (if any)
+Renewal narrative: what the renewal conversation looks like given these commercial terms
+Customer bandwidth: solo founder / team, responsive / slow — implications for execution
+Referral signals: any indication they'll refer others
+Unexpected upsell signals from the call beyond the two Pass 1 hypotheses
 <!-- END INTERNAL ONLY -->
 
-### Section 5 — Execution Plan (7 milestones, day-level)
-Sequence all 7 milestones based on these customer-specific factors from the kickoff call:
-  - Approval-cycle speed (solo founder = fast; committee = slow — adjust Milestone 5 buffer)
-  - Stakeholder count (who needs to sign off on copy, sender identity, segments)
-  - Bandwidth signals (how responsive/available the customer is)
-  - Complexity of segments (simple single ICP vs multiple complex ICPs)
+### 5. Execution Plan — 7 Milestones, Day-Level
+Sequence based on customer-specific factors from the kickoff call:
+approval-cycle speed | stakeholder count | bandwidth | segment complexity
 
-Pre-fill all decisions already locked on the call:
-  - Sender identity (name and persona confirmed by customer)
-  - ICP and target verticals/personas confirmed
-  - Exclusion list (existing customers, competitors, prior outreach — confirmed on call)
-  - CTA pattern (soft vs hard CTA based on customer's industry and cycle)
-  - Reporting cadence and recipient confirmed
+Pre-fill every decision already locked on the call (sender identity, ICP, exclusion list, CTA pattern, cadence).
 
-For each of the 7 milestones, provide:
-  - Day range (e.g., Day 1–2)
-  - Owner: CSM / GTM Engineer / Customer (or shared)
-  - Specific deliverable
-  - Customer action required (if any) with hard deadline
-  - Any risk note for this customer [INTERNAL ONLY block if sensitive]
+| Milestone | Days | Owner | Deliverable | Customer Action | Risk |
+|---|---|---|---|---|---|
+| 1. Email Setup | Day 1–2 | CSM | Domains, inboxes, DNS, redirects, warmup start | Confirm sender identity by Day 2 | Domain purchase blocked until sender identity locked |
+| 2. TAM Sourcing | Day 3–4 | GTM Eng | Raw prospect lists per locked ICP, sized for 30-day send | — | Google Maps needed if local/regional ICP |
+| 3. List Segmentation | Day 5–6 | GTM Eng | AI-qualified segments, exclusion list applied | Sign off on exclusion list by Day 6 | Missing exclusion list = brand safety risk |
+| 4. Campaign Strategy | Day 7–8 | CSM | Pitch angle, CTA, A/B variant design, sequence shape | — | Soft CTAs for long-cycle customers |
+| 5. Campaign Messaging | Day 9–11 | CSM | Full copy drafted, sent for approval | Approve copy by Day 11 | [INTERNAL: approval-cycle risk — solo=24h, committee=3-4d] |
+| 6. Sending Strategy | Day 12–13 | CSM | Daily volume (25/inbox), send windows matched to prospect TZ | — | Send windows must match prospect local time |
+| 7. Launch | Day 15 | CSM | First send post-warmup | Reply within 24–48h of first positive | Pause if bounce >2% in first 24h |
 
-Milestones:
-  1. Email Accounts + Deliverability Setup (lookalike domains, inboxes, DNS, 301 redirects, warmup start)
-     - Confirm inbox count vs customer's opportunity volume target
-     - Sender identity must be locked before domain purchase
-  2. TAM Sourcing (pull raw lists per locked ICP — size to 30 days of sending volume)
-     - Flag if Google Maps scrape needed for local/regional customers
-  3. List Segmentation (split TAM, AI-qualify, apply exclusion list)
-     - Customer must sign off on exclusion list explicitly — get confirmation in writing
-  4. Campaign Strategy (pitch angle, CTA, A/B variants, sequence shape per segment)
-     - Minimum 2 variants per segment for A/B testing
-  5. Campaign Messaging (full copy drafted, sent for customer approval)
-     - Flag approval-cycle risk: solo founder = 24h; committee = 3–4 days minimum
-     - If bandwidth-constrained, propose a live 15-min review call instead of async
-  6. Sending Strategy (daily volume per inbox, send windows by time zone, sequence cadence)
-     - Default 25 emails/inbox/day
-     - Send windows must match prospect's local business hours, not customer's
-  7. Launch — Day 15 (first send the morning after warmup completes)
-     - Bounce rate >2% in first 24h = pause immediately
-     - Remind customer: positive replies hit their inbox within hours — 24–48h SLA
+Warmup: parallel track Day 3–Day 14. Non-negotiable — cannot be shortened.
 
-  Warmup: runs in parallel from Day 3 through Day 14 (non-negotiable, cannot be shortened)
-
-### Section 6 — Pass 2 Closing
-End with exactly:
+### 6. Closing
 "Execution plan locked. Launch day: [Day 15 date]. Customer-action items: [count].
-Highest-risk slip point for this customer: [milestone name + specific reason based on kickoff signals]."
+Highest-risk slip point: [milestone + specific reason from this customer's kickoff signals]."
 
 ---
 
-## EXTERNAL version (customer-safe — clean 2-week roadmap)
-Strip ALL internal blocks (<!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY -->) entirely.
-The external version reads as a clean, collaborative 2-week roadmap showing:
-  - Dates and deliverables per milestone
-  - What the customer needs to do and when (their action items highlighted)
-  - Confirmed expectations, measurement contract, expansion paths
-  - Tone: forward-looking and professional — this is shared directly with the customer
+## EXTERNAL VERSION (customer-safe, internal blocks fully stripped)
+- Strip ALL <!-- INTERNAL ONLY --> blocks
+- Reads as a clean collaborative 2-week plan
+- Lead with confirmed expectations + measurement contract (1–2 sentences each)
+- Table of 7 milestones: date range, deliverable, what the customer needs to do and when
+- Close with: "Launch is Day 15. Questions before then? Reply to this email."
+- Tone: professional, forward-looking, collaborative
+- 1–2 pages maximum
 
 ---
 
-## Output format — return valid JSON only
-{
-  "internal_md": "<full internal document in markdown>",
-  "external_md": "<customer-safe 2-week roadmap in markdown>"
-}
+## JSON OUTPUT FORMAT
+{"internal_md": "...", "external_md": "..."}
 
-## Non-negotiable rules
-- Never name a price in either version
-- Stamina-controlled metrics only in the measurement contract
-- Two confidence states: confirmed [source] or needs confirmation
-- Internal blocks use <!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY --> markers
-- Never fabricate — if something wasn't confirmed on the call, mark it needs confirmation
-- External version must never contain any internal block content whatsoever
+## NON-NEGOTIABLE RULES
+1. Never name a price in either version
+2. Stamina-controlled metrics only in measurement contract
+3. confirmed [source] or needs confirmation — no other states
+4. Internal blocks: <!-- INTERNAL ONLY --> ... <!-- END INTERNAL ONLY -->
+5. Never fabricate — unconfirmed items stay as needs confirmation
+6. External must never contain any internal block content
+7. Internal: 2 pages ideal, 3 max. External: 1–2 pages max.
 """
 
 # ── Account detection ─────────────────────────────────────────────────────────
@@ -407,28 +380,39 @@ def generate_pdf(content_md: str, customer_name: str, is_internal: bool) -> byte
 <head>
 <meta charset="utf-8">
 <style>
-  @page {{ size: A4; margin: 0; }}
+  @page {{ size: A4; margin: 18mm 14mm 20mm 14mm; }}
+  @page :first {{ margin-top: 0; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a; font-size: 13px; line-height: 1.6; }}
-  .header {{ background: #1a2035; padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; }}
-  .header img {{ height: 26px; filter: brightness(0) invert(1); }}
+  body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a;
+          font-size: 11px; line-height: 1.55; orphans: 3; widows: 3; }}
+  .header {{ background: #1a2035; padding: 22px 36px; display: flex; align-items: center;
+             justify-content: space-between; }}
+  .header img {{ height: 22px; filter: brightness(0) invert(1); }}
   .header-right {{ text-align: right; }}
-  .header-right .label {{ color: #8892a4; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }}
-  .header-right .title {{ color: white; font-size: 16px; font-weight: 700; margin-top: 4px; }}
-  .header-right .sub {{ color: #8892a4; font-size: 11px; margin-top: 2px; }}
-  .internal-banner {{ background: #b91c1c; color: white; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px; }}
-  .body {{ padding: 36px 48px 80px; }}
-  h1 {{ font-size: 18px; font-weight: 700; color: #1a2035; margin: 24px 0 10px; border-bottom: 2px solid #1a2035; padding-bottom: 6px; }}
-  h2 {{ font-size: 15px; font-weight: 700; color: #1a2035; margin: 20px 0 8px; }}
-  h3 {{ font-size: 13px; font-weight: 700; color: #444; margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.5px; }}
-  p {{ margin-bottom: 8px; color: #333; }}
-  .bullet {{ margin: 3px 0 3px 16px; color: #333; }}
-  .spacer {{ height: 8px; }}
-  .checkbox {{ margin: 4px 0 4px 16px; color: #333; }}
-  code {{ background: #f4f4f4; padding: 1px 4px; border-radius: 3px; font-size: 12px; font-family: monospace; }}
-  .internal-block {{ background: #fff8f8; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; margin: 16px 0; }}
-  .internal-tag {{ font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #dc2626; margin-bottom: 6px; }}
-  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 48px; border-top: 1px solid #e8eaed; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; background: white; }}
+  .header-right .label {{ color: #8892a4; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; }}
+  .header-right .title {{ color: white; font-size: 14px; font-weight: 700; margin-top: 3px; }}
+  .header-right .sub {{ color: #8892a4; font-size: 10px; margin-top: 2px; }}
+  .internal-banner {{ background: #b91c1c; color: white; text-align: center; font-size: 9px;
+                      font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px; }}
+  .body {{ padding: 18px 0 60px; }}
+  h1 {{ font-size: 14px; font-weight: 700; color: #1a2035; margin: 18px 0 7px;
+        border-bottom: 2px solid #1a2035; padding-bottom: 4px; page-break-after: avoid; }}
+  h2 {{ font-size: 12px; font-weight: 700; color: #1a2035; margin: 14px 0 5px;
+        page-break-after: avoid; }}
+  h3 {{ font-size: 10.5px; font-weight: 700; color: #555; margin: 10px 0 4px;
+        text-transform: uppercase; letter-spacing: 0.5px; page-break-after: avoid; }}
+  p {{ margin-bottom: 5px; color: #333; page-break-inside: avoid; }}
+  .bullet {{ margin: 2px 0 2px 14px; color: #333; page-break-inside: avoid; }}
+  .spacer {{ height: 5px; }}
+  .checkbox {{ margin: 3px 0 3px 14px; color: #333; page-break-inside: avoid; }}
+  code {{ background: #f4f4f4; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-family: monospace; }}
+  .internal-block {{ background: #fff8f8; border: 1px solid #fecaca; border-radius: 5px;
+                     padding: 10px 14px; margin: 10px 0; page-break-inside: avoid; }}
+  .internal-tag {{ font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
+                   text-transform: uppercase; color: #dc2626; margin-bottom: 5px; }}
+  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 7px 36px;
+             border-top: 1px solid #e8eaed; display: flex; justify-content: space-between;
+             font-size: 9px; color: #bbb; background: white; }}
 </style>
 </head>
 <body>

@@ -757,8 +757,29 @@ def gather_account_data(customer: dict, start_date: str, end_date: str) -> dict:
     }
 
 
+# ── Shared thresholds (same as queue_generator) ───────────────────────────────
+THRESH_RR_POOR     = 1.0   # reply_rate % — below = flag
+THRESH_RR_GOOD     = 3.0   # reply_rate % — above = upsell signal
+THRESH_PRR_POOR    = 0.5   # positive_reply_rate % — below = flag
+THRESH_PRR_GOOD    = 1.5   # positive_reply_rate % — above = upsell signal
+THRESH_BOUNCE      = 2.0   # bounce_rate % — above = flag
+THRESH_BOUNCE_CRIT = 4.0   # bounce_rate % — above = urgent
+THRESH_HEALTH_WARN = 90    # inbox health % — below = warn
+THRESH_HEALTH_CRIT = 80    # inbox health % — below = flag
+THRESH_CAMP_PROG   = 65    # campaign_progress % — above = new campaigns needed
+THRESH_EL_MIN      = 400   # e_l_ratio lower bound
+THRESH_EL_MAX      = 700   # e_l_ratio upper bound
+THRESH_EL_SENT     = 1200  # minimum emails_sent_total to check e_l_ratio
+THRESH_CAMP_SENT   = 800   # minimum campaign emails_sent to flag variant
+
+
+def _pct(v) -> str:
+    """Round float to 2dp and append %."""
+    return f"{round(float(v), 2)}%" if v is not None else "N/A"
+
+
 def _metrics_block(metrics: list, prior: list, period: str) -> str:
-    """Compute and format the core metrics block for an account."""
+    """Compute and format the core metrics block — pre-flagged against thresholds."""
     def avg(rows, field):
         vals = [r[field] for r in rows if r.get(field) is not None]
         return round(sum(vals) / len(vals), 2) if vals else None
@@ -784,59 +805,147 @@ def _metrics_block(metrics: list, prior: list, period: str) -> str:
     prev_pr    = total(prior, "positive_replies")
     prev_leads = total(prior, "total_leads_contacted")
 
+    # Threshold flags
+    rr_flag = (f" 🚨 BELOW {THRESH_RR_POOR}% THRESHOLD"
+               if cur_rr is not None and cur_rr < THRESH_RR_POOR else
+               (f" ✅ ABOVE {THRESH_RR_GOOD}%" if cur_rr is not None and cur_rr > THRESH_RR_GOOD else ""))
+    br_flag = (f" 🚨 CRITICAL — ABOVE {THRESH_BOUNCE_CRIT}%"
+               if cur_br is not None and cur_br > THRESH_BOUNCE_CRIT else
+               (f" 🚨 ABOVE {THRESH_BOUNCE}% THRESHOLD"
+                if cur_br is not None and cur_br > THRESH_BOUNCE else ""))
+    pr_flag = " 🚨 ZERO POSITIVE REPLIES" if cur_pr == 0 and cur_sent > 500 else ""
+
     return (
         f"  Emails sent:       {cur_sent} vs {prev_sent} ({delta(cur_sent, prev_sent)})\n"
         f"  Leads contacted:   {cur_leads} vs {prev_leads} ({delta(cur_leads, prev_leads)})\n"
-        f"  Reply rate:        {cur_rr}% vs {prev_rr}% ({delta(cur_rr, prev_rr)})\n"
-        f"  Positive replies:  {cur_pr} vs {prev_pr} ({delta(cur_pr, prev_pr)})\n"
-        f"  Bounce rate:       {cur_br}%\n"
+        f"  Reply rate:        {_pct(cur_rr)} vs {_pct(prev_rr)} ({delta(cur_rr, prev_rr)}){rr_flag}\n"
+        f"  Positive replies:  {cur_pr} vs {prev_pr} ({delta(cur_pr, prev_pr)}){pr_flag}\n"
+        f"  Bounce rate:       {_pct(cur_br)}{br_flag}\n"
         f"  Live campaigns:    {cur_camps}"
     )
 
 
 def format_account_for_internal(data: dict, period: str) -> str:
     """
-    Compact account block for the internal report (multiple accounts in one GPT call).
-    Budget: ~2000 chars per account to keep total prompt within GPT-4o context.
-    CSMs lived through these meetings — they need highlights and flags, not full transcripts.
+    Compact account block for the internal report — pre-flagged against thresholds.
+    Same benchmark logic as queue_generator but over the full report period.
+    Budget: ~2500 chars per account.
     """
     c        = data["customer"]
     meetings = data["meetings"]
     slack    = data["slack"]
     issues   = data["issues"]
     replies  = data["reply_data"]
+    metrics  = data["metrics"]
+    inboxes  = data["inboxes"]
 
-    onboarding_flag = " ⚠ ONBOARDING RISK" if data["onboarding_risk"] else ""
+    onboarding_flag = " 🚨 ONBOARDING RISK" if data["onboarding_risk"] else ""
 
-    # Metrics
-    metrics_text = _metrics_block(data["metrics"], data["prior_metrics"], period)
+    # ── Metrics with threshold flags ──────────────────────────────────────────
+    metrics_text = _metrics_block(metrics, data["prior_metrics"], period)
 
-    # Inboxes summary
-    inboxes = data["inboxes"]
-    inbox_issues = [i for i in inboxes if not i.get("is_active") or (i.get("bounce_rate") or 0) > 2]
-    inbox_summary = f"{c.get('active_inboxes',0)} active / {c.get('disconnected_inboxes',0)} disconnected"
-    if inbox_issues:
-        inbox_summary += " | INBOX ISSUES: " + ", ".join(
-            f"{i['email_account']} (active={i.get('is_active')}, bounce={i.get('bounce_rate')}%)"
-            for i in inbox_issues[:3]
+    # Extra metric-level flags
+    extra_flags = []
+    if metrics:
+        # campaign_progress > 65%
+        for m in metrics:
+            cp = m.get("campaign_progress")
+            if cp is not None:
+                try:
+                    cp_val = round(float(str(cp).replace("%", "")), 1)
+                    if cp_val > THRESH_CAMP_PROG:
+                        extra_flags.append(f"🚨 campaign_progress {cp_val}% — new campaigns required (threshold: {THRESH_CAMP_PROG}%)")
+                        break
+                except (ValueError, TypeError):
+                    pass
+        # e_l_ratio
+        for m in metrics:
+            el   = m.get("e_l_ratio")
+            sent = m.get("emails_sent_total") or m.get("number_of_emails_sent", 0) or 0
+            if el is not None and sent >= THRESH_EL_SENT:
+                try:
+                    el_val = round(float(el), 1)
+                    if el_val < THRESH_EL_MIN:
+                        extra_flags.append(f"🚨 e_l_ratio {el_val} BELOW {THRESH_EL_MIN} (range: {THRESH_EL_MIN}–{THRESH_EL_MAX})")
+                    elif el_val > THRESH_EL_MAX:
+                        extra_flags.append(f"🚨 e_l_ratio {el_val} ABOVE {THRESH_EL_MAX} (range: {THRESH_EL_MIN}–{THRESH_EL_MAX})")
+                except (ValueError, TypeError):
+                    pass
+
+    extra_text = "\n  " + "\n  ".join(extra_flags) if extra_flags else ""
+
+    # ── Inbox health with flags ────────────────────────────────────────────────
+    disconnected = c.get("disconnected_inboxes", 0) or 0
+    active_cnt   = c.get("active_inboxes", 0) or 0
+    inbox_flags  = []
+    if disconnected > 0:
+        inbox_flags.append(f"🚨 {disconnected} DISCONNECTED (threshold: 0)")
+    for inbox in inboxes:
+        br  = round(float(inbox.get("bounce_rate") or 0), 2)
+        hs  = inbox.get("health_score") or 100
+        act = inbox.get("is_active")
+        if not act:
+            inbox_flags.append(f"🚨 INACTIVE: {inbox['email_account']}")
+        elif br > THRESH_BOUNCE_CRIT:
+            inbox_flags.append(f"🚨 CRITICAL bounce {br}%: {inbox['email_account']}")
+        elif br > THRESH_BOUNCE:
+            inbox_flags.append(f"🚨 bounce {br}%: {inbox['email_account']}")
+        if hs < THRESH_HEALTH_CRIT:
+            inbox_flags.append(f"🚨 health {hs}%: {inbox['email_account']}")
+        elif hs < THRESH_HEALTH_WARN:
+            inbox_flags.append(f"⚠ health {hs}%: {inbox['email_account']}")
+    inbox_summary = (f"{active_cnt} active / {disconnected} disconnected"
+                     + (" | " + " | ".join(inbox_flags[:4]) if inbox_flags else " ✓"))
+
+    # ── Campaign flags ─────────────────────────────────────────────────────────
+    campaigns = sorted(data["campaigns"], key=lambda x: x.get("positive_reply_rate") or 0, reverse=True)
+    camp_lines = []
+    for camp in campaigns[:8]:
+        rr  = round(float(camp.get("reply_rate") or 0), 2)
+        prr = round(float(camp.get("positive_reply_rate") or 0), 2)
+        br  = round(float(camp.get("bounce_rate") or 0), 2)
+        pr  = camp.get("positive_replies") or 0
+        nr  = camp.get("negative_replies") or 0
+        sent = camp.get("emails_sent") or 0
+        flags = []
+        if sent >= THRESH_CAMP_SENT:
+            if rr < THRESH_RR_POOR:
+                flags.append(f"🚨 rr {rr}% BELOW {THRESH_RR_POOR}%")
+            if prr < THRESH_PRR_POOR:
+                flags.append(f"🚨 prr {prr}% BELOW {THRESH_PRR_POOR}%")
+            if pr == 0:
+                flags.append("🚨 ZERO positive replies")
+            if br > THRESH_BOUNCE_CRIT:
+                flags.append(f"🚨 bounce {br}% CRITICAL")
+            elif br > THRESH_BOUNCE:
+                flags.append(f"🚨 bounce {br}%")
+        if prr > THRESH_PRR_GOOD:
+            flags.append(f"✅ prr {prr}% STRONG")
+        elif rr > THRESH_RR_GOOD:
+            flags.append(f"✅ rr {rr}% STRONG")
+        flag_str = " | ".join(flags)
+        camp_lines.append(
+            f"  {camp['campaign_name']} [{camp.get('segment','')}|{camp.get('variant_name','')}]: "
+            f"sent={sent}, rr={rr}%, prr={prr}%, +{pr}/-{nr}"
+            + (f" → {flag_str}" if flag_str else "")
         )
+    camp_text = "\n".join(camp_lines) or "  None"
 
-    # Meetings (200 chars summary each, max 3)
+    # ── Meetings ───────────────────────────────────────────────────────────────
     meetings_text = "\n".join(
         f"  {m['meeting_date'][:10]} [{m['meeting_type']}] {m['title']}: "
         f"{(m.get('summary_text') or '')[:200]}"
         for m in meetings[:3]
     ) or "  None"
 
-    # Slack (8 messages, 120 chars each — customer messages only for internal)
+    # ── Slack ──────────────────────────────────────────────────────────────────
     slack_text = "\n".join(
-        f"  {s['message_date'][:10]} ({'CSM' if s['is_internal'] else 'customer'}): {s['text'][:120]}"
+        f"  {s['message_date'][:10]} ({'CSM' if s['is_internal'] else 'CUSTOMER'}): {s['text'][:120]}"
         for s in slack[-8:]
     ) or "  No messages"
 
-    # Reply summary — counts + named positive + unreplied flags
-    label_counts = {}
-    pos_names, unreplied = [], []
+    # ── Replies ────────────────────────────────────────────────────────────────
+    label_counts, pos_names, unreplied = {}, [], []
     for r in replies:
         lbl = r.get("reply_label", "unknown")
         label_counts[lbl] = label_counts.get(lbl, 0) + 1
@@ -846,43 +955,34 @@ def format_account_for_internal(data: dict, period: str) -> str:
             pos_names.append(f"{name} ({co})")
             if not r.get("customer_responded"):
                 hrs = r.get("customer_response_delay_hrs") or 999
-                unreplied.append(f"{name} ({co}) — {round(hrs/24)}d unreplied")
+                unreplied.append(f"🚨 {name} ({co}) — {round(hrs/24)}d unreplied")
 
     reply_text = " | ".join(f"{lbl}: {cnt}" for lbl, cnt in label_counts.items()) or "none"
     if pos_names:
-        reply_text += "\n  Positive: " + ", ".join(pos_names[:8])
+        reply_text += "\n  Positive: " + ", ".join(pos_names[:6])
     if unreplied:
-        reply_text += "\n  ⚠ UNREPLIED: " + " | ".join(unreplied)
+        reply_text += "\n  " + " | ".join(unreplied[:5])
 
-    # Campaigns top 5 by positive reply rate
-    campaigns = sorted(data["campaigns"], key=lambda x: x.get("positive_reply_rate") or 0, reverse=True)
-    camp_text = "\n".join(
-        f"  {camp['campaign_name']} [{camp.get('segment','')}|{camp.get('variant_name','')}]: "
-        f"sent={camp.get('emails_sent',0)}, rr={camp.get('reply_rate',0)}%, "
-        f"+replies={camp.get('positive_replies',0)}, -replies={camp.get('negative_replies',0)}"
-        for camp in campaigns[:5]
-    ) or "  None"
+    # ── Issues ─────────────────────────────────────────────────────────────────
+    issues_text = " | ".join(f"[{i['priority']}] {i['title']}" for i in issues) or "None"
 
-    issues_text = " | ".join(
-        f"[{i['priority']}] {i['title']}" for i in issues
-    ) or "None"
-
+    # ── Kickoff context ────────────────────────────────────────────────────────
     kickoff = f"\nMeasurement contract: {data['kickoff_context'][:600]}" if data["kickoff_context"] else ""
 
     return f"""
 ━━━ {c['name'].upper()} | {c.get('tier','?')} | Health:{c.get('health_score','?')} | {inbox_summary}{onboarding_flag}
 
 METRICS ({period}):
-{metrics_text}
+{metrics_text}{extra_text}
+
+CAMPAIGNS:
+{camp_text}
 
 MEETINGS: {meetings_text}
 
 SLACK: {slack_text}
 
 REPLIES: {reply_text}
-
-CAMPAIGNS:
-{camp_text}
 
 ISSUES: {issues_text}{kickoff}
 """

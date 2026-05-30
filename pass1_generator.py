@@ -26,6 +26,7 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 
 import requests
@@ -58,6 +59,17 @@ with open(LOGO_PATH, "rb") as _f:
 
 def log(msg: str):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+
+
+def with_retry(fn, retries=3, delay=5, label=""):
+    for attempt in range(1, retries + 1):
+        try:
+            return fn()
+        except Exception as e:
+            if attempt == retries:
+                raise
+            log(f"  Retry {attempt}/{retries} for {label}: {e} — waiting {delay}s")
+            time.sleep(delay)
 
 # ── OS System Prompt ──────────────────────────────────────────────────────────
 
@@ -433,7 +445,10 @@ def main():
                 continue
 
             log(f"    Generating Pass 1 via GPT-4o...")
-            content_md = generate_pass1_content(customer, closing_call, contacts, website)
+            content_md = with_retry(
+                lambda: generate_pass1_content(customer, closing_call, contacts, website),
+                retries=3, delay=10, label=f"Pass 1 {name}"
+            )
 
             if DRY_RUN:
                 log(f"    [DRY RUN] Would store {len(content_md)} chars and send email to {pair.get('report_email')}")

@@ -24,6 +24,7 @@ import json
 import os
 import re
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 
@@ -68,6 +69,18 @@ with open(LOGO_PATH, "rb") as _f:
 
 def log(msg: str):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+
+
+def with_retry(fn, retries=3, delay=5, label=""):
+    """Call fn() up to `retries` times, waiting `delay` seconds between attempts."""
+    for attempt in range(1, retries + 1):
+        try:
+            return fn()
+        except Exception as e:
+            if attempt == retries:
+                raise
+            log(f"  Retry {attempt}/{retries} for {label}: {e} — waiting {delay}s")
+            time.sleep(delay)
 
 # ── Date windows ──────────────────────────────────────────────────────────────
 
@@ -1215,7 +1228,10 @@ def run_reports(period: str):
         log(f"  Generating internal {period} report...")
         if not DRY_RUN:
             try:
-                internal_md  = generate_internal_report(pair, accounts_data, period, start_str, end_str)
+                internal_md  = with_retry(
+                    lambda: generate_internal_report(pair, accounts_data, period, start_str, end_str),
+                    retries=3, delay=10, label=f"internal report {pair_name}"
+                )
                 internal_pdf = generate_pdf(
                     internal_md,
                     title    = f"{pair_name} — All Accounts",
@@ -1243,7 +1259,10 @@ def run_reports(period: str):
                 return name, "dry-run"
 
             try:
-                external_md  = generate_external_report(data, period, start_str, end_str)
+                external_md  = with_retry(
+                    lambda: generate_external_report(data, period, start_str, end_str),
+                    retries=3, delay=8, label=f"external report {name}"
+                )
                 external_pdf = generate_pdf(
                     external_md,
                     title    = name,
@@ -1251,14 +1270,17 @@ def run_reports(period: str):
                     is_internal = False,
                 )
                 if pylon_id:
-                    url = upload_to_pylon(external_pdf, filename, pylon_id)
+                    url = with_retry(
+                        lambda: upload_to_pylon(external_pdf, filename, pylon_id),
+                        retries=3, delay=5, label=f"Pylon upload {name}"
+                    )
                     return name, url
                 else:
                     return name, "no-pylon-id"
             except Exception as e:
                 return name, f"ERROR: {e}"
 
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=10) as executor:
             futures = {executor.submit(process_external, d): d for d in accounts_data}
             for future in as_completed(futures):
                 name, result = future.result()

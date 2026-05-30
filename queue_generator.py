@@ -30,6 +30,7 @@ import json
 import os
 import re
 import sys
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -65,6 +66,17 @@ with open(LOGO_PATH, "rb") as _f:
 
 def log(msg: str):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+
+
+def with_retry(fn, retries=3, delay=5, label=""):
+    for attempt in range(1, retries + 1):
+        try:
+            return fn()
+        except Exception as e:
+            if attempt == retries:
+                raise
+            log(f"  Retry {attempt}/{retries} for {label}: {e} — waiting {delay}s")
+            time.sleep(delay)
 
 # ── System prompt ─────────────────────────────────────────────────────────────
 
@@ -816,7 +828,10 @@ def main():
         # Generate new tickets via GPT-4o
         log(f"  Generating new tickets via GPT-4o...")
         try:
-            new_tickets = generate_new_tickets(pair, accounts_signals)
+            new_tickets = with_retry(
+                lambda: generate_new_tickets(pair, accounts_signals),
+                retries=3, delay=10, label=f"queue {pair_name}"
+            )
             log(f"  Generated {len(new_tickets)} new tickets")
         except Exception as e:
             log(f"  ERROR generating tickets: {e}")

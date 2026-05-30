@@ -107,117 +107,141 @@ def get_monthly_window():
 INTERNAL_WEEKLY_PROMPT = """
 You are the Stamina CS Intelligence agent generating an internal weekly report for a CSM pair.
 
-This is a tactical sprint document covering ALL accounts for this pair — 7 to 8 pages.
-INTERNAL ONLY. The CSM pair and staff success manager read this before their Monday sprint.
-Never share with clients under any circumstances.
-
-## Document structure — same every week, no exceptions
+INTERNAL ONLY. 7–8 pages. The CSM pair and staff success manager use this to run their Monday sprint.
+CRITICAL: Use ONLY the actual data provided below. Do not invent, estimate, or generalise.
+Every number, every account name, every Slack message, every campaign stat must come from the data.
+If data is missing for an account, say "no data this week" — do not fabricate.
 
 ---
 
-### SECTION 1 — Pair Scorecard (This Week vs Prior Week)
+## Data sources in the input (use ALL of them):
+- METRICS: emails_sent_total, reply_rate, positive_replies, bounce_rate, live_campaigns, total_leads_contacted
+  → Compare this week vs prior week. Flag if reply_rate or positive_replies dropped significantly.
+- CAMPAIGNS: campaign_name, segment, variant_name, emails_sent, reply_rate, positive_reply_rate, positive_replies, negative_replies
+  → Which variants are outperforming? Which segments are struggling? Name them with actual %s.
+- MEETINGS: date, type, summary
+  → What was discussed? Any commitments made? Flag kickoffs, CS calls, or missed cadence.
+- SLACK: customer vs internal messages with timestamps
+  → Extract actual customer questions, concerns, requests, or signals of disengagement.
+  → Flag tone shifts (was positive, now silent). Quote specific messages where relevant.
+- REPLIES: reply_label (positive/negative/neutral), reply_body, customer_responded, response_delay_hrs
+  → Name every positive reply (prospect name, company). Flag unreplied leads with exact days elapsed.
+  → Surface objection patterns from negative replies.
+- INBOXES: email_account, is_active, health_score, bounce_rate
+  → Any disconnected inboxes? Any bounce_rate > 2%? Any warmup health < 90%?
+- ISSUES: title, priority, status
+  → Open Pylon issues — how long have they been open?
+- KICKOFF CONTEXT: measurement contract thresholds, forward commitment
+  → Use thresholds to determine ✓/✗ status for each metric. Reference the forward commitment progress.
+
+---
+
+## SECTION 1 — Pair Scorecard
+
+Fill every cell with actual numbers from the data:
 
 | Metric | This week | Prior week | Change |
 |---|---|---|---|
-| Total accounts | | | |
-| Accounts above threshold (all metrics) | | | |
-| Accounts with 1+ metric below threshold | | | |
-| Accounts with 2+ metrics below threshold (critical) | | | |
-| Total positive replies | | | |
-| Total unreplied positive leads | | | |
-| Open issues across all accounts | | | |
-| Upsell signals active | | | |
-| Onboarding risks | | | |
+| Total accounts | [count] | [count] | [±n] |
+| Accounts above threshold (all metrics) | [count] | [count] | [±n] |
+| Accounts with 1+ metric below threshold | [count] | [count] | [±n] |
+| Accounts with 2+ metrics below threshold | [count] | [count] | [±n] |
+| Total positive replies | [count] | [count] | [±n] |
+| Total unreplied positive leads | [count] | [count] | [±n] |
+| Open Pylon issues | [count] | [count] | [±n] |
+| Onboarding risks | [count] | [count] | [±n] |
 
-One-line overall pair performance summary for the week.
+One-line pair performance summary based on the actual numbers above.
 
 ---
 
-### SECTION 2 — Accounts Needing Immediate Attention
-Accounts with critical underperformance, onboarding risks, or escalation flags — full detail blocks, listed first.
+## SECTION 2 — Accounts Needing Immediate Attention
+List FIRST. Include every account where: reply_rate below threshold for 2+ weeks, bounce_rate > 2%, disconnected inboxes, unreplied positive leads, open escalation issues, or onboarding risk.
 
-For each critical account:
+For each:
 
-**[Account Name]** | Tier: [tier] | Health: [n] | Inboxes: [active] active / [disconnected] disconnected
+**[EXACT Account Name]** | Tier: [tier] | Health: [n] | Inboxes: [n active] / [n disconnected]
 
 | Metric | This week | Prior week | Threshold | Status |
 |---|---|---|---|---|
-| Emails sent | | | | |
-| Leads contacted | | | | |
-| Reply rate | | | | ✓/✗ |
-| Positive replies | | | | ✓/✗ |
-| Bounce rate | | | | ✓/✗ |
-| Live campaigns | | | | |
+| Emails sent | [actual number] | [actual number] | — | |
+| Leads contacted | [actual number] | [actual number] | — | |
+| Reply rate | [actual %] | [actual %] | [from measurement contract or —] | ✓/✗ |
+| Positive replies | [actual count] | [actual count] | — | |
+| Bounce rate | [actual %] | [actual %] | 2% | ✓/✗ |
+| Live campaigns | [actual count] | — | — | |
 
-What happened this week:
-- Meetings: [date] [type] — [1-line summary of what was discussed/decided]
-- Slack: [key customer messages — flag requests, complaints, tone shifts, or silence]
-- Replies: [named positive replies with company + prospect name; unreplied leads with days elapsed]
-- Campaigns: [which variants are running, any notable segment performance this week]
-- Open issues: [title, priority, days open]
+What happened this week (use actual data from input):
+- Meetings: [list each meeting by date/type — quote key points from summary if available]
+- Slack: [quote actual customer messages with timestamps — flag concerns, silence, or requests]
+- Campaigns: [name actual campaigns/variants with actual reply_rate and positive_reply_rate %s]
+- Replies: [name each positive reply prospect + company; for negative replies, name the objection pattern]
+- Inbox issues: [list any disconnected or unhealthy inboxes with actual health_score and bounce_rate]
+- Open issues: [list title, priority, days open]
 
-Why it needs attention: [specific diagnosis — don't soften. Name the exact problem.]
+Why it needs attention: [specific diagnosis using the actual data above — name exact metrics, exact accounts, exact numbers]
 
 [internal review only]
-- Renewal window: [days until renewal if known]
-- Upsell signal: [which lever, what data triggered it, forward commitment progress %]
-- Customer bandwidth: [responsive vs slow, solo vs team, any concerns]
-- Escalation: [should Amartya be looped in? Yes/No + why]
+- Forward commitment: [from kickoff context — current progress vs target]
+- Upsell signal: [specific lever + specific data point that triggered it]
+- Customer bandwidth: [infer from Slack response frequency and meeting attendance]
+- Escalation: Yes/No — [specific reason if yes]
 [end internal review only]
 
 ---
 
-### SECTION 3 — All Other Accounts
-Accounts performing at or above threshold — concise blocks.
+## SECTION 3 — All Other Accounts (performing at or above threshold)
 
-**[Account Name]** | Tier: [tier] | Health: [n] | [one-line metric snapshot]
-- Performance: [2–3 bullets on key metrics vs prior week]
-- This week: [meetings, Slack, replies — 2–3 bullets max]
-- Flag if any: [single notable item even if account is healthy]
-[internal review only] Upsell: [lever + signal] | Renewal: [window] [end internal review only]
+For each account not in Section 2:
 
----
-
-### SECTION 4 — Onboarding Risk Accounts
-Accounts added 2–7 days ago with 0 active inboxes OR 0 meetings. Flag every week until resolved.
-
-For each:
-- Account name | Days since onboarded | What's missing (inboxes / meetings / both)
-- Last Slack activity from customer (if any)
-- Action: who does what, by when
+**[EXACT Account Name]** | Tier: [tier] | Health: [n] | [actual metric snapshot: X emails, Y% reply rate, Z positive replies]
+- Metrics: [actual this week vs prior week with %s — name what moved]
+- Campaigns: [actual top-performing variant or segment with real numbers]
+- Activity: [any meetings, Slack activity, or positive replies this week — name them]
+- Flag: [anything worth noting even if healthy — quote specific Slack, name specific reply]
+[internal review only] Upsell: [lever + actual data signal if any] | Renewal: [window if known] [end internal review only]
 
 ---
 
-### SECTION 5 — Reply Coaching Summary
-For every account with positive replies this week:
-- Account | [n] positive replies | [n] unreplied
-- Unreplied leads: name, company, days elapsed, recovery move (call now / SMS / last-chance email)
-- Coaching flag: if the customer's reply handling is consistently poor, name it for the sprint discussion
+## SECTION 4 — Onboarding Risk Accounts
+Accounts 2–7 days old with 0 active inboxes OR 0 meetings.
+
+For each: account name | days since created | what's missing | last Slack message from customer (quote it) | action needed
 
 ---
 
-### SECTION 6 — This Week's Sprint Priorities & Upsell Pipeline
+## SECTION 5 — Reply Coaching Summary
 
-**Sprint priorities (top 3–5, ranked):**
-Account | What needs to happen | Owner | Deadline
+For every account with positive replies:
+Account | [n] positive | [n] unreplied
+For each unreplied: [prospect name] at [company] — replied [X] days ago — "[quote their reply body]" — Recovery: [call now / SMS / last-chance email with suggested text]
 
-**Upsell conversations to have this week:**
-Account | Lever | Why now (specific data signal) | Suggested opening line for the CSM
-
-**Accounts to loop Amartya into:**
-Account | Why | Urgency level
+Pattern flags: if the same customer consistently ignores positive leads, name it with evidence.
 
 ---
 
-## Rules — non-negotiable
-- Aggressive, direct tone. Surface problems clearly. Never soften bad news.
-- Every account must appear — no skipping. If no data, write "no data this week."
-- [internal review only] ... [end internal review only] marks content never shared with clients
+## SECTION 6 — Sprint Priorities & Upsell Pipeline
+
+Sprint priorities (top 3–5, ranked by urgency):
+| Account | What needs to happen | Owner | Deadline |
+|---|---|---|---|
+
+Upsell conversations this week (use actual data signals):
+| Account | Lever | Signal (actual data point) | Suggested opening |
+|---|---|---|---|
+
+Escalate to Amartya: [account | specific reason | urgency]
+
+---
+
+## Non-negotiable rules
+- Use actual names, actual numbers, actual dates from the data. Never generic statements like "engagement is low."
+- Every account in the data must appear in either Section 2 or Section 3.
+- Tables must be filled with actual values — no empty cells with placeholders.
+- [internal review only] ... [end internal review only] never goes to clients
 - Never name a price
-- Unreplied positive leads: name the lead, the account, days elapsed, the exact recovery move
-- Onboarding risk: flag every week until resolved — never let it quietly drop off
-- Tables for scorecard and per-account metrics. Prose + bullets for commentary.
-- 7–8 pages. Be thorough. This is the document the pair uses to run their week.
+- Aggressive tone: "Reply rate is 0.4% for the 3rd consecutive week — this campaign is failing" not "reply rate could improve"
+- 7–8 pages. Every sentence must reference specific data.
 """
 
 INTERNAL_MONTHLY_PROMPT = """
@@ -1072,10 +1096,49 @@ def md_inline(text: str) -> str:
     return text
 
 
+def _is_table_row(line: str) -> bool:
+    return line.startswith("|") and line.endswith("|") and line.count("|") >= 2
+
+
+def _is_separator_row(line: str) -> bool:
+    return _is_table_row(line) and all(c in "|-:— " for c in line)
+
+
+def _parse_cells(line: str) -> list:
+    cells = [c.strip() for c in line.split("|")]
+    return [c for c in cells if c != ""]
+
+
+def _build_html_table(header: list, rows: list, css_class: str = "md-table") -> str:
+    th = "".join(f"<th>{md_inline(h)}</th>" for h in header)
+    body = ""
+    for i, row in enumerate(rows):
+        cells = "".join(f"<td>{md_inline(c)}</td>" for c in row)
+        cls = ' class="alt"' if i % 2 == 1 else ""
+        body += f"<tr{cls}>{cells}</tr>"
+    return f'<table class="{css_class}"><thead><tr>{th}</tr></thead><tbody>{body}</tbody></table>'
+
+
 def md_to_html_body(md: str) -> str:
     lines = md.split("\n")
     html_lines = []
-    for line in lines:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+
+        # ── Markdown table detection ──────────────────────────────────────────
+        if (_is_table_row(line) and i + 1 < len(lines)
+                and _is_separator_row(lines[i + 1])):
+            header = _parse_cells(line)
+            i += 2  # skip header + separator
+            rows = []
+            while i < len(lines) and _is_table_row(lines[i]):
+                rows.append(_parse_cells(lines[i]))
+                i += 1
+            html_lines.append(_build_html_table(header, rows))
+            continue
+
+        # ── Normal elements ───────────────────────────────────────────────────
         if line.startswith("# "):
             html_lines.append(f'<h1>{md_inline(line[2:])}</h1>')
         elif line.startswith("## "):
@@ -1090,6 +1153,8 @@ def md_to_html_body(md: str) -> str:
             html_lines.append('<div class="spacer"></div>')
         else:
             html_lines.append(f'<p>{md_inline(line)}</p>')
+        i += 1
+
     return "\n".join(html_lines)
 
 
@@ -1135,6 +1200,11 @@ def _generate_internal_pdf(content_md: str, title: str, subtitle: str) -> bytes:
   .internal-tag {{ color: #dc2626; font-weight: 700; font-size: 9px; }}
   strong {{ color: #111; }}
   code {{ background: #f4f4f4; padding: 1px 3px; border-radius: 3px; font-size: 9px; font-family: monospace; }}
+  table.md-table {{ width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10px; page-break-inside: avoid; }}
+  table.md-table thead tr {{ background: #1a2035; color: white; }}
+  table.md-table thead th {{ padding: 6px 8px; text-align: left; font-weight: 600; font-size: 9.5px; }}
+  table.md-table tbody td {{ padding: 5px 8px; border-bottom: 1px solid #e8eaed; color: #333; }}
+  table.md-table tbody tr.alt {{ background: #f8f9fb; }}
   .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 6px 36px;
              border-top: 1px solid #e8eaed; display: flex; justify-content: space-between;
              font-size: 9px; color: #bbb; background: white; }}
@@ -1198,6 +1268,13 @@ def _generate_external_pdf(content_md: str, title: str, subtitle: str) -> bytes:
   strong {{ color: #111; font-weight: 600; }}
   code {{ background: #f5f6f8; padding: 1px 4px; border-radius: 3px;
           font-size: 10px; font-family: monospace; color: #333; }}
+
+  /* ── Tables ── */
+  table.md-table {{ width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 11px; page-break-inside: avoid; }}
+  table.md-table thead tr {{ background: #1a2035; color: white; }}
+  table.md-table thead th {{ padding: 7px 10px; text-align: left; font-weight: 600; font-size: 10.5px; }}
+  table.md-table tbody td {{ padding: 6px 10px; border-bottom: 1px solid #eaecf0; color: #2d2d2d; }}
+  table.md-table tbody tr.alt {{ background: #f7f8fa; }}
 
   /* ── Footer ── */
   .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 40px;

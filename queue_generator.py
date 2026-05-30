@@ -226,7 +226,9 @@ Grey zone: customer asks to change campaign AND data shows it's underperforming 
 6. Campaign issues: cite exact campaign name, variant, and specific metric value
 7. When uncertain: low_confidence=true, still open
 8. Multiple severe issues for one account = one high-priority iteration ticket covering all of them
-9. Return ONLY a valid JSON array. No prose, no explanations.
+9. Return ONLY this exact JSON structure — a wrapper object with a "tickets" array:
+   {"tickets": [ticket1, ticket2, ticket3, ...]}
+   Every 🚨 line in the data must produce at least one ticket in this array.
 """
 # ── Data gathering ────────────────────────────────────────────────────────────
 
@@ -711,10 +713,19 @@ Return ONLY a valid JSON array of ticket objects.
     )
 
     raw = json.loads(response.choices[0].message.content)
-    # Handle both {"tickets": [...]} and [...] response formats
+    # Model returns {"tickets": [...]} — extract the array
     if isinstance(raw, list):
         return raw
-    return raw.get("tickets", raw.get("items", []))
+    if "tickets" in raw:
+        return raw["tickets"]
+    # Fallback: if model returned a single ticket object, wrap it
+    if "ticket_id" in raw:
+        return [raw]
+    # Last resort: look for any list value
+    for v in raw.values():
+        if isinstance(v, list):
+            return v
+    return []
 
 
 # ── Ticket persistence ────────────────────────────────────────────────────────

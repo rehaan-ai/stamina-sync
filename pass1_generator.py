@@ -30,7 +30,7 @@ import time
 from datetime import datetime, timezone
 
 import requests
-from openai import OpenAI
+import anthropic
 from supabase import create_client
 
 DRY_RUN = "--dry-run" in sys.argv
@@ -39,11 +39,11 @@ DRY_RUN = "--dry-run" in sys.argv
 
 SUPABASE_URL   = os.environ.get("SUPABASE_URL", "https://jgvyeavyffenvuhphejg.supabase.co")
 SUPABASE_KEY   = os.environ.get("SUPABASE_KEY")
-OPENAI_KEY     = os.environ.get("OPENAI_KEY")
+ANTHROPIC_KEY  = os.environ.get("ANTHROPIC_KEY")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
-openai = OpenAI(api_key=OPENAI_KEY)
+claude = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
 
 RESEND_FROM    = "Stamina <stamina@reports.stamina.io>"
 AMARTYA_EMAIL  = "amartya@stamina.io"
@@ -301,16 +301,14 @@ Generate the full Pass 1 OS document now. Follow all rules in your instructions 
 def generate_pass1_content(customer: dict, closing_call: dict, contacts: list, website: str) -> str:
     user_prompt = build_user_prompt(customer, closing_call, contacts, website)
 
-    response = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": PASS1_SYSTEM_PROMPT},
-            {"role": "user",   "content": user_prompt},
-        ],
-        temperature=0.3,
+    response = claude.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        system=PASS1_SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_prompt}],
+        temperature=1,
         max_tokens=4000,
     )
-    return response.choices[0].message.content
+    return response.content[0].text
 
 
 # ── PDF generation ────────────────────────────────────────────────────────────

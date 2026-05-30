@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 
 import requests
-from openai import OpenAI
+import anthropic
 from rapidfuzz import fuzz
 from supabase import create_client
 
@@ -35,7 +35,7 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV
 PYLON_KEY    = os.environ.get("PYLON_KEY",    "pylon_api_85d658281b647d275a1b1e7dfc081e73de9ebfa9de87d563007eb3ab12251301")
 CLOSE_KEY    = os.environ.get("CLOSE_KEY",    "api_0FCex972M1uIx5VuDOWAhQ.2Cb9NFpnEwxdIFdOWKWzFH")
 FATHOM_KEY   = os.environ.get("FATHOM_KEY",   "TsFqHkp3rX_-rj-7xt_sFg.QYh_uE7H8Prn9WjH5bHWX0AcdmRFKFX0bUTVkIvlJIA")
-OPENAI_KEY   = os.environ.get("OPENAI_KEY")
+ANTHROPIC_KEY = os.environ.get("ANTHROPIC_KEY")
 
 PYLON_BASE  = "https://api.usepylon.com"
 CLOSE_BASE  = "https://api.close.com/api/v1"
@@ -47,7 +47,7 @@ FUZZY_MATCH_THRESHOLD = 80
 # ── Clients ───────────────────────────────────────────────────────────────────
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
-openai = OpenAI(api_key=OPENAI_KEY)
+claude = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
 
 pylon_h  = {"Authorization": f"Bearer {PYLON_KEY}", "Content-Type": "application/json"}
 fathom_h = {"X-Api-Key": FATHOM_KEY}
@@ -880,13 +880,12 @@ def generate_sow(meeting: dict, company_name: str, ae_name: str) -> str:
         duration=duration,
         transcript=meeting_summary,
     )
-    resp = openai.chat.completions.create(
-        model="gpt-4o",
+    resp = claude.messages.create(
+        model="claude-3-5-haiku-20241022",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=4096,
-        temperature=0.3,
     )
-    return resp.choices[0].message.content
+    return resp.content[0].text
 
 
 def post_sow_as_highlight(pylon_account_id: str, sow_md: str):

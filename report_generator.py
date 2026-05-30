@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 
 import requests
-from openai import OpenAI
+import anthropic
 from supabase import create_client
 
 # ── Mode detection ────────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ is_monthly = FORCE_MONTHLY or (not FORCE_WEEKLY  and now.day == 1)
 
 SUPABASE_URL   = os.environ.get("SUPABASE_URL", "https://jgvyeavyffenvuhphejg.supabase.co")
 SUPABASE_KEY   = os.environ.get("SUPABASE_KEY")
-OPENAI_KEY     = os.environ.get("OPENAI_KEY")
+ANTHROPIC_KEY  = os.environ.get("ANTHROPIC_KEY")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 PYLON_KEY      = os.environ.get("PYLON_KEY", "pylon_api_85d658281b647d275a1b1e7dfc081e73de9ebfa9de87d563007eb3ab12251301")
 
@@ -61,7 +61,7 @@ BCC_EMAILS    = ["arjun@stamina.io", "rehaan@stamina.io"]
 TEST_EMAIL    = os.environ.get("TEST_EMAIL")
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
-openai = OpenAI(api_key=OPENAI_KEY)
+claude = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
 
 # ── Logo ──────────────────────────────────────────────────────────────────────
 
@@ -1274,16 +1274,14 @@ Total accounts: {len(accounts_data)}
 {accounts_block}
 """
 
-    response = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user",   "content": user},
-        ],
-        temperature=0.3,
+    response = claude.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        system=system,
+        messages=[{"role": "user", "content": user}],
+        temperature=1,
         max_tokens=6000,
     )
-    return response.choices[0].message.content
+    return response.content[0].text
 
 
 def generate_external_report(account_data: dict, period: str,
@@ -1301,16 +1299,14 @@ Period: {start_date} to {end_date}
 {account_block}
 """
 
-    response = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user",   "content": user},
-        ],
-        temperature=0.3,
+    response = claude.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        system=system,
+        messages=[{"role": "user", "content": user}],
+        temperature=1,
         max_tokens=3000,
     )
-    return response.choices[0].message.content
+    return response.content[0].text
 
 
 # ── PDF generation ────────────────────────────────────────────────────────────

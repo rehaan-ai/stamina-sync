@@ -43,7 +43,7 @@ jobs:
         env:
           SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
-          OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
+          ANTHROPIC_KEY:  ${{ secrets.ANTHROPIC_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           TEST_EMAIL:     ${{ secrets.TEST_EMAIL }}
 
@@ -56,6 +56,6 @@ jobs:
           SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
           PYLON_KEY:      ${{ secrets.PYLON_KEY }}
-          OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
+          ANTHROPIC_KEY:  ${{ secrets.ANTHROPIC_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           TEST_EMAIL:     ${{ secrets.TEST_EMAIL }}

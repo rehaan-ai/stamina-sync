@@ -35,7 +35,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 import requests
-from openai import OpenAI
+import anthropic
 from supabase import create_client
 
 DRY_RUN    = "--dry-run" in sys.argv
@@ -49,7 +49,7 @@ yesterday_str = (now - timedelta(days=1)).strftime("%Y-%m-%d")
 
 SUPABASE_URL   = os.environ.get("SUPABASE_URL", "https://jgvyeavyffenvuhphejg.supabase.co")
 SUPABASE_KEY   = os.environ.get("SUPABASE_KEY")
-OPENAI_KEY     = os.environ.get("OPENAI_KEY")
+ANTHROPIC_KEY  = os.environ.get("ANTHROPIC_KEY")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
 RESEND_FROM   = "Stamina <stamina@reports.stamina.io>"
@@ -57,7 +57,7 @@ AMARTYA_EMAIL = "amartya@stamina.io"
 TEST_EMAIL    = os.environ.get("TEST_EMAIL")
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
-openai = OpenAI(api_key=OPENAI_KEY)
+claude = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
 
 LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
 with open(LOGO_PATH, "rb") as _f:
@@ -838,18 +838,18 @@ Return ONLY a valid JSON array of ticket objects.
 {signals_block}
 """
 
-    response = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": QUEUE_SYSTEM_PROMPT},
-            {"role": "user",   "content": user_prompt},
-        ],
-        temperature=0.2,
+    response = claude.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        system=QUEUE_SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_prompt}],
+        temperature=1,
         max_tokens=6000,
-        response_format={"type": "json_object"},
     )
 
-    raw = json.loads(response.choices[0].message.content)
+    text = response.content[0].text
+    # Extract JSON — Claude may wrap in markdown code blocks
+    json_match = re.search(r'\{.*\}', text, re.DOTALL)
+    raw = json.loads(json_match.group() if json_match else text)
     # Model returns {"tickets": [...]} — extract the array
     if isinstance(raw, list):
         return raw

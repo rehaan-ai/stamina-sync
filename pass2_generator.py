@@ -25,7 +25,7 @@ import time
 from datetime import datetime, timezone
 
 import requests
-from openai import OpenAI
+import anthropic
 from supabase import create_client
 
 DRY_RUN = "--dry-run" in sys.argv
@@ -34,7 +34,7 @@ DRY_RUN = "--dry-run" in sys.argv
 
 SUPABASE_URL   = os.environ.get("SUPABASE_URL", "https://jgvyeavyffenvuhphejg.supabase.co")
 SUPABASE_KEY   = os.environ.get("SUPABASE_KEY")
-OPENAI_KEY     = os.environ.get("OPENAI_KEY")
+ANTHROPIC_KEY  = os.environ.get("ANTHROPIC_KEY")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 PYLON_KEY      = os.environ.get("PYLON_KEY", "pylon_api_85d658281b647d275a1b1e7dfc081e73de9ebfa9de87d563007eb3ab12251301")
 
@@ -45,7 +45,7 @@ BCC_EMAILS    = ["arjun@stamina.io", "rehaan@stamina.io"]
 TEST_EMAIL    = os.environ.get("TEST_EMAIL")  # If set, all emails go here only (no CC/BCC)
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
-openai = OpenAI(api_key=OPENAI_KEY)
+claude = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
 
 # ── Logo ──────────────────────────────────────────────────────────────────────
 
@@ -340,18 +340,18 @@ Generate the Pass 2 JSON response now. Return ONLY valid JSON with internal_md a
 def generate_pass2_content(customer: dict, pass1_md: str, meeting: dict, contacts: list) -> dict:
     user_prompt = build_user_prompt(customer, pass1_md, meeting, contacts)
 
-    response = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": PASS2_SYSTEM_PROMPT},
-            {"role": "user",   "content": user_prompt},
-        ],
-        temperature=0.3,
+    response = claude.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        system=PASS2_SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_prompt}],
+        temperature=1,
         max_tokens=6000,
-        response_format={"type": "json_object"},
     )
 
-    result = json.loads(response.choices[0].message.content)
+    raw = response.content[0].text
+    # Extract JSON from response (Claude may wrap in markdown code blocks)
+    json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+    result = json.loads(json_match.group() if json_match else raw)
     return {
         "internal_md": result.get("internal_md", ""),
         "external_md": result.get("external_md", ""),

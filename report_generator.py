@@ -115,6 +115,9 @@ If data is missing for an account, say "no data this week" — do not fabricate.
 ---
 
 ## Data sources in the input (use ALL of them):
+- MEETINGS: CS CALLS contain customer commitments, concerns, expansion signals — use the full summary.
+  STANDUPS contain internal team status updates on this account's tickets and actions.
+  KICKOFFS contain the agreed expectations and plan.
 - METRICS: emails_sent_total, reply_rate, positive_replies, bounce_rate, live_campaigns, total_leads_contacted
   → Compare this week vs prior week. Flag if reply_rate or positive_replies dropped significantly.
 - CAMPAIGNS: campaign_name, segment, variant_name, emails_sent, reply_rate, positive_reply_rate, positive_replies, negative_replies
@@ -172,7 +175,10 @@ For each:
 | Live campaigns | [actual count] | — | — | |
 
 What happened this week (use actual data from input):
-- Meetings: [list each meeting by date/type — quote key points from summary if available]
+- CS Calls: [for each CS call — date, what the customer said, any commitments made by either side,
+  concerns raised, expansion signals. Quote directly from summary where possible.]
+- Standups: [for each standup — what was discussed about this account, any status updates on
+  existing tickets or actions, what the team agreed to do next.]
 - Slack: [quote actual customer messages with timestamps — flag concerns, silence, or requests]
 - Campaigns: [name actual campaigns/variants with actual reply_rate and positive_reply_rate %s]
 - Replies: [name each positive reply prospect + company; for negative replies, name the objection pattern]
@@ -297,7 +303,11 @@ Month-over-month performance:
 | Live campaigns | | | | | |
 
 What happened this month:
-- Meetings: [list of CS calls + kickoff if applicable, 1-line each]
+- CS Calls: [list each CS call with date and key points — customer commitments, concerns raised,
+  expansion signals, tone (engaged/disengaged). Quote from summary where relevant.]
+- Standups: [recurring patterns from standups — what issues kept coming up for this account,
+  what the team agreed, what was actioned vs outstanding.]
+- Kickoffs: [if applicable — what was agreed, what the customer's goals are]
 - Slack: [theme of customer Slack activity — engaged / requesting / quiet / concerned]
 - Replies: [total positive, total unreplied, any notable reply patterns]
 - Campaigns: [segment and variant performance highlights for the month]
@@ -931,12 +941,23 @@ def format_account_for_internal(data: dict, period: str) -> str:
         )
     camp_text = "\n".join(camp_lines) or "  None"
 
-    # ── Meetings ───────────────────────────────────────────────────────────────
-    meetings_text = "\n".join(
-        f"  {m['meeting_date'][:10]} [{m['meeting_type']}] {m['title']}: "
-        f"{(m.get('summary_text') or '')[:200]}"
-        for m in meetings[:3]
-    ) or "  None"
+    # ── Meetings — all in period, separated by type, fuller summaries ──────────
+    standups_r = [m for m in meetings if m.get("meeting_type") == "standup"]
+    cs_calls_r = [m for m in meetings if m.get("meeting_type") == "cs_call"]
+    kickoffs_r = [m for m in meetings if m.get("meeting_type") == "kickoff"]
+
+    def _fmt_m(m):
+        return (f"  {m['meeting_date'][:10]} — {m['title']}: "
+                f"{(m.get('summary_text') or 'No summary')[:600]}")
+
+    meetings_text = ""
+    if cs_calls_r:
+        meetings_text += "  CS CALLS:\n" + "\n".join(_fmt_m(m) for m in cs_calls_r) + "\n"
+    if standups_r:
+        meetings_text += "  STANDUPS:\n" + "\n".join(_fmt_m(m) for m in standups_r) + "\n"
+    if kickoffs_r:
+        meetings_text += "  KICKOFFS:\n" + "\n".join(_fmt_m(m) for m in kickoffs_r) + "\n"
+    meetings_text = meetings_text.strip() or "  None this period"
 
     # ── Slack ──────────────────────────────────────────────────────────────────
     slack_text = "\n".join(

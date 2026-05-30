@@ -91,9 +91,12 @@ When uncertain, set low_confidence=true and open anyway.
 
 ## DATA SCOPE
 
-SLACK (last 24h) + PYLON ISSUES (open) → TICKETING only
-  Customer-raised signals. A customer Slack message is a service request or concern.
-  A Pylon issue is something flagged by customer or CSM. NOT iteration or upsell sources.
+SLACK (last 24h) + PYLON ISSUES (open) + CS CALL SUMMARIES (last 48h) → TICKETING
+  Customer-raised signals from three sources:
+  - Slack: customer questions, requests, concerns
+  - CS calls: anything the customer said or that Stamina committed to on the call
+  - Standup summaries: context only — use to understand account status, NOT to open new tickets
+  NOT iteration or upsell sources.
 
 CAMPAIGN STATS + ACCOUNT METRICS + EMAIL INBOXES (7–14 days, current state) → ITERATION + UPSELL
   Performance signals. Analyse current state and trends — NOT time-boxed to 24h.
@@ -173,13 +176,19 @@ Signal field MUST cite actual numbers: "positive_reply_rate 2.8% on Segment A, u
 
 ### CUSTOMER-REQUEST (ticketing) — customer or Stamina commitment triggers this
 
-Sources: SLACK (last 24h) and PYLON ISSUES only.
+Sources: SLACK (last 24h), PYLON ISSUES, and CS CALL SUMMARIES (last 48h).
 
 Open when:
 - Customer Slack message: question, concern, request, or deadline mention
   → Quote exact message in source_detail with timestamp
+- CS call / customer meeting summary: any customer question, concern, request, or
+  stated commitment (e.g. "I'll send you that by Friday") mentioned on the call
+  → Cite the call date and quote the relevant part of the summary
+- Standup meeting summary: if the standup discussed a specific account's ticket
+  status, update that context but do NOT open new tickets from standup alone
+  (standups are for tracking, not for generating new requests)
 - Open Pylon issue → ticket if not already in queue
-- Stamina CSM committed something on a call → open on CSM
+- Stamina CSM committed something on a call → open on CSM with the call date
 - Positive lead unreplied 24h+ → URGENT (SLA breach)
 - Account 2–7 days old with 0 active inboxes OR 0 meetings → onboarding risk
 
@@ -282,12 +291,13 @@ def gather_account_signals(customer: dict) -> dict:
     )
     last_customer_slack_date = last_customer_slack[0]["message_date"] if last_customer_slack else None
 
-    # Meetings in last 24h (Fathom calls — extract commitments and concerns)
+    # Meetings in last 48h — catch yesterday's standup + recent CS calls
+    two_days_ago = (now - timedelta(days=2)).strftime("%Y-%m-%d")
     recent_calls = (
         sb.table("meetings")
         .select("title, meeting_date, meeting_type, summary_text")
         .eq("customer_id", cid)
-        .gte("meeting_date", yesterday_str)
+        .gte("meeting_date", two_days_ago)
         .order("meeting_date", desc=False)
         .execute()
         .data
@@ -622,12 +632,18 @@ def format_signals_for_prompt(data: dict) -> str:
         for s in data["slack"]
     ) or "  No messages in last 24h"
 
-    # Recent calls (last 24h)
-    calls_text = "\n".join(
-        f"  [{m['meeting_date'][:10]}] [{m['meeting_type']}] {m['title']}\n"
-        f"  {(m.get('summary_text') or 'No summary')[:1000]}"
-        for m in data["recent_calls"]
-    ) or "  No calls in last 24h"
+    # Recent meetings (last 48h) — separated by type
+    standups   = [m for m in data["recent_calls"] if m.get("meeting_type") == "standup"]
+    cs_calls   = [m for m in data["recent_calls"] if m.get("meeting_type") == "cs_call"]
+    kickoffs   = [m for m in data["recent_calls"] if m.get("meeting_type") == "kickoff"]
+
+    def fmt_meeting(m):
+        return (f"  [{m['meeting_date'][:10]}] {m['title']}\n"
+                f"  Summary: {(m.get('summary_text') or 'No summary')[:1200]}")
+
+    standup_text = "\n".join(fmt_meeting(m) for m in standups) or "  None in last 48h"
+    cs_call_text = "\n".join(fmt_meeting(m) for m in cs_calls) or "  None in last 48h"
+    kickoff_text = "\n".join(fmt_meeting(m) for m in kickoffs) or "  None"
 
     # Positive lead SLA flags — no response OR response took > 2 hours
     unreplied_lines = []
@@ -749,8 +765,14 @@ ENGAGEMENT SIGNALS:
 SLACK MESSAGES (last 24h):
 {slack_text}
 
-RECENT CALLS (last 24h):
-{calls_text}
+STANDUP MEETINGS (last 48h — internal Stamina team only):
+{standup_text}
+
+CS CALLS / CUSTOMER MEETINGS (last 48h):
+{cs_call_text}
+
+KICKOFF CALLS:
+{kickoff_text}
 
 UNREPLIED POSITIVE LEADS (SLA breach — no customer response):
 {unreplied_text}

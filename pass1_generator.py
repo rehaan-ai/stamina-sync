@@ -46,6 +46,7 @@ openai = OpenAI(api_key=OPENAI_KEY)
 
 RESEND_FROM    = "Stamina <stamina@reports.stamina.io>"
 AMARTYA_EMAIL  = "amartya@stamina.io"
+TEST_EMAIL     = os.environ.get("TEST_EMAIL")  # If set, all emails go here only (no CC/BCC)
 
 # ── Logo (base64 embedded) ────────────────────────────────────────────────────
 
@@ -359,11 +360,21 @@ def send_email(pair: dict, pdf_bytes: bytes, customer_name: str):
 
     filename = f"{customer_name.replace(' ', '_')}_Pass1_PreKickoff.pdf"
 
+    # Test mode: override all recipients
+    if TEST_EMAIL:
+        to_emails = [TEST_EMAIL]
+        cc_list   = []
+        reply_to  = TEST_EMAIL
+        log(f"  [TEST MODE] Sending to {TEST_EMAIL} only")
+    else:
+        cc_list  = [AMARTYA_EMAIL]
+        reply_to = AMARTYA_EMAIL
+
     payload = {
         "from":    RESEND_FROM,
         "to":      to_emails,
-        "cc":      [AMARTYA_EMAIL],
-        "reply_to": AMARTYA_EMAIL,
+        "cc":      cc_list,
+        "reply_to": reply_to,
         "template": {
             "id":        "prekickoff-context",
             "variables": {},

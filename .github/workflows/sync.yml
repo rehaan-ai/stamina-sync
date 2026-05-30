@@ -45,6 +45,7 @@ jobs:
           SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
           OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          TEST_EMAIL:     ${{ secrets.TEST_EMAIL }}
 
       # ── Step 3: Pass 2 — execution plan for accounts with kickoff call done ──
       # Detects accounts that have real Pass 1 + kickoff meeting + no Pass 2 yet.
@@ -57,3 +58,4 @@ jobs:
           PYLON_KEY:      ${{ secrets.PYLON_KEY }}
           OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          TEST_EMAIL:     ${{ secrets.TEST_EMAIL }}

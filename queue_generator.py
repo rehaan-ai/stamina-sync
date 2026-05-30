@@ -467,6 +467,41 @@ def format_signals_for_prompt(data: dict) -> str:
         if avg_rr > THRESH_REPLY_RATE_GOOD:
             metrics_lines.append(
                 f"  ✅ UPSELL SIGNAL: reply_rate {round(avg_rr,2)}% is ABOVE {THRESH_REPLY_RATE_GOOD}% — campaigns working well")
+
+        # campaign_progress > 65% → new campaigns needed
+        for m in metrics:
+            cp = m.get("campaign_progress")
+            if cp is not None:
+                try:
+                    cp_val = float(str(cp).replace("%",""))
+                    if cp_val > 65:
+                        metrics_lines.append(
+                            f"  🚨 ITERATION: campaign_progress {cp_val}% on {m.get('date','?')} "
+                            f"— above 65% threshold, new campaigns required")
+                        break
+                except (ValueError, TypeError):
+                    pass
+
+        # e_l_ratio: flag if outside 400–700 when emails_sent_total >= 1200
+        E_L_MIN, E_L_MAX, E_L_MIN_SENT = 400, 700, 1200
+        for m in metrics:
+            el = m.get("e_l_ratio")
+            sent = m.get("emails_sent_total") or m.get("number_of_emails_sent", 0)
+            if el is not None and sent is not None and (sent or 0) >= E_L_MIN_SENT:
+                try:
+                    el_val = float(el)
+                    if el_val < E_L_MIN:
+                        metrics_lines.append(
+                            f"  🚨 ITERATION: e_l_ratio {el_val} on {m.get('date','?')} "
+                            f"is BELOW {E_L_MIN} (acceptable range: {E_L_MIN}–{E_L_MAX}, "
+                            f"emails_sent={sent})")
+                    elif el_val > E_L_MAX:
+                        metrics_lines.append(
+                            f"  🚨 ITERATION: e_l_ratio {el_val} on {m.get('date','?')} "
+                            f"is ABOVE {E_L_MAX} (acceptable range: {E_L_MIN}–{E_L_MAX}, "
+                            f"emails_sent={sent})")
+                except (ValueError, TypeError):
+                    pass
     else:
         metrics_lines = ["  No account metrics data"]
     metrics_text = "\n".join(metrics_lines)
@@ -502,7 +537,8 @@ def format_signals_for_prompt(data: dict) -> str:
             inbox_detail_lines.append("  No inbox detail in DB — check Pylon")
     inbox_detail_text = "\n".join(inbox_detail_lines)
 
-    # ── Campaign performance — pre-flag poor campaigns ──
+    # ── Campaign performance — pre-flag poor campaigns + underperforming variants ──
+    CAMP_MIN_SENT = 800  # minimum emails sent to consider a campaign/variant statistically
     campaigns = sorted(data["campaigns"], key=lambda x: x.get("positive_reply_rate") or 0, reverse=True)
     camp_lines = []
     for camp in campaigns[:15]:
@@ -511,17 +547,28 @@ def format_signals_for_prompt(data: dict) -> str:
         br   = camp.get("bounce_rate") or 0
         pr   = camp.get("positive_replies") or 0
         nr   = camp.get("negative_replies") or 0
+        sent = camp.get("emails_sent", 0) or 0
         flags = []
-        if rr < THRESH_REPLY_RATE_POOR:
-            flags.append(f"🚨 ITERATION: reply_rate {rr}% BELOW {THRESH_REPLY_RATE_POOR}% threshold")
-        if prr < THRESH_POS_REPLY_RATE_POOR and camp.get("emails_sent", 0) > 100:
-            flags.append(f"🚨 ITERATION: positive_reply_rate {prr}% BELOW {THRESH_POS_REPLY_RATE_POOR}% threshold")
-        if prr == 0 and camp.get("emails_sent", 0) > 100:
-            flags.append("🚨 URGENT ITERATION: ZERO positive replies on active campaign")
-        if br > THRESH_BOUNCE_CRITICAL:
-            flags.append(f"🚨 URGENT ITERATION: bounce {br}% FAR ABOVE {THRESH_BOUNCE_ALERT}% threshold")
-        elif br > THRESH_BOUNCE_ALERT:
-            flags.append(f"🚨 ITERATION: bounce {br}% ABOVE {THRESH_BOUNCE_ALERT}% threshold")
+        # Only flag underperformance if minimum sample size reached
+        if sent >= CAMP_MIN_SENT:
+            if rr < THRESH_REPLY_RATE_POOR:
+                flags.append(
+                    f"🚨 UNDERPERFORMING VARIANT — reply_rate {rr}% BELOW {THRESH_REPLY_RATE_POOR}% "
+                    f"(campaign: '{camp['campaign_name']}', variant: '{camp.get('variant_name','—')}')")
+            if prr < THRESH_POS_REPLY_RATE_POOR:
+                flags.append(
+                    f"🚨 UNDERPERFORMING VARIANT — positive_reply_rate {prr}% BELOW {THRESH_POS_REPLY_RATE_POOR}% "
+                    f"(campaign: '{camp['campaign_name']}', variant: '{camp.get('variant_name','—')}')")
+            if prr == 0:
+                flags.append(
+                    f"🚨 URGENT — ZERO positive replies on '{camp['campaign_name']}' / '{camp.get('variant_name','—')}' "
+                    f"({sent} emails sent)")
+            if br > THRESH_BOUNCE_CRITICAL:
+                flags.append(
+                    f"🚨 URGENT — bounce {br}% CRITICAL on '{camp['campaign_name']}' / '{camp.get('variant_name','—')}'")
+            elif br > THRESH_BOUNCE_ALERT:
+                flags.append(
+                    f"🚨 bounce {br}% ABOVE {THRESH_BOUNCE_ALERT}% on '{camp['campaign_name']}' / '{camp.get('variant_name','—')}'")
         if prr > THRESH_POS_REPLY_RATE_GOOD:
             flags.append(f"✅ UPSELL SIGNAL: positive_reply_rate {prr}% ABOVE {THRESH_POS_REPLY_RATE_GOOD}%")
         if rr > THRESH_REPLY_RATE_GOOD:

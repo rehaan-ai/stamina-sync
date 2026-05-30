@@ -241,6 +241,7 @@ Escalate to Amartya: [account | specific reason | urgency]
 - [internal review only] ... [end internal review only] never goes to clients
 - Never name a price
 - Aggressive tone: "Reply rate is 0.4% for the 3rd consecutive week — this campaign is failing" not "reply rate could improve"
+- Every severity claim must cite evidence: never write "severe inbox health issues" or "critical deliverability problem" without immediately following it with the specific data — e.g. "bounce rate: 4.2% (threshold: 2%), inbox health score: 67%" or "3 of 12 inboxes disconnected." If you can't cite a specific number from the data, do not make the claim.
 - 7–8 pages. Every sentence must reference specific data.
 """
 

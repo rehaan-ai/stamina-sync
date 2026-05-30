@@ -1333,20 +1333,24 @@ def md_to_html_body(md: str) -> str:
             continue
 
         # ── Normal elements ───────────────────────────────────────────────────
-        if line.startswith("# "):
-            html_lines.append(f'<h1>{md_inline(line[2:])}</h1>')
-        elif line.startswith("## "):
-            html_lines.append(f'<h2>{md_inline(line[3:])}</h2>')
-        elif line.startswith("### "):
-            html_lines.append(f'<h3>{md_inline(line[4:])}</h3>')
-        elif line.startswith("- "):
-            html_lines.append(f'<div class="bullet">• {md_inline(line[2:])}</div>')
-        elif line.startswith("━") or line.startswith("---"):
+        stripped = line.lstrip()
+        indent   = len(line) - len(stripped)
+        ml       = 14 + min(indent, 4) * 4  # indent up to 2 levels
+
+        if stripped.startswith("# "):
+            html_lines.append(f'<h1>{md_inline(stripped[2:])}</h1>')
+        elif stripped.startswith("## "):
+            html_lines.append(f'<h2>{md_inline(stripped[3:])}</h2>')
+        elif stripped.startswith("### "):
+            html_lines.append(f'<h3>{md_inline(stripped[4:])}</h3>')
+        elif stripped.startswith("- ") or stripped.startswith("* "):
+            html_lines.append(f'<div class="bullet" style="margin-left:{ml}px">• {md_inline(stripped[2:])}</div>')
+        elif stripped.startswith("━") or stripped.startswith("---"):
             html_lines.append('<hr class="divider">')
-        elif line.strip() == "":
+        elif stripped == "":
             html_lines.append('<div class="spacer"></div>')
         else:
-            html_lines.append(f'<p>{md_inline(line)}</p>')
+            html_lines.append(f'<p style="margin-left:{min(indent,2)*8}px">{md_inline(line)}</p>')
         i += 1
 
     return "\n".join(html_lines)
@@ -1423,58 +1427,60 @@ def _generate_internal_pdf(content_md: str, title: str, subtitle: str) -> bytes:
 
 
 def _generate_external_pdf(content_md: str, title: str, subtitle: str) -> bytes:
-    """Enterprise-grade external PDF — customer-ready."""
+    """Enterprise-grade external PDF — customer-ready, clean white design."""
     from weasyprint import HTML as WP_HTML
     body_html = md_to_html_body(content_md)
     today = datetime.now().strftime("%B %d, %Y")
     html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
-  @page {{ size: A4; margin: 22mm 16mm 26mm 16mm; }}
-  @page :first {{ margin-top: 0; }}
+  @page {{ size: A4; margin: 16mm 16mm 22mm 16mm; }}
+  @page :first {{ margin-top: 14mm; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: "Helvetica Neue", Arial, sans-serif; background: white; color: #1a1a1a;
-          font-size: 11.5px; line-height: 1.6; orphans: 3; widows: 3; }}
+          font-size: 11px; line-height: 1.55; orphans: 3; widows: 3; }}
 
-  /* ── Clean professional header ── */
-  .header {{ background: #1a2035; padding: 24px 40px; display: flex;
-             align-items: center; justify-content: space-between; }}
-  .header img {{ height: 24px; filter: brightness(0) invert(1); }}
+  /* ── White header — logo left, company + period right ── */
+  .header {{ background: white; padding: 16px 0 14px; display: flex;
+             align-items: center; justify-content: space-between;
+             border-bottom: 2px solid #1a2035; margin-bottom: 4px; }}
+  .header img {{ height: 22px; }}
   .header-meta {{ text-align: right; }}
-  .header-meta .company {{ color: white; font-size: 15px; font-weight: 700; }}
-  .header-meta .period {{ color: #8892a4; font-size: 10px; margin-top: 3px; letter-spacing: 0.5px; }}
+  .header-meta .company {{ color: #1a1a1a; font-size: 14px; font-weight: 700; }}
+  .header-meta .period {{ color: #888; font-size: 9.5px; margin-top: 2px; }}
 
   /* ── Body ── */
-  .body {{ padding: 20px 0 0; }}
+  .body {{ padding: 10px 0 0; }}
 
   /* ── Section headings ── */
-  h1 {{ font-size: 14px; font-weight: 700; color: #1a2035; margin: 22px 0 8px;
-        padding-bottom: 5px; border-bottom: 2px solid #1a2035; page-break-after: avoid; }}
-  h2 {{ font-size: 12px; font-weight: 700; color: #1a2035; margin: 16px 0 6px;
+  h1 {{ font-size: 13px; font-weight: 700; color: #1a1a1a; margin: 16px 0 6px;
+        padding-bottom: 4px; border-bottom: 1.5px solid #1a1a1a; page-break-after: avoid; }}
+  h2 {{ font-size: 11.5px; font-weight: 700; color: #1a1a1a; margin: 12px 0 4px;
         page-break-after: avoid; }}
-  h3 {{ font-size: 11px; font-weight: 700; color: #2d3a5e; margin: 12px 0 5px;
+  h3 {{ font-size: 10.5px; font-weight: 700; color: #333; margin: 9px 0 3px;
         page-break-after: avoid; }}
 
-  /* ── Body text ── */
-  p {{ margin-bottom: 6px; color: #2d2d2d; page-break-inside: avoid; line-height: 1.65; }}
-  .bullet {{ margin: 3px 0 3px 16px; color: #2d2d2d; page-break-inside: avoid; }}
-  .spacer {{ height: 8px; }}
-  hr.divider {{ border: none; border-top: 1px solid #e8eaed; margin: 14px 0; }}
+  /* ── Body text — no dashes, proper bullets ── */
+  p {{ margin-bottom: 4px; color: #2d2d2d; page-break-inside: avoid; line-height: 1.6; }}
+  .bullet {{ margin: 2px 0 2px 14px; color: #2d2d2d; page-break-inside: avoid; line-height: 1.5; }}
+  .spacer {{ height: 4px; }}
+  hr.divider {{ border: none; border-top: 1px solid #e8eaed; margin: 10px 0; }}
   strong {{ color: #111; font-weight: 600; }}
   code {{ background: #f5f6f8; padding: 1px 4px; border-radius: 3px;
-          font-size: 10px; font-family: monospace; color: #333; }}
+          font-size: 9.5px; font-family: monospace; color: #333; }}
 
-  /* ── Tables ── */
-  table.md-table {{ width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 11px; page-break-inside: avoid; }}
-  table.md-table thead tr {{ background: #1a2035; color: white; }}
-  table.md-table thead th {{ padding: 7px 10px; text-align: left; font-weight: 600; font-size: 10.5px; }}
-  table.md-table tbody td {{ padding: 6px 10px; border-bottom: 1px solid #eaecf0; color: #2d2d2d; }}
-  table.md-table tbody tr.alt {{ background: #f7f8fa; }}
+  /* ── Tables — neutral header, no blue ── */
+  table.md-table {{ width: 100%; border-collapse: collapse; margin: 8px 0;
+                    font-size: 10.5px; page-break-inside: avoid; }}
+  table.md-table thead tr {{ background: #1a1a1a; color: white; }}
+  table.md-table thead th {{ padding: 6px 9px; text-align: left; font-weight: 600; }}
+  table.md-table tbody td {{ padding: 5px 9px; border-bottom: 1px solid #eaecf0; color: #2d2d2d; }}
+  table.md-table tbody tr.alt {{ background: #f9f9f9; }}
 
   /* ── Footer ── */
-  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 40px;
+  .footer {{ position: fixed; bottom: 0; left: 0; right: 0; padding: 7px 16mm;
              border-top: 1px solid #e8eaed; display: flex; justify-content: space-between;
-             font-size: 9.5px; color: #999; background: white; }}
-  .footer .brand {{ font-weight: 600; color: #1a2035; }}
+             font-size: 9px; color: #aaa; background: white; }}
+  .footer .brand {{ font-weight: 600; color: #1a1a1a; }}
 </style></head>
 <body>
 <div class="header">

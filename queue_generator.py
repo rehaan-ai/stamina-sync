@@ -136,6 +136,12 @@ From EMAIL INBOXES:
 - bounce_rate > 2% on any inbox → iteration ticket
 - bounce_rate > 4% → URGENT
 
+From ENGAGEMENT SIGNALS section in the data (pre-flagged — every 🚨 here is an iteration ticket):
+- 🚨 CUSTOMER SLACK SILENCE > 5 days → iteration ticket: customer disengagement risk
+- 🚨 NO CS CALL IN > 14 DAYS → iteration ticket: meeting cadence breach
+- 🚨 NEGATIVE/POSITIVE RATIO > 3:1 → iteration ticket: positioning/messaging problem
+- 🚨 A/B GAP (best variant > 2x worst) → iteration ticket: kill underperformer, name the variant
+
 Mark URGENT if: bounce > 4% anywhere, any disconnected inbox, reply_rate = 0 for 7 days, positive replies = 0 across all campaigns, campaign_progress > 65%.
 Issue field MUST cite actual numbers and campaign/variant names from the data.
 
@@ -160,8 +166,9 @@ From REPLY DATA:
 From KICKOFF CONTEXT:
 - Forward commitment KPI is close to target or hit — upsell timing conversation
 
-From SLACK (last 24h):
+From SLACK (last 24h) or CS CALL SUMMARY:
 - Customer mentions expansion, adding inboxes, scaling, or new segments → URGENT upsell
+- CS call summary mentions customer asking about expansion, new services, or scaling → URGENT upsell
 
 Lever to assign:
 - Approaching email volume cap → Higher Email Volume
@@ -203,7 +210,7 @@ Grey zone: customer asks to change campaign AND data shows it's underperforming 
   "customer_name": "exact account name",
   "type": "iteration | upsell | customer-request",
   "title": "Action-verb-led, specific. Include account name and actual metric. 'Fix 0% positive reply rate — Segment A dead for 3 weeks [Account]'",
-  "source": "campaign-stats | account-metrics | inbox-health | slack | pylon-issue | reply-data | kickoff-document | onboarding-check",
+  "source": "campaign-stats | account-metrics | inbox-health | slack | pylon-issue | reply-data | kickoff-document | onboarding-check | cs-call | standup | engagement-flag",
   "source_detail": "Cite actual data: 'Campaign: SaaS Segment A, reply_rate 0.3% for 14 days' or 'Slack [timestamp]: [exact quote]'",
   "priority": "urgent | this_week | this_month",
   "owner": "CSM | GTM Engineer",

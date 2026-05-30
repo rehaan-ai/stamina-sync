@@ -159,7 +159,15 @@ One-line pair performance summary based on the actual numbers above.
 ---
 
 ## SECTION 2 — Accounts Needing Immediate Attention
-List FIRST. Include every account where: reply_rate below threshold for 2+ weeks, bounce_rate > 2%, disconnected inboxes, unreplied positive leads, open escalation issues, or onboarding risk.
+List FIRST. Include every account where ANY of the following apply:
+- reply_rate below 1% threshold, bounce_rate > 2%, disconnected inboxes, zero positive replies
+- unreplied positive leads or slow response > 2h
+- open escalation issues
+- onboarding risk (0 inboxes or 0 meetings in first 7 days)
+- campaign_progress > 65% (new campaigns needed — flagged in METRICS section)
+- e_l_ratio outside 400–700 range (flagged in METRICS section)
+- 🚨 ENGAGEMENT FLAGS in data: Slack silence, no CS call > 14 days, neg/pos ratio > 3:1, A/B variant gap
+- CS call raised concerns, customer disengagement signals, or expansion discussion
 
 For each:
 
@@ -179,8 +187,11 @@ What happened this week (use actual data from input):
   concerns raised, expansion signals. Quote directly from summary where possible.]
 - Standups: [for each standup — what was discussed about this account, any status updates on
   existing tickets or actions, what the team agreed to do next.]
+- Engagement flags: [reference the ENGAGEMENT FLAGS section in the data — Slack silence days,
+  last CS call date, neg/pos reply ratio, A/B variant gaps. Use exact numbers from the flags.]
 - Slack: [quote actual customer messages with timestamps — flag concerns, silence, or requests]
-- Campaigns: [name actual campaigns/variants with actual reply_rate and positive_reply_rate %s]
+- Campaigns: [name actual campaigns/variants with actual reply_rate and positive_reply_rate %s.
+  Flag campaign_progress > 65% and e_l_ratio outside 400–700 if present in data.]
 - Replies: [name each positive reply prospect + company; for negative replies, name the objection pattern]
 - Inbox issues: [list any disconnected or unhealthy inboxes with actual health_score and bounce_rate]
 - Open issues: [list title, priority, days open]
@@ -308,9 +319,11 @@ What happened this month:
 - Standups: [recurring patterns from standups — what issues kept coming up for this account,
   what the team agreed, what was actioned vs outstanding.]
 - Kickoffs: [if applicable — what was agreed, what the customer's goals are]
+- Engagement flags: [from ENGAGEMENT FLAGS in the data — Slack silence, last CS call date,
+  neg/pos ratio, A/B gaps. Use exact numbers. campaign_progress > 65% = new campaigns urgently needed.]
 - Slack: [theme of customer Slack activity — engaged / requesting / quiet / concerned]
 - Replies: [total positive, total unreplied, any notable reply patterns]
-- Campaigns: [segment and variant performance highlights for the month]
+- Campaigns: [segment and variant performance highlights. Flag e_l_ratio outside 400–700 if present.]
 - Issues: [open issues count + any resolved this month]
 
 Account health assessment:

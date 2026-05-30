@@ -109,25 +109,32 @@ KICKOFF CONTEXT → UPSELL timing (forward commitment progress)
 
 Scan EVERY account's campaign stats, account metrics, and inboxes. Open iteration tickets when:
 
-From CAMPAIGN STATS:
-- reply_rate < 1% on any active campaign
-- positive_reply_rate = 0 on a campaign running 2+ weeks
-- negative_replies significantly outnumber positive_replies (positioning problem — name the ratio)
-- bounce_rate > 2% on any campaign
-- One variant performing far worse than others — kill it
+The data you receive is PRE-FLAGGED with 🚨 and ✅ markers. Every 🚨 line is an iteration signal you MUST turn into a ticket.
+
+From CAMPAIGN STATS (minimum 800 emails sent per campaign/variant for these thresholds):
+- reply_rate < 1% on any campaign/variant → iteration ticket naming exact campaign + variant
+- positive_reply_rate < 0.5% on any campaign/variant → iteration ticket naming exact campaign + variant
+- positive_reply_rate = 0 on active campaign → URGENT iteration ticket
+- bounce_rate > 2% on any campaign → iteration ticket
+- bounce_rate > 4% → URGENT iteration ticket
+- negative_replies significantly outnumber positive_replies → positioning problem — name the ratio
 
 From ACCOUNT METRICS (account_metrics_daily):
-- reply_rate declining for 2+ consecutive periods
-- positive_replies dropped significantly vs prior period
-- bounce_rate trending up
+- reply_rate < 1% (avg over 7 days) → iteration ticket
+- bounce_rate > 2% (avg over 7 days) → iteration ticket; > 4% → URGENT
+- zero positive replies over 7 days → iteration ticket
+- campaign_progress > 65% → iteration ticket: "New campaigns required — current campaigns at X% completion"
+- e_l_ratio outside 400–700 (only when emails_sent_total >= 1200) → iteration ticket:
+  below 400 = too few emails per lead (underutilising); above 700 = too many emails per lead (over-contacting)
 
 From EMAIL INBOXES:
-- is_active = false on any inbox — URGENT if 2+ disconnected
-- health_score < 90 on any inbox
-- bounce_rate > 2% on any inbox
+- any inbox is_active = false → iteration ticket (threshold is 0 disconnected — any disconnected is a problem)
+- health_score < 90% → iteration ticket; < 80% → URGENT
+- bounce_rate > 2% on any inbox → iteration ticket
+- bounce_rate > 4% → URGENT
 
-Mark URGENT if: bounce > 4%, 3+ inboxes disconnected, reply_rate = 0 for 2+ weeks, or positive replies = 0 across all campaigns.
-Issue field MUST cite actual numbers: "reply_rate 0.3% (campaign: Segment A Variant B), declining 3 weeks"
+Mark URGENT if: bounce > 4% anywhere, any disconnected inbox, reply_rate = 0 for 7 days, positive replies = 0 across all campaigns, campaign_progress > 65%.
+Issue field MUST cite actual numbers and campaign/variant names from the data.
 
 ### UPSELL — strong performance signals trigger this
 
@@ -140,6 +147,7 @@ From CAMPAIGN STATS:
 
 From ACCOUNT METRICS:
 - positive_replies increasing week-over-week
+- reply_rate > 3% (avg) → campaigns working well, expansion opportunity
 - Emails sent approaching what looks like the plan cap
 
 From REPLY DATA:

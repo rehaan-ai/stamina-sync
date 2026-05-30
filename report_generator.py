@@ -1434,36 +1434,36 @@ def run_reports(period: str):
                 log(f"  Filtered to account: {ACCOUNT_FILTER} ({len(external_data)} match)")
             log(f"  Generating {len(external_data)} external reports...")
 
-        def process_external(data: dict):
-            name      = data["customer"]["name"]
-            pylon_id  = data["customer"].get("pylon_account_id")
-            today_str = datetime.now().strftime("%B %d, %Y")
-            filename  = f"{name} Report — {today_str}.pdf"
+            def process_external(data: dict):
+                name      = data["customer"]["name"]
+                pylon_id  = data["customer"].get("pylon_account_id")
+                today_str = datetime.now().strftime("%B %d, %Y")
+                filename  = f"{name} Report — {today_str}.pdf"
 
-            if DRY_RUN:
-                return name, "dry-run"
+                if DRY_RUN:
+                    return name, "dry-run"
 
-            try:
-                external_md  = with_retry(
-                    lambda: generate_external_report(data, period, start_str, end_str),
-                    retries=3, delay=8, label=f"external report {name}"
-                )
-                external_pdf = generate_pdf(
-                    external_md,
-                    title    = name,
-                    subtitle = label,
-                    is_internal = False,
-                )
-                if pylon_id:
-                    url = with_retry(
-                        lambda: upload_to_pylon(external_pdf, filename, pylon_id),
-                        retries=3, delay=5, label=f"Pylon upload {name}"
+                try:
+                    external_md  = with_retry(
+                        lambda: generate_external_report(data, period, start_str, end_str),
+                        retries=3, delay=8, label=f"external report {name}"
                     )
-                    return name, url
-                else:
-                    return name, "no-pylon-id"
-            except Exception as e:
-                return name, f"ERROR: {e}"
+                    external_pdf = generate_pdf(
+                        external_md,
+                        title    = name,
+                        subtitle = label,
+                        is_internal = False,
+                    )
+                    if pylon_id:
+                        url = with_retry(
+                            lambda: upload_to_pylon(external_pdf, filename, pylon_id),
+                            retries=3, delay=5, label=f"Pylon upload {name}"
+                        )
+                        return name, url
+                    else:
+                        return name, "no-pylon-id"
+                except Exception as e:
+                    return name, f"ERROR: {e}"
 
             with ThreadPoolExecutor(max_workers=10) as executor:
                 futures = {executor.submit(process_external, d): d for d in external_data}

@@ -396,9 +396,9 @@ def format_signals_for_prompt(data: dict) -> str:
     disconnected_inboxes = c.get("disconnected_inboxes") or 0
     inbox_summary = f"{active_inboxes} active / {disconnected_inboxes} disconnected"
     if disconnected_inboxes >= 3:
-        inbox_summary += f"  🚨 CRITICAL: {disconnected_inboxes} INBOXES DISCONNECTED"
+        inbox_summary += f"  🚨 CRITICAL: {disconnected_inboxes} INBOXES DISCONNECTED — URGENT ITERATION"
     elif disconnected_inboxes > 0:
-        inbox_summary += f"  ⚠ WARNING: {disconnected_inboxes} inbox(es) disconnected"
+        inbox_summary += f"  🚨 ALERT: {disconnected_inboxes} inbox(es) disconnected — threshold is 0"
 
     # ── Onboarding flag ──
     onboarding_flag = ""
@@ -410,18 +410,33 @@ def format_signals_for_prompt(data: dict) -> str:
             f"Active inboxes: {active_inboxes}, Recent calls: {len(data['recent_calls'])}"
         )
 
-    # ── Metrics — show all 7 days + pre-flag bad values ──
+    # Standard thresholds
+    THRESH_REPLY_RATE_POOR     = 1.0   # % — below this = iteration
+    THRESH_REPLY_RATE_GOOD     = 3.0   # % — above this = upsell signal
+    THRESH_POS_REPLY_RATE_POOR = 0.5   # % — below this = iteration
+    THRESH_POS_REPLY_RATE_GOOD = 1.5   # % — above this = upsell signal
+    THRESH_BOUNCE_ALERT        = 2.0   # % — above this = iteration
+    THRESH_BOUNCE_CRITICAL     = 4.0   # % — above this = urgent iteration
+    THRESH_DISCONNECTED        = 0     # any disconnected inbox = alert
+    THRESH_HEALTH_WARN         = 90    # % — below this = warning
+    THRESH_HEALTH_ALERT        = 80    # % — below this = alert
+
+    # ── Metrics — show all 7 days + pre-flag against thresholds ──
     metrics = data["metrics"]
     metrics_lines = []
     if metrics:
-        # Show each day
         for m in metrics:
-            rr  = m.get("reply_rate")
-            pr  = m.get("positive_replies", 0)
-            br  = m.get("bounce_rate")
+            rr   = m.get("reply_rate")
+            pr   = m.get("positive_replies", 0)
+            br   = m.get("bounce_rate")
             sent = m.get("emails_sent_total") or m.get("number_of_emails_sent", 0)
-            rr_flag = " 🚨 BELOW 1%" if (rr is not None and rr < 1) else ""
-            br_flag = " 🚨 ABOVE 2% THRESHOLD" if (br is not None and br > 2) else ""
+            rr_flag = (f" 🚨 BELOW {THRESH_REPLY_RATE_POOR}% THRESHOLD"
+                       if (rr is not None and rr < THRESH_REPLY_RATE_POOR) else
+                       (f" ✅ ABOVE {THRESH_REPLY_RATE_GOOD}%" if (rr is not None and rr > THRESH_REPLY_RATE_GOOD) else ""))
+            br_flag = (f" 🚨 CRITICAL — ABOVE {THRESH_BOUNCE_CRITICAL}%"
+                       if (br is not None and br > THRESH_BOUNCE_CRITICAL) else
+                       (f" 🚨 ABOVE {THRESH_BOUNCE_ALERT}% THRESHOLD"
+                        if (br is not None and br > THRESH_BOUNCE_ALERT) else ""))
             metrics_lines.append(
                 f"  {m.get('date','?')}: sent={sent}, "
                 f"reply_rate={rr}%{rr_flag}, "
@@ -429,20 +444,29 @@ def format_signals_for_prompt(data: dict) -> str:
                 f"bounce={br}%{br_flag}, "
                 f"live_campaigns={m.get('live_campaigns',0)}"
             )
-        # Aggregate flags
-        avg_rr = sum(m.get("reply_rate") or 0 for m in metrics) / len(metrics)
-        avg_br = sum(m.get("bounce_rate") or 0 for m in metrics) / len(metrics)
+        # Aggregate summary + flags
+        avg_rr  = sum(m.get("reply_rate")  or 0 for m in metrics) / len(metrics)
+        avg_br  = sum(m.get("bounce_rate") or 0 for m in metrics) / len(metrics)
         total_pr = sum(m.get("positive_replies") or 0 for m in metrics)
         metrics_lines.append(
-            f"\n  7-day averages: avg_reply_rate={round(avg_rr,2)}%, "
-            f"avg_bounce={round(avg_br,2)}%, total_positive_replies={total_pr}"
+            f"\n  7-day averages: reply_rate={round(avg_rr,2)}% (threshold: {THRESH_REPLY_RATE_POOR}%), "
+            f"bounce={round(avg_br,2)}% (threshold: {THRESH_BOUNCE_ALERT}%), "
+            f"total_positive_replies={total_pr}"
         )
-        if avg_rr < 1:
-            metrics_lines.append(f"  🚨 ITERATION SIGNAL: avg reply rate {round(avg_rr,2)}% is BELOW 1% threshold")
-        if avg_br > 2:
-            metrics_lines.append(f"  🚨 ITERATION SIGNAL: avg bounce rate {round(avg_br,2)}% is ABOVE 2% threshold")
+        if avg_rr < THRESH_REPLY_RATE_POOR:
+            metrics_lines.append(
+                f"  🚨 ITERATION: reply_rate {round(avg_rr,2)}% is BELOW {THRESH_REPLY_RATE_POOR}% threshold for 7 days")
+        if avg_br > THRESH_BOUNCE_CRITICAL:
+            metrics_lines.append(
+                f"  🚨 URGENT ITERATION: bounce {round(avg_br,2)}% is ABOVE {THRESH_BOUNCE_CRITICAL}% — critical")
+        elif avg_br > THRESH_BOUNCE_ALERT:
+            metrics_lines.append(
+                f"  🚨 ITERATION: bounce {round(avg_br,2)}% is ABOVE {THRESH_BOUNCE_ALERT}% threshold")
         if total_pr == 0:
-            metrics_lines.append(f"  🚨 ITERATION SIGNAL: ZERO positive replies in 7 days")
+            metrics_lines.append(f"  🚨 ITERATION: ZERO positive replies in 7 days")
+        if avg_rr > THRESH_REPLY_RATE_GOOD:
+            metrics_lines.append(
+                f"  ✅ UPSELL SIGNAL: reply_rate {round(avg_rr,2)}% is ABOVE {THRESH_REPLY_RATE_GOOD}% — campaigns working well")
     else:
         metrics_lines = ["  No account metrics data"]
     metrics_text = "\n".join(metrics_lines)
@@ -455,25 +479,27 @@ def format_signals_for_prompt(data: dict) -> str:
         active = inbox.get("is_active")
         flags = []
         if not active:
-            flags.append("🚨 INACTIVE")
-        if br > 4:
-            flags.append(f"🚨 BOUNCE {br}% — FAR ABOVE 2% THRESHOLD")
-        elif br > 2:
-            flags.append(f"⚠ BOUNCE {br}% — ABOVE 2% THRESHOLD")
-        if hs < 90:
-            flags.append(f"⚠ HEALTH {hs}% — BELOW 90%")
+            flags.append(f"🚨 DISCONNECTED — threshold is 0 disconnected inboxes")
+        if br > THRESH_BOUNCE_CRITICAL:
+            flags.append(f"🚨 BOUNCE {br}% — CRITICAL (threshold: {THRESH_BOUNCE_ALERT}%)")
+        elif br > THRESH_BOUNCE_ALERT:
+            flags.append(f"🚨 BOUNCE {br}% — ABOVE {THRESH_BOUNCE_ALERT}% THRESHOLD")
+        if hs < THRESH_HEALTH_ALERT:
+            flags.append(f"🚨 HEALTH {hs}% — BELOW {THRESH_HEALTH_ALERT}%")
+        elif hs < THRESH_HEALTH_WARN:
+            flags.append(f"⚠ HEALTH {hs}% — BELOW {THRESH_HEALTH_WARN}%")
         flag_str = " | ".join(flags) if flags else "✓ healthy"
         inbox_detail_lines.append(
             f"  {inbox['email_account']}: active={active}, health={hs}, bounce={br}% — {flag_str}"
         )
     # Also use customers.disconnected_inboxes if no inbox detail available
     if not inbox_detail_lines:
-        if disconnected_inboxes > 0:
+        if disconnected_inboxes > THRESH_DISCONNECTED:
             inbox_detail_lines.append(
-                f"  🚨 {disconnected_inboxes} DISCONNECTED INBOXES (from Pylon — no inbox detail in DB)"
+                f"  🚨 {disconnected_inboxes} DISCONNECTED INBOXES — threshold is 0 (from Pylon sync)"
             )
         else:
-            inbox_detail_lines.append("  No inbox detail available")
+            inbox_detail_lines.append("  No inbox detail in DB — check Pylon")
     inbox_detail_text = "\n".join(inbox_detail_lines)
 
     # ── Campaign performance — pre-flag poor campaigns ──
@@ -486,16 +512,20 @@ def format_signals_for_prompt(data: dict) -> str:
         pr   = camp.get("positive_replies") or 0
         nr   = camp.get("negative_replies") or 0
         flags = []
-        if rr < 1:
-            flags.append(f"🚨 reply_rate {rr}% BELOW 1%")
+        if rr < THRESH_REPLY_RATE_POOR:
+            flags.append(f"🚨 ITERATION: reply_rate {rr}% BELOW {THRESH_REPLY_RATE_POOR}% threshold")
+        if prr < THRESH_POS_REPLY_RATE_POOR and camp.get("emails_sent", 0) > 100:
+            flags.append(f"🚨 ITERATION: positive_reply_rate {prr}% BELOW {THRESH_POS_REPLY_RATE_POOR}% threshold")
         if prr == 0 and camp.get("emails_sent", 0) > 100:
-            flags.append("🚨 ZERO positive replies")
-        if br > 2:
-            flags.append(f"🚨 bounce {br}% ABOVE 2%")
-        if prr > 1.5:
-            flags.append(f"✅ STRONG prr {prr}% — upsell signal")
-        if rr > 3:
-            flags.append(f"✅ STRONG reply_rate {rr}%")
+            flags.append("🚨 URGENT ITERATION: ZERO positive replies on active campaign")
+        if br > THRESH_BOUNCE_CRITICAL:
+            flags.append(f"🚨 URGENT ITERATION: bounce {br}% FAR ABOVE {THRESH_BOUNCE_ALERT}% threshold")
+        elif br > THRESH_BOUNCE_ALERT:
+            flags.append(f"🚨 ITERATION: bounce {br}% ABOVE {THRESH_BOUNCE_ALERT}% threshold")
+        if prr > THRESH_POS_REPLY_RATE_GOOD:
+            flags.append(f"✅ UPSELL SIGNAL: positive_reply_rate {prr}% ABOVE {THRESH_POS_REPLY_RATE_GOOD}%")
+        if rr > THRESH_REPLY_RATE_GOOD:
+            flags.append(f"✅ UPSELL SIGNAL: reply_rate {rr}% ABOVE {THRESH_REPLY_RATE_GOOD}%")
         flag_str = " | ".join(flags) if flags else ""
         camp_lines.append(
             f"  [{camp.get('snapshot_date','')[:10]}] {camp['campaign_name']} "

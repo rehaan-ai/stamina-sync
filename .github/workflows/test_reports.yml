@@ -22,29 +22,7 @@ jobs:
       - name: Install weasyprint system dependencies
         run: sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf2.0-0
 
-      # 1. Weekly internal for Vijetha (all her accounts, one PDF)
-      - name: Weekly internal — Vijetha
-        run: python report_generator.py --weekly --pair "Vijetha" --internal-only
-        env:
-          SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
-          PYLON_KEY:      ${{ secrets.PYLON_KEY }}
-          OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          TEST_EMAIL:     ${{ secrets.TEST_EMAIL }}
-
-      # 2. Weekly external for Ai Healthcare Marketing only (upload to Pylon + email)
-      - name: Weekly external — Ai Healthcare Marketing
-        run: python report_generator.py --weekly --pair "Bala & Raswant" --account "Ai Healthcare Marketing" --external-only
-        env:
-          SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
-          PYLON_KEY:      ${{ secrets.PYLON_KEY }}
-          OPENAI_KEY:     ${{ secrets.OPENAI_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          TEST_EMAIL:     ${{ secrets.TEST_EMAIL }}
-
-      # 3. Daily queue for Nishkarsh
+      # Daily queue for Nishkarsh only
       - name: Daily queue — Nishkarsh
         run: python queue_generator.py --pair "Nishkarsh"
         env:

@@ -1653,6 +1653,8 @@ def run_reports(period: str):
         # ── External reports (one per account, parallelised) ──────────────────
         if INTERNAL_ONLY:
             log(f"  Skipping external reports (--internal-only)")
+        elif period == "weekly":
+            log(f"  Skipping external reports — external reports are monthly only (1st of month)")
         else:
             # Apply account filter if set
             external_data = accounts_data

@@ -341,7 +341,7 @@ def generate_pass2_content(customer: dict, pass1_md: str, meeting: dict, contact
     user_prompt = build_user_prompt(customer, pass1_md, meeting, contacts)
 
     response = claude.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-5-20250929",
         system=PASS2_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_prompt}],
         temperature=1,

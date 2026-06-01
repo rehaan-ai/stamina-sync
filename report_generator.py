@@ -1275,7 +1275,7 @@ Total accounts: {len(accounts_data)}
 """
 
     response = claude.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-5-20250929",
         system=system,
         messages=[{"role": "user", "content": user}],
         temperature=1,
@@ -1300,7 +1300,7 @@ Period: {start_date} to {end_date}
 """
 
     response = claude.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-5-20250929",
         system=system,
         messages=[{"role": "user", "content": user}],
         temperature=1,

@@ -38734,3 +38734,1411 @@ Traceback (most recent call last):
   File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/openai/_client.py", line 158, in __init__
     raise OpenAIError(
 openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+[11:49:50] Sync started at 2026-05-30T11:49:50Z
+[11:49:58] Building Pylon user cache...
+[11:50:07]   30 users
+[11:50:07] === TRACK A: Pylon sync ===
+[11:50:53] FATAL: HTTPSConnectionPool(host='api.usepylon.com', port=443): Read timed out.
+[11:50:53] Done. synced=0, enriched=0, errors=1
+/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+[14:53:54] Sync started at 2026-05-30T14:53:54Z
+[14:53:55] Building Pylon user cache...
+[14:53:57]   30 users
+[14:53:57] === TRACK A: Pylon sync ===
+[14:54:00]   109 accounts found
+[14:54:00]   ✓ Win Win Parenting
+[14:54:01]   ✓ GroundOps
+[14:54:01]   ✓ Quantum Pension Solutions, Inc.
+[14:54:01]   ✓ Proactive Waste Solutions LLC
+[14:54:02]   ✓ ORCA Killer Warehouse
+[14:54:02]   ✓ dcny
+[14:54:02]   ✓ Stratigroup
+[14:54:03]   ✓ EnKounters Inc.
+[14:54:03]   ✓ Ibik
+[14:54:03]   ✓ Gaffa
+[14:54:04]   ✓ Slate Street Capital
+[14:54:04]   ✓ Inventive Foundation Inc.
+[14:54:04]   ✓ Modal Group
+[14:54:05]   ✓ Startup Assist UK
+[14:54:05]   ✓ GENCapital
+[14:54:05]   ✓ XO Agency
+[14:54:06]   ✓ QeRetail
+[14:54:06]   ✓ Voovo
+[14:54:06]   ✓ Pansori Creative
+[14:54:06]   ✓ ALTO SIX
+[14:54:07]   ✓ Income Protection USA
+[14:54:08]   ✓ Zero To One
+[14:54:08]   ✓ Field Agent Canada
+[14:54:08]   ✓ Synderys
+[14:54:09]   ✓ Restoration 1 of NWA
+[14:54:09]   ✓ Poweral
+[14:54:09]   ✓ InnoDraw
+[14:54:10]   ✓ Asia Investment Fund
+[14:54:10]   ✓ Bling Bling Packaging and Display
+[14:54:10]   ✓ Abivo
+[14:54:11]   ✓ Marathon Accountants
+[14:54:11]   ✓ Promus Energy
+[14:54:11]   ✓ Folio3 AI
+[14:54:11]   ✓ Exactus Pay
+[14:54:12]   ✓ Complete Background Screening
+[14:54:12]   ✓ Verifiable Results
+[14:54:12]   ✓ UniversalLab
+[14:54:13]   ✓ Victory Built USA
+[14:54:13]   ✓ Retail Smart Guys
+[14:54:13]   ✓ AI Topia
+[14:54:14]   ✓ First Flight Non-Executive Directors
+[14:54:14]   ✓ Olivia's Tanghulu
+[14:54:14]   ✓ Corporate Finances
+[14:54:15]   ✓ Illumify Media
+[14:54:15]   ✓ Epc Recruiting
+[14:54:15]   ✓ OSA DigiTeam
+[14:54:15]   ✓ Rounds Student Engagement Made Simple
+[14:54:16]   ✓ MJN Insurance Services, Inc.
+[14:54:16]   ✓ Digital Transformation Institute
+[14:54:16]   ✓ Crew Electrical Services
+[14:54:17]   ✓ Statera Capital Zebs
+[14:54:17]   ✓ Fsa Valuation Service
+[14:54:17]   ✓ Strategic Insurance A
+[14:54:18]   ✓ Success Mgt Corp
+[14:54:18]   ✓ Nouswise
+[14:54:18]   ✓ Openfunds Investment 
+[14:54:19]   ✓ Motocoders Com
+[14:54:19]   ✓ Beacon Search Group
+[14:54:19]   ✓ Millenium Capital
+[14:54:19]   ✓ Repicci’s Real Italian Ice & Gelato
+[14:54:20]   ✓ Oncueai
+[14:54:20]   ✓ Ai Healthcare Marketing
+[14:54:20]   ✓ Purple Brains
+[14:54:21]   ✓ Wake Logistics
+[14:54:21]   ✓ MCL Architecture
+[14:54:21]   ✓ New New Solutions
+[14:54:22]   ✓ Biotrax Testing Laboratory
+[14:54:22]   ✓ Arctos Industries
+[14:54:22]   ✓ VARA Salon Suites
+[14:54:23]   ✓ Certatude Solutions
+[14:54:23]   ✓ US Polymers Accurez
+[14:54:23]   ✓ QStimate
+[14:54:24]   ✓ multithread-agency
+[14:54:24]   ✓ Nataliz
+[14:54:24]   ✓ The Bee Conservatory
+[14:54:24]   ✓ Trade Edge 360
+[14:54:25]   ✓ Integrity Services
+[14:54:25]   ✓ Batin Studio
+[14:54:25]   ✓ Spek Creative
+[14:54:26]   ✓ Musgrave Insurance Services
+[14:54:26]   ✓ IndigoStone Advisors
+[14:54:26]   ✓ Welcome2guests
+[14:54:27]   ✓ Impact Outsourcing
+[14:54:27]   ✓ KABMS
+[14:54:27]   ✓ Ark Academy
+[14:54:28]   ✓ Anima Films
+[14:54:28]   ✓ Zenyth
+[14:54:28]   ✓ Ascendeon
+[14:54:28]   ✓ Montana Fly Fishing Lodge
+[14:54:29]   ✓ RevGrow
+[14:54:29]   ✓ Dorron Marketing
+[14:54:29]   ✓ Outcome
+[14:54:30]   ✓ Lochburn Capital
+[14:54:30]   ✓ Heinzroth
+[14:54:30]   ✓ AH A
+[14:54:31]   ✓ Pacific Lending Priority
+[14:54:31]   ✓ Workscape Designs
+[14:54:31]   ✓ Cypress Data Defense
+[14:54:32]   ✓ MaisonQR
+[14:54:32]   ✓ Altera Staffing
+[14:54:32]   ✓ Apptage LLC
+[14:54:32]   ✓ Moonshot Consulting
+[14:54:33]   ✓ SpringWell360 LLC
+[14:54:33]   ✓ Tothenew
+[14:54:33]   ✓ interGen, Inc.
+[14:54:34]   ✓ Sifi Tech Solutions
+[14:54:34]   ✓ Whitepeak
+[14:54:34]   ✓ Innovative Health Insurance Advisors
+[14:54:35]   ✓ Marked Communications
+[14:54:35]   Accounts done — 109/109 upserted
+[14:54:35]   Syncing contacts globally...
+[14:55:02]   149 contacts fetched globally
+[14:55:02]   2 contacts skipped (unknown account)
+[14:55:02]   ✓ 147 contacts upserted
+[14:55:02]   Syncing issues globally...
+[14:55:47]   Issues fetch error: HTTPSConnectionPool(host='api.usepylon.com', port=443): Read timed out.
+[14:55:47]   0 issues fetched globally
+[14:55:47] Track A done — 109/109 accounts, contacts + issues synced globally
+[14:55:47] Building Fathom lookup caches...
+[14:55:48]   email_cache=167, domain_cache=138
+[14:55:48] === TRACK B: Fathom meetings ===
+[14:55:48]   245 meetings already in Supabase
+[14:55:51]   Caught up — no new meetings in this page, stopping
+[14:55:51] Track B done — 0 new meetings synced
+[14:55:51] Tagging meeting types...
+[14:56:05]   Meeting types — kickoff=0, standup=0, cs_call=0, unchanged=245
+[14:56:05] Building Close leads cache...
+[14:59:31] FATAL: HTTPSConnectionPool(host='api.close.com', port=443): Read timed out.
+[14:59:46] Done. synced=109, enriched=0, errors=1
+/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+[04:03:27] Sync started at 2026-05-31T04:03:27Z
+[04:03:28] Building Pylon user cache...
+[04:03:30]   30 users
+[04:03:30] === TRACK A: Pylon sync ===
+[04:03:32]   109 accounts found
+[04:03:32]   ✓ Win Win Parenting
+[04:03:32]   ✓ GroundOps
+[04:03:33]   ✓ Quantum Pension Solutions, Inc.
+[04:03:33]   ✓ Proactive Waste Solutions LLC
+[04:03:34]   ✓ ORCA Killer Warehouse
+[04:03:34]   ✓ dcny
+[04:03:34]   ✓ Stratigroup
+[04:03:35]   ✓ EnKounters Inc.
+[04:03:35]   ✓ Ibik
+[04:03:35]   ✓ Gaffa
+[04:03:36]   ✓ Slate Street Capital
+[04:04:04]   ✓ Inventive Foundation Inc.
+[04:04:04]   ✓ Modal Group
+[04:04:05]   ✓ Startup Assist UK
+[04:04:05]   ✓ GENCapital
+[04:04:05]   ✓ XO Agency
+[04:04:06]   ✓ QeRetail
+[04:04:07]   ✓ Voovo
+[04:04:07]   ✓ Pansori Creative
+[04:04:07]   ✓ ALTO SIX
+[04:04:08]   ✓ Income Protection USA
+[04:04:08]   ✓ Zero To One
+[04:04:08]   ✓ Field Agent Canada
+[04:04:09]   ✓ Synderys
+[04:04:09]   ✓ Restoration 1 of NWA
+[04:04:10]   ✓ Poweral
+[04:04:10]   ✓ InnoDraw
+[04:04:10]   ✓ Asia Investment Fund
+[04:04:11]   ✓ Bling Bling Packaging and Display
+[04:04:37]   ✓ Abivo
+[04:04:37]   ✓ Marathon Accountants
+[04:04:37]   ✓ Promus Energy
+[04:04:38]   ✓ Folio3 AI
+[04:04:38]   ✓ Exactus Pay
+[04:04:38]   ✓ Complete Background Screening
+[04:04:39]   ✓ Verifiable Results
+[04:04:39]   ✓ UniversalLab
+[04:04:39]   ✓ Victory Built USA
+[04:04:40]   ✓ Retail Smart Guys
+[04:04:40]   ✓ AI Topia
+[04:04:41]   ✓ First Flight Non-Executive Directors
+[04:04:41]   ✓ Olivia's Tanghulu
+[04:04:41]   ✓ Corporate Finances
+[04:04:42]   ✓ Illumify Media
+[04:04:42]   ✓ Epc Recruiting
+[04:04:42]   ✓ OSA DigiTeam
+[04:04:43]   ✓ Rounds Student Engagement Made Simple
+[04:04:43]   ✓ MJN Insurance Services, Inc.
+[04:04:44]   ✓ Digital Transformation Institute
+[04:04:44]   ✓ Crew Electrical Services
+[04:04:44]   ✓ Statera Capital Zebs
+[04:04:45]   ✓ Fsa Valuation Service
+[04:04:45]   ✓ Strategic Insurance A
+[04:04:45]   ✓ Success Mgt Corp
+[04:04:46]   ✓ Nouswise
+[04:04:46]   ✓ Openfunds Investment 
+[04:04:47]   ✓ Motocoders Com
+[04:04:47]   ✓ Beacon Search Group
+[04:04:47]   ✓ Millenium Capital
+[05:13:21]   ✗ Repicci’s Real Italian Ice & Gelato: The read operation timed out
+[05:13:23]   ✓ Oncueai
+[05:13:24]   ✓ Ai Healthcare Marketing
+[05:13:24]   ✓ Purple Brains
+[05:13:24]   ✓ Wake Logistics
+[05:13:24]   ✓ MCL Architecture
+[05:13:25]   ✓ New New Solutions
+[05:13:25]   ✓ Biotrax Testing Laboratory
+[05:13:25]   ✓ Arctos Industries
+[05:13:26]   ✓ VARA Salon Suites
+[05:13:26]   ✓ Certatude Solutions
+[05:13:26]   ✓ US Polymers Accurez
+[05:13:27]   ✓ QStimate
+[05:13:27]   ✓ multithread-agency
+[05:13:27]   ✓ Nataliz
+[05:13:27]   ✓ The Bee Conservatory
+[05:13:28]   ✓ Trade Edge 360
+[05:13:28]   ✓ Integrity Services
+[05:13:28]   ✓ Batin Studio
+[05:13:29]   ✓ Spek Creative
+[05:13:29]   ✓ Musgrave Insurance Services
+[05:13:29]   ✓ IndigoStone Advisors
+[05:13:30]   ✓ Welcome2guests
+[05:13:30]   ✓ Impact Outsourcing
+[05:13:30]   ✓ KABMS
+[05:13:31]   ✓ Ark Academy
+[05:13:31]   ✓ Anima Films
+[05:13:31]   ✓ Zenyth
+[05:13:31]   ✓ Ascendeon
+[05:13:32]   ✓ Montana Fly Fishing Lodge
+[05:13:32]   ✓ RevGrow
+[05:13:32]   ✓ Dorron Marketing
+[05:13:33]   ✓ Outcome
+[05:13:33]   ✓ Lochburn Capital
+[05:13:33]   ✓ Heinzroth
+[05:13:34]   ✓ AH A
+[05:13:34]   ✓ Pacific Lending Priority
+[05:13:34]   ✓ Workscape Designs
+[05:13:34]   ✓ Cypress Data Defense
+[05:13:35]   ✓ MaisonQR
+[05:13:35]   ✓ Altera Staffing
+[05:13:35]   ✓ Apptage LLC
+[05:13:36]   ✓ Moonshot Consulting
+[05:13:36]   ✓ SpringWell360 LLC
+[05:13:36]   ✓ Tothenew
+[05:13:36]   ✓ interGen, Inc.
+[05:13:37]   ✓ Sifi Tech Solutions
+[05:13:37]   ✓ Whitepeak
+[05:13:37]   ✓ Innovative Health Insurance Advisors
+[05:13:38]   ✓ Marked Communications
+[05:13:38]   Accounts done — 108/109 upserted
+[05:13:38]   Syncing contacts globally...
+[05:30:23]   ✗ contacts sync failed: HTTPSConnectionPool(host='api.usepylon.com', port=443): Read timed out. (read timeout=30)
+[05:30:23]   Syncing issues globally...
+[05:49:12]   Issues fetch error: HTTPSConnectionPool(host='api.usepylon.com', port=443): Max retries exceeded with url: /issues?start_time=2026-05-01T05%3A30%3A23Z&end_time=2026-05-31T05%3A30%3A23Z&limit=500 (Caused by NameResolutionError("HTTPSConnection(host='api.usepylon.com', port=443): Failed to resolve 'api.usepylon.com' ([Errno 8] nodename nor servname provided, or not known)"))
+[05:49:12]   0 issues fetched globally
+[05:49:12] Track A done — 108/109 accounts, contacts + issues synced globally
+[05:49:12] Building Fathom lookup caches...
+[05:49:47] FATAL: [Errno 8] nodename nor servname provided, or not known
+Traceback (most recent call last):
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpcore/_sync/connection.py", line 101, in handle_request
+    raise exc
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpcore/_sync/connection.py", line 78, in handle_request
+    stream = self._connect(request)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpcore/_sync/connection.py", line 124, in _connect
+    stream = self._network_backend.connect_tcp(**kwargs)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpcore/_backends/sync.py", line 215, in connect_tcp
+    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectError: [Errno 8] nodename nor servname provided, or not known
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rehaankothari/stamina/sync.py", line 1056, in <module>
+    main()
+  File "/Users/rehaankothari/stamina/sync.py", line 1045, in main
+    sb.table("sync_runs").update({
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/postgrest/_sync/request_builder.py", line 78, in execute
+    r = send_with_retry(self.request)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/postgrest/_sync/request_builder.py", line 50, in send_with_retry
+    resp = req.send(headers)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/postgrest/base_request_builder.py", line 90, in send
+    return self.session.request(
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: [Errno 8] nodename nor servname provided, or not known
+/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+[11:44:55] Sync started at 2026-05-31T11:44:55Z
+[11:44:56] Building Pylon user cache...
+[11:44:57]   30 users
+[11:44:57] === TRACK A: Pylon sync ===
+[11:45:01]   109 accounts found
+[11:45:02]   ✓ Win Win Parenting
+[11:45:02]   ✓ GroundOps
+[11:45:02]   ✓ Quantum Pension Solutions, Inc.
+[11:45:03]   ✓ Proactive Waste Solutions LLC
+[11:45:03]   ✓ ORCA Killer Warehouse
+[11:45:03]   ✓ dcny
+[11:45:03]   ✓ Stratigroup
+[11:45:04]   ✓ EnKounters Inc.
+[11:45:04]   ✓ Ibik
+[11:45:04]   ✓ Gaffa
+[11:45:05]   ✓ Slate Street Capital
+[11:45:05]   ✓ Inventive Foundation Inc.
+[11:45:05]   ✓ Modal Group
+[11:45:06]   ✓ Startup Assist UK
+[11:45:06]   ✓ GENCapital
+[11:45:06]   ✓ XO Agency
+[11:45:07]   ✓ QeRetail
+[11:45:07]   ✓ Voovo
+[11:45:07]   ✓ Pansori Creative
+[11:45:07]   ✓ ALTO SIX
+[11:45:08]   ✓ Income Protection USA
+[11:45:08]   ✓ Zero To One
+[11:45:08]   ✓ Field Agent Canada
+[11:45:09]   ✓ Synderys
+[11:45:09]   ✓ Restoration 1 of NWA
+[11:45:09]   ✓ Poweral
+[11:45:10]   ✓ InnoDraw
+[11:45:10]   ✓ Asia Investment Fund
+[11:45:10]   ✓ Bling Bling Packaging and Display
+[11:45:11]   ✓ Abivo
+[11:45:11]   ✓ Marathon Accountants
+[11:45:11]   ✓ Promus Energy
+[11:45:11]   ✓ Folio3 AI
+[11:45:12]   ✓ Exactus Pay
+[11:45:12]   ✓ Complete Background Screening
+[11:45:12]   ✓ Verifiable Results
+[11:45:13]   ✓ UniversalLab
+[11:45:13]   ✓ Victory Built USA
+[11:45:14]   ✓ Retail Smart Guys
+[11:45:14]   ✓ AI Topia
+[11:45:14]   ✓ First Flight Non-Executive Directors
+[11:45:15]   ✓ Olivia's Tanghulu
+[11:45:15]   ✓ Corporate Finances
+[11:45:15]   ✓ Illumify Media
+[11:45:16]   ✓ Epc Recruiting
+[11:45:16]   ✓ OSA DigiTeam
+[11:45:16]   ✓ Rounds Student Engagement Made Simple
+[11:45:16]   ✓ MJN Insurance Services, Inc.
+[11:45:17]   ✓ Digital Transformation Institute
+[11:45:17]   ✓ Crew Electrical Services
+[11:45:17]   ✓ Statera Capital Zebs
+[11:45:18]   ✓ Fsa Valuation Service
+[11:45:18]   ✓ Strategic Insurance A
+[11:45:18]   ✓ Success Mgt Corp
+[11:45:19]   ✓ Nouswise
+[11:45:19]   ✓ Openfunds Investment 
+[11:45:19]   ✓ Motocoders Com
+[11:45:20]   ✓ Beacon Search Group
+[11:45:20]   ✓ Millenium Capital
+[11:45:20]   ✓ Repicci’s Real Italian Ice & Gelato
+[11:45:21]   ✓ Oncueai
+[11:45:21]   ✓ Ai Healthcare Marketing
+[11:45:21]   ✓ Purple Brains
+[11:45:21]   ✓ Wake Logistics
+[11:45:22]   ✓ MCL Architecture
+[11:45:22]   ✓ New New Solutions
+[11:45:22]   ✓ Biotrax Testing Laboratory
+[11:45:23]   ✓ Arctos Industries
+[11:45:23]   ✓ VARA Salon Suites
+[11:45:23]   ✓ Certatude Solutions
+[11:45:24]   ✓ US Polymers Accurez
+[11:45:24]   ✓ QStimate
+[11:45:24]   ✓ multithread-agency
+[11:45:25]   ✓ Nataliz
+[11:45:25]   ✓ The Bee Conservatory
+[11:45:25]   ✓ Trade Edge 360
+[11:45:25]   ✓ Integrity Services
+[11:45:26]   ✓ Batin Studio
+[11:45:26]   ✓ Spek Creative
+[11:45:26]   ✓ Musgrave Insurance Services
+[11:45:27]   ✓ IndigoStone Advisors
+[11:45:27]   ✓ Welcome2guests
+[11:45:27]   ✓ Impact Outsourcing
+[11:45:28]   ✓ KABMS
+[11:45:28]   ✓ Ark Academy
+[11:45:28]   ✓ Anima Films
+[11:45:29]   ✓ Zenyth
+[11:45:29]   ✓ Ascendeon
+[11:45:29]   ✓ Montana Fly Fishing Lodge
+[11:45:30]   ✓ RevGrow
+[11:45:30]   ✓ Dorron Marketing
+[11:45:30]   ✓ Outcome
+[11:45:30]   ✓ Lochburn Capital
+[11:45:31]   ✓ Heinzroth
+[11:45:31]   ✓ AH A
+[11:45:31]   ✓ Pacific Lending Priority
+[11:45:32]   ✓ Workscape Designs
+[11:45:32]   ✓ Cypress Data Defense
+[11:45:32]   ✓ MaisonQR
+[11:45:33]   ✓ Altera Staffing
+[11:45:33]   ✓ Apptage LLC
+[11:45:33]   ✓ Moonshot Consulting
+[11:45:33]   ✓ SpringWell360 LLC
+[11:45:34]   ✓ Tothenew
+[11:45:34]   ✓ interGen, Inc.
+[11:45:34]   ✓ Sifi Tech Solutions
+[11:45:35]   ✓ Whitepeak
+[11:45:35]   ✓ Innovative Health Insurance Advisors
+[11:45:35]   ✓ Marked Communications
+[11:45:35]   Accounts done — 109/109 upserted
+[11:45:35]   Syncing contacts globally...
+[11:45:36]   149 contacts fetched globally
+[11:45:36]   2 contacts skipped (unknown account)
+[11:45:37]   ✓ 147 contacts upserted
+[11:45:37]   Syncing issues globally...
+[11:45:53]   353 issues fetched globally
+[11:45:54]   ✓ 353 issues upserted
+[11:45:54] Track A done — 109/109 accounts, contacts + issues synced globally
+[11:45:54] Building Fathom lookup caches...
+[11:45:55]   email_cache=167, domain_cache=138
+[11:45:55] === TRACK B: Fathom meetings ===
+[11:45:55]   245 meetings already in Supabase
+[11:46:17]   Caught up — no new meetings in this page, stopping
+[11:46:17] Track B done — 0 new meetings synced
+[11:46:17] Tagging meeting types...
+[11:46:19]   Meeting types — kickoff=0, standup=0, cs_call=0, unchanged=245
+[11:46:19] Building Close leads cache...
+[11:48:13]   14953 Close leads loaded
+[11:48:13] === TRACK C: Close matching + SOW generation ===
+[11:48:14]   128 accounts total, 79 already have SOWs
+[11:48:14]   – Crew Electrical Services (SOW exists, skipping)
+[11:48:17]   ✓ Matched Proactive Waste Solutions LLC → Close (no AI summary yet, SOW skipped)
+[11:48:18]   ~ No Close match: GroundOps
+[11:48:18]   – Integrity Services (SOW exists, skipping)
+[11:48:18]   – GENCapital (SOW exists, skipping)
+[11:48:18]   – Inventive Foundation Inc. (SOW exists, skipping)
+[11:48:18]   – Retail Smart Guys (SOW exists, skipping)
+[11:48:18]   – Ai Healthcare Marketing (SOW exists, skipping)
+[11:48:18]   – ORCA Killer Warehouse (SOW exists, skipping)
+[11:48:18]   ✓ Matched Olivia's Tanghulu → Close (no AI summary yet, SOW skipped)
+[11:48:19]   ✓ Matched KABMS → Close (no AI summary yet, SOW skipped)
+[11:48:19]   – Pacific Lending Priority (SOW exists, skipping)
+[11:48:19]   – Stratigroup (SOW exists, skipping)
+[11:48:19]   – Slate Street Capital (SOW exists, skipping)
+[11:48:19]   – Oncueai (SOW exists, skipping)
+[11:48:19]   – Motocoders Com (SOW exists, skipping)
+[11:48:19]   – Biotrax Testing Laboratory (SOW exists, skipping)
+[11:48:19]   – Gaffa (SOW exists, skipping)
+[11:48:21]   ✓ Matched Quantum Pension Solutions, Inc. → Close (no AI summary yet, SOW skipped)
+[11:48:22]   ✓ Matched Miraa → Close (no AI summary yet, SOW skipped)
+[11:48:23]   ✓ Matched Musgrave Insurance Services → Close (no AI summary yet, SOW skipped)
+[11:48:23]   – Lochburn Capital (SOW exists, skipping)
+[11:48:23]   – Asia Investment Fund (SOW exists, skipping)
+[11:48:23]   – The Bee Conservatory (SOW exists, skipping)
+[11:48:24]   ✓ Matched nimblechapps → Close (no AI summary yet, SOW skipped)
+[11:48:24]   ✓ Matched Stamina 22 → Close (no AI summary yet, SOW skipped)
+[11:48:25]   ✓ Matched Walking on Air Shoes → Close (no AI summary yet, SOW skipped)
+[11:48:25]   – Dorron Marketing (SOW exists, skipping)
+[11:48:26]   ~ No Close match: ALTO SIX
+[11:48:26]   – InvestWell Solutions (SOW exists, skipping)
+[11:48:26]   – ParadiseAI (SOW exists, skipping)
+[11:48:26]   – Impact Outsourcing (SOW exists, skipping)
+[11:48:26]   – Devello (SOW exists, skipping)
+[11:48:26]   ~ No Close match: PeopleScape.AI
+[11:48:27]   ~ No Close match: TripleHelixCorp
+[11:48:27]   ✓ Matched EN Enterprises Inc. → Close (no AI summary yet, SOW skipped)
+[11:48:27]   – Promus Energy (SOW exists, skipping)
+[11:48:27]   – Purple Brains (SOW exists, skipping)
+[11:48:29]   ✓ Matched Synderys → Close (no AI summary yet, SOW skipped)
+[11:48:29]   – Folio3 AI (SOW exists, skipping)
+[11:48:30]   ✓ Matched Victory Built USA → Close (no AI summary yet, SOW skipped)
+[11:48:30]   – Welcome2guests (SOW exists, skipping)
+[11:48:33]   ✓ Matched zob → Close (no AI summary yet, SOW skipped)
+[11:48:33]   – Btsb (SOW exists, skipping)
+[11:48:35]   ✓ Matched Moonshot Consulting → Close (no AI summary yet, SOW skipped)
+[11:48:35]   – Openfunds Investment  (SOW exists, skipping)
+[11:48:35]   – Tothenew (SOW exists, skipping)
+[11:48:35]   – Heinzroth (SOW exists, skipping)
+[11:48:35]   ✓ Matched TALLY RETAIL SOLUTIONS → Close (no AI summary yet, SOW skipped)
+[11:48:35]   – Montana Fly Fishing Lodge (SOW exists, skipping)
+[11:48:35]   – Marked Communications (SOW exists, skipping)
+[11:48:35]   – Startup Assist UK (SOW exists, skipping)
+[11:48:36]   ✓ Matched Income Protection USA → Close (no AI summary yet, SOW skipped)
+[11:48:37]   ~ No Close match: testing testingg
+[11:48:37]   ✓ Matched MaisonQR → Close (no AI summary yet, SOW skipped)
+[11:48:37]   – Altera Staffing (SOW exists, skipping)
+[11:48:37]   – Cypress Data Defense (SOW exists, skipping)
+[11:48:37]   – Apptage LLC (SOW exists, skipping)
+[11:48:38]   ✓ Matched VARA Salon Suites → Close (no AI summary yet, SOW skipped)
+[11:48:38]   – Batin Studio (SOW exists, skipping)
+[11:48:38]   – Beacon Search Group (SOW exists, skipping)
+[11:48:39]   ✓ Matched Win Win Parenting → Close (no AI summary yet, SOW skipped)
+[11:48:39]   ✓ Matched MCL Architecture → Close (no AI summary yet, SOW skipped)
+[11:48:39]   – Workscape Designs (SOW exists, skipping)
+[11:48:39]   – QStimate (SOW exists, skipping)
+[11:48:40]   ✓ Matched RevGrow → Close (no AI summary yet, SOW skipped)
+[11:48:40]   – interGen, Inc. (SOW exists, skipping)
+[11:48:40]   – Trade Edge 360 (SOW exists, skipping)
+[11:48:41]   ✓ Zero To One matched (conf=95%) — 5295 chars — generating SOW...
+/Users/rehaankothari/stamina/sync.py:883: DeprecationWarning: The model 'claude-3-5-haiku-20241022' is deprecated and will reach end-of-life on February 19th, 2026.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  resp = claude.messages.create(
+[11:48:41]   ✗ Zero To One: "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+[11:48:41]   – dcny (SOW exists, skipping)
+[11:48:41]   – Sifi Tech Solutions (SOW exists, skipping)
+[11:48:42]   ✓ Matched Abivo → Close (no AI summary yet, SOW skipped)
+[11:48:42]   ✓ Matched Ibik → Close (no AI summary yet, SOW skipped)
+[11:48:43]   ~ No Close match: Modal Group
+[11:48:43]   – Verifiable Results (SOW exists, skipping)
+[11:48:43]   ~ No Close match: EnKounters Inc.
+[11:48:43]   – XO Agency (SOW exists, skipping)
+[11:48:43]   – QeRetail (SOW exists, skipping)
+[11:48:43]   – Success Mgt Corp (SOW exists, skipping)
+[11:48:43]   – Anima Films (SOW exists, skipping)
+[11:48:43]   – Spek Creative (SOW exists, skipping)
+[11:48:43]   – Outcome (SOW exists, skipping)
+[11:48:43]   – OSA DigiTeam (SOW exists, skipping)
+[11:48:44]   ~ No Close match: Repicci’s Real Italian Ice & Gelato
+[11:48:44]   – SpringWell360 LLC (SOW exists, skipping)
+[11:48:44]   – AH A (SOW exists, skipping)
+[11:48:44]   – Innovative Health Insurance Advisors (SOW exists, skipping)
+[11:48:44]   – AI Topia (SOW exists, skipping)
+[11:48:44]   – Certatude Solutions (SOW exists, skipping)
+[11:48:44]   ~ No Close match: Exactus Pay
+[11:48:44]   – multithread-agency (SOW exists, skipping)
+[11:48:45]   ✓ Matched Whitepeak → Close (no AI summary yet, SOW skipped)
+[11:48:45]   – Digital Transformation Institute (SOW exists, skipping)
+[11:48:45]   – Wake Logistics (SOW exists, skipping)
+[11:48:46]   ~ No Close match: Corporate Finances
+[11:48:46]   – Epc Recruiting (SOW exists, skipping)
+[11:48:46]   – Strategic Insurance A (SOW exists, skipping)
+[11:48:47]   ✓ Matched Nouswise → Close (no AI summary yet, SOW skipped)
+[11:48:47]   – Zenyth (SOW exists, skipping)
+[11:48:48]   ~ No Close match: Prescribery Pharm
+[11:48:48]   – Bling Bling Packaging and Display (SOW exists, skipping)
+[11:48:48]   ~ No Close match: New New Solutions
+[11:48:48]   – Ark Academy (SOW exists, skipping)
+[11:48:48]   – Marathon Accountants (SOW exists, skipping)
+[11:48:49]   ✓ Matched IndigoStone Advisors → Close (no AI summary yet, SOW skipped)
+[11:48:49]   – FounderMove (SOW exists, skipping)
+[11:48:58]   ✓ Matched Supper CLub LLC → Close (no AI summary yet, SOW skipped)
+[11:48:59]   ✓ Matched Illumify Media → Close (no AI summary yet, SOW skipped)
+[11:48:59]   – Poweral (SOW exists, skipping)
+[11:49:01]   ✓ Matched Arctos Industries → Close (no AI summary yet, SOW skipped)
+[11:49:02]   ✓ Matched Fsa Valuation Service → Close (no AI summary yet, SOW skipped)
+[11:49:02]   ~ No Close match: testing testingg
+[11:49:03]   ✓ Matched brand1 → Close (no AI summary yet, SOW skipped)
+[11:49:03]   – Field Agent Canada (SOW exists, skipping)
+[11:49:03]   ✓ Matched Complete Background Screening → Close (no AI summary yet, SOW skipped)
+[11:49:03]   – Restoration 1 of NWA (SOW exists, skipping)
+[11:49:03]   – InnoDraw (SOW exists, skipping)
+[11:49:03]   – First Flight Non-Executive Directors (SOW exists, skipping)
+[11:49:04]   ✓ Matched US Polymers Accurez → Close (no AI summary yet, SOW skipped)
+[11:49:04]   – MJN Insurance Services, Inc. (SOW exists, skipping)
+[11:49:04]   – UniversalLab (SOW exists, skipping)
+[11:49:04]   – Statera Capital Zebs (SOW exists, skipping)
+[11:49:04]   – Millenium Capital (SOW exists, skipping)
+[11:49:04]   – Voovo (SOW exists, skipping)
+[11:49:05]   ✓ Matched Pansori Creative → Close (no AI summary yet, SOW skipped)
+[11:49:06]   ✓ Matched Nataliz → Close (no AI summary yet, SOW skipped)
+[11:49:06]   – Rounds Student Engagement Made Simple (SOW exists, skipping)
+[11:49:06]   – Ascendeon (SOW exists, skipping)
+[11:49:06] Track C done — 0 SOWs generated
+[11:49:06] Done. synced=109, enriched=0, errors=1
+/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+[03:46:18] Sync started at 2026-06-01T03:46:18Z
+[03:46:19] Building Pylon user cache...
+[03:46:20]   30 users
+[03:46:20] === TRACK A: Pylon sync ===
+[03:46:22]   109 accounts found
+[03:46:22]   ✓ Win Win Parenting
+[03:46:23]   ✓ GroundOps
+[03:46:23]   ✓ Quantum Pension Solutions, Inc.
+[03:46:23]   ✓ Proactive Waste Solutions LLC
+[03:46:24]   ✓ ORCA Killer Warehouse
+[03:46:24]   ✓ dcny
+[03:46:24]   ✓ Stratigroup
+[03:46:25]   ✓ EnKounters Inc.
+[03:46:25]   ✓ Ibik
+[03:46:25]   ✓ Gaffa
+[03:46:26]   ✓ Slate Street Capital
+[03:46:26]   ✓ Inventive Foundation Inc.
+[03:46:27]   ✓ Modal Group
+[03:46:27]   ✓ Startup Assist UK
+[03:46:27]   ✓ GENCapital
+[03:46:28]   ✓ XO Agency
+[03:46:28]   ✓ QeRetail
+[03:46:29]   ✓ Voovo
+[03:46:29]   ✓ Pansori Creative
+[03:46:30]   ✓ ALTO SIX
+[03:46:30]   ✓ Income Protection USA
+[03:46:30]   ✓ Zero To One
+[03:46:31]   ✓ Field Agent Canada
+[03:46:31]   ✓ Synderys
+[03:46:31]   ✓ Restoration 1 of NWA
+[03:46:32]   ✓ Poweral
+[03:46:32]   ✓ InnoDraw
+[03:46:32]   ✓ Asia Investment Fund
+[03:46:33]   ✓ Bling Bling Packaging and Display
+[03:46:33]   ✓ Abivo
+[03:46:34]   ✓ Marathon Accountants
+[03:46:34]   ✓ Promus Energy
+[03:46:34]   ✓ Folio3 AI
+[03:46:35]   ✓ Exactus Pay
+[03:46:35]   ✓ Complete Background Screening
+[03:46:35]   ✓ Verifiable Results
+[03:46:36]   ✓ UniversalLab
+[03:46:36]   ✓ Victory Built USA
+[03:46:36]   ✓ Retail Smart Guys
+[03:46:37]   ✓ AI Topia
+[03:46:37]   ✓ First Flight Non-Executive Directors
+[03:46:37]   ✓ Olivia's Tanghulu
+[03:46:38]   ✓ Corporate Finances
+[03:46:38]   ✓ Illumify Media
+[03:46:39]   ✓ Epc Recruiting
+[03:46:39]   ✓ OSA DigiTeam
+[03:46:39]   ✓ Rounds Student Engagement Made Simple
+[03:46:40]   ✓ MJN Insurance Services, Inc.
+[03:46:40]   ✓ Digital Transformation Institute
+[03:46:40]   ✓ Crew Electrical Services
+[03:46:41]   ✓ Statera Capital Zebs
+[03:46:41]   ✓ Fsa Valuation Service
+[03:46:41]   ✓ Strategic Insurance A
+[03:46:42]   ✓ Success Mgt Corp
+[03:46:42]   ✓ Nouswise
+[03:46:42]   ✓ Openfunds Investment 
+[03:46:43]   ✓ Motocoders Com
+[03:46:43]   ✓ Beacon Search Group
+[03:46:44]   ✓ Millenium Capital
+[03:46:44]   ✓ Repicci’s Real Italian Ice & Gelato
+[03:46:44]   ✓ Oncueai
+[03:46:45]   ✓ Ai Healthcare Marketing
+[03:46:45]   ✓ Purple Brains
+[03:46:45]   ✓ Wake Logistics
+[03:46:46]   ✓ MCL Architecture
+[03:46:46]   ✓ New New Solutions
+[03:46:46]   ✓ Biotrax Testing Laboratory
+[03:46:47]   ✓ Arctos Industries
+[03:46:47]   ✓ VARA Salon Suites
+[03:46:48]   ✓ Certatude Solutions
+[03:46:48]   ✓ US Polymers Accurez
+[03:46:48]   ✓ QStimate
+[03:46:49]   ✓ multithread-agency
+[03:46:49]   ✓ Nataliz
+[03:46:50]   ✓ The Bee Conservatory
+[03:46:50]   ✓ Trade Edge 360
+[03:46:50]   ✓ Integrity Services
+[03:46:51]   ✓ Batin Studio
+[03:46:51]   ✓ Spek Creative
+[03:46:51]   ✓ Musgrave Insurance Services
+[03:46:52]   ✓ IndigoStone Advisors
+[03:46:52]   ✓ Welcome2guests
+[03:46:52]   ✓ Impact Outsourcing
+[03:46:53]   ✓ KABMS
+[03:46:53]   ✓ Ark Academy
+[03:46:53]   ✓ Anima Films
+[03:46:54]   ✓ Zenyth
+[03:46:54]   ✓ Ascendeon
+[03:46:55]   ✓ Montana Fly Fishing Lodge
+[03:46:55]   ✓ RevGrow
+[03:46:55]   ✓ Dorron Marketing
+[03:46:56]   ✓ Outcome
+[03:46:56]   ✓ Lochburn Capital
+[03:46:56]   ✓ Heinzroth
+[03:46:57]   ✓ AH A
+[03:46:57]   ✓ Pacific Lending Priority
+[03:46:57]   ✓ Workscape Designs
+[03:46:58]   ✓ Cypress Data Defense
+[03:46:58]   ✓ MaisonQR
+[03:46:58]   ✓ Altera Staffing
+[03:46:59]   ✓ Apptage LLC
+[03:46:59]   ✓ Moonshot Consulting
+[03:47:00]   ✓ SpringWell360 LLC
+[03:47:00]   ✓ Tothenew
+[03:47:00]   ✓ interGen, Inc.
+[03:47:01]   ✓ Sifi Tech Solutions
+[03:47:01]   ✓ Whitepeak
+[03:47:01]   ✓ Innovative Health Insurance Advisors
+[03:47:02]   ✓ Marked Communications
+[03:47:02]   Accounts done — 109/109 upserted
+[03:47:02]   Syncing contacts globally...
+[03:47:02]   149 contacts fetched globally
+[03:47:02]   2 contacts skipped (unknown account)
+[03:47:03]   ✓ 147 contacts upserted
+[03:47:03]   Syncing issues globally...
+[03:47:09]   348 issues fetched globally
+[03:47:11]   ✓ 348 issues upserted
+[03:47:11] Track A done — 109/109 accounts, contacts + issues synced globally
+[03:47:11] Building Fathom lookup caches...
+[03:47:11]   email_cache=167, domain_cache=138
+[03:47:11] === TRACK B: Fathom meetings ===
+[03:47:11]   245 meetings already in Supabase
+[03:47:14]   Caught up — no new meetings in this page, stopping
+[03:47:14] Track B done — 0 new meetings synced
+[03:47:14] Tagging meeting types...
+[03:47:15]   Meeting types — kickoff=0, standup=0, cs_call=0, unchanged=245
+[03:47:15] Building Close leads cache...
+[03:48:10]   14957 Close leads loaded
+[03:48:10] === TRACK C: Close matching + SOW generation ===
+[03:48:12]   128 accounts total, 79 already have SOWs
+[03:48:13]   ✓ Matched Proactive Waste Solutions LLC → Close (no AI summary yet, SOW skipped)
+[03:48:13]   – Crew Electrical Services (SOW exists, skipping)
+[03:48:14]   ~ No Close match: GroundOps
+[03:48:14]   – GENCapital (SOW exists, skipping)
+[03:48:14]   – Integrity Services (SOW exists, skipping)
+[03:48:15]   ✓ Matched Olivia's Tanghulu → Close (no AI summary yet, SOW skipped)
+[03:48:15]   – ORCA Killer Warehouse (SOW exists, skipping)
+[03:48:15]   – Ai Healthcare Marketing (SOW exists, skipping)
+[03:48:15]   – Retail Smart Guys (SOW exists, skipping)
+[03:48:15]   – Inventive Foundation Inc. (SOW exists, skipping)
+[03:48:15]   – Slate Street Capital (SOW exists, skipping)
+[03:48:15]   – Pacific Lending Priority (SOW exists, skipping)
+[03:48:15]   – Stratigroup (SOW exists, skipping)
+[03:48:15]   – Gaffa (SOW exists, skipping)
+[03:48:15]   – Biotrax Testing Laboratory (SOW exists, skipping)
+[03:48:15]   – Oncueai (SOW exists, skipping)
+[03:48:15]   – Motocoders Com (SOW exists, skipping)
+[03:48:15]   ✓ Matched Quantum Pension Solutions, Inc. → Close (no AI summary yet, SOW skipped)
+[03:48:16]   ✓ Matched Musgrave Insurance Services → Close (no AI summary yet, SOW skipped)
+[03:48:16]   – Lochburn Capital (SOW exists, skipping)
+[03:48:17]   ✓ Matched Miraa → Close (no AI summary yet, SOW skipped)
+[03:48:17]   – Asia Investment Fund (SOW exists, skipping)
+[03:48:17]   – The Bee Conservatory (SOW exists, skipping)
+[03:48:18]   ✓ Matched Stamina 22 → Close (no AI summary yet, SOW skipped)
+[03:48:18]   ✓ Matched nimblechapps → Close (no AI summary yet, SOW skipped)
+[03:48:18]   – multithread-agency (SOW exists, skipping)
+[03:48:18]   – Dorron Marketing (SOW exists, skipping)
+[03:48:19]   ✓ Matched Walking on Air Shoes → Close (no AI summary yet, SOW skipped)
+[03:48:20]   ✓ Matched Income Protection USA → Close (no AI summary yet, SOW skipped)
+[03:48:21]   ✓ Matched KABMS → Close (no AI summary yet, SOW skipped)
+[03:48:21]   – InvestWell Solutions (SOW exists, skipping)
+[03:48:21]   – ParadiseAI (SOW exists, skipping)
+[03:48:22]   ✓ Matched EN Enterprises Inc. → Close (no AI summary yet, SOW skipped)
+[03:48:22]   – Devello (SOW exists, skipping)
+[03:48:22]   ~ No Close match: PeopleScape.AI
+[03:48:23]   ~ No Close match: TripleHelixCorp
+[03:48:23]   – Impact Outsourcing (SOW exists, skipping)
+[03:48:24]   ~ No Close match: ALTO SIX
+[03:48:24]   ✓ Matched Victory Built USA → Close (no AI summary yet, SOW skipped)
+[03:48:24]   – Promus Energy (SOW exists, skipping)
+[03:48:24]   – OSA DigiTeam (SOW exists, skipping)
+[03:48:24]   – Folio3 AI (SOW exists, skipping)
+[03:48:25]   ✓ Matched Synderys → Close (no AI summary yet, SOW skipped)
+[03:48:26]   ✓ Matched zob → Close (no AI summary yet, SOW skipped)
+[03:48:26]   – Purple Brains (SOW exists, skipping)
+[03:48:26]   – Welcome2guests (SOW exists, skipping)
+[03:48:26]   – Btsb (SOW exists, skipping)
+[03:48:26]   – Openfunds Investment  (SOW exists, skipping)
+[03:48:26]   – Tothenew (SOW exists, skipping)
+[03:48:26]   – Outcome (SOW exists, skipping)
+[03:48:26]   ✓ Matched Moonshot Consulting → Close (no AI summary yet, SOW skipped)
+[03:48:26]   – Montana Fly Fishing Lodge (SOW exists, skipping)
+[03:48:26]   – Marked Communications (SOW exists, skipping)
+[03:48:27]   ✓ Matched TALLY RETAIL SOLUTIONS → Close (no AI summary yet, SOW skipped)
+[03:48:27]   – Startup Assist UK (SOW exists, skipping)
+[03:48:28]   ~ No Close match: testing testingg
+[03:48:28]   ✓ Matched MaisonQR → Close (no AI summary yet, SOW skipped)
+[03:48:28]   – Altera Staffing (SOW exists, skipping)
+[03:48:28]   – Heinzroth (SOW exists, skipping)
+[03:48:28]   – Apptage LLC (SOW exists, skipping)
+[03:48:29]   ✓ Matched VARA Salon Suites → Close (no AI summary yet, SOW skipped)
+[03:48:30]   ✓ Matched MCL Architecture → Close (no AI summary yet, SOW skipped)
+[03:48:30]   – Batin Studio (SOW exists, skipping)
+[03:48:30]   – Beacon Search Group (SOW exists, skipping)
+[03:48:31]   ✓ Matched Win Win Parenting → Close (no AI summary yet, SOW skipped)
+[03:48:31]   – Workscape Designs (SOW exists, skipping)
+[03:48:31]   – QStimate (SOW exists, skipping)
+[03:48:31]   ✓ Matched RevGrow → Close (no AI summary yet, SOW skipped)
+[03:48:31]   – interGen, Inc. (SOW exists, skipping)
+[03:48:31]   – Trade Edge 360 (SOW exists, skipping)
+[03:48:31]   – Cypress Data Defense (SOW exists, skipping)
+[03:48:32]   ✓ Matched Whitepeak → Close (no AI summary yet, SOW skipped)
+[03:48:33]   ✓ Zero To One matched (conf=95%) — 5295 chars — generating SOW...
+/Users/rehaankothari/stamina/sync.py:883: DeprecationWarning: The model 'claude-3-5-haiku-20241022' is deprecated and will reach end-of-life on February 19th, 2026.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  resp = claude.messages.create(
+Python(26764) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Python(26765) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[03:48:33]   ✗ Zero To One: "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+[03:48:33]   – dcny (SOW exists, skipping)
+[03:48:33]   – Sifi Tech Solutions (SOW exists, skipping)
+[03:48:34]   ✓ Matched Ibik → Close (no AI summary yet, SOW skipped)
+[03:48:35]   ✓ Matched Abivo → Close (no AI summary yet, SOW skipped)
+[03:48:35]   ~ No Close match: Modal Group
+[03:48:35]   – Verifiable Results (SOW exists, skipping)
+[03:48:36]   ~ No Close match: EnKounters Inc.
+[03:48:36]   – XO Agency (SOW exists, skipping)
+[03:48:36]   – QeRetail (SOW exists, skipping)
+[03:48:36]   – Success Mgt Corp (SOW exists, skipping)
+[03:48:36]   – Anima Films (SOW exists, skipping)
+[03:48:36]   – Spek Creative (SOW exists, skipping)
+[03:48:36]   ~ No Close match: Repicci’s Real Italian Ice & Gelato
+[03:48:36]   – SpringWell360 LLC (SOW exists, skipping)
+[03:48:36]   – AH A (SOW exists, skipping)
+[03:48:36]   – Innovative Health Insurance Advisors (SOW exists, skipping)
+[03:48:37]   ~ No Close match: Exactus Pay
+[03:48:37]   – AI Topia (SOW exists, skipping)
+[03:48:37]   – Certatude Solutions (SOW exists, skipping)
+[03:48:37]   – Digital Transformation Institute (SOW exists, skipping)
+[03:48:37]   – Wake Logistics (SOW exists, skipping)
+[03:48:38]   ✓ Matched Nouswise → Close (no AI summary yet, SOW skipped)
+[03:48:38]   – Epc Recruiting (SOW exists, skipping)
+[03:48:38]   – Strategic Insurance A (SOW exists, skipping)
+[03:48:39]   ~ No Close match: Corporate Finances
+[03:48:39]   ~ No Close match: Prescribery Pharm
+[03:48:39]   – Zenyth (SOW exists, skipping)
+[03:48:39]   – Bling Bling Packaging and Display (SOW exists, skipping)
+[03:48:40]   ~ No Close match: New New Solutions
+[03:48:40]   – Ark Academy (SOW exists, skipping)
+[03:48:40]   – Marathon Accountants (SOW exists, skipping)
+[03:48:41]   ✓ Matched IndigoStone Advisors → Close (no AI summary yet, SOW skipped)
+[03:48:41]   – FounderMove (SOW exists, skipping)
+[03:48:41]   ✓ Matched Supper CLub LLC → Close (no AI summary yet, SOW skipped)
+[03:48:42]   ✓ Matched Arctos Industries → Close (no AI summary yet, SOW skipped)
+[03:48:43]   ✓ Matched Illumify Media → Close (no AI summary yet, SOW skipped)
+[03:48:43]   – Poweral (SOW exists, skipping)
+[03:48:44]   ✓ Matched Fsa Valuation Service → Close (no AI summary yet, SOW skipped)
+[03:48:44]   ~ No Close match: testing testingg
+[03:48:45]   ✓ Matched brand1 → Close (no AI summary yet, SOW skipped)
+[03:48:45]   – Field Agent Canada (SOW exists, skipping)
+[03:48:45]   – First Flight Non-Executive Directors (SOW exists, skipping)
+[03:48:45]   – InnoDraw (SOW exists, skipping)
+[03:48:46]   ✓ Matched Complete Background Screening → Close (no AI summary yet, SOW skipped)
+[03:48:46]   – Restoration 1 of NWA (SOW exists, skipping)
+[03:48:46]   – MJN Insurance Services, Inc. (SOW exists, skipping)
+[03:48:46]   ✓ Matched US Polymers Accurez → Close (no AI summary yet, SOW skipped)
+[03:48:46]   – Statera Capital Zebs (SOW exists, skipping)
+[03:48:46]   – UniversalLab (SOW exists, skipping)
+[03:48:46]   – Millenium Capital (SOW exists, skipping)
+[03:48:47]   ✓ Matched Pansori Creative → Close (no AI summary yet, SOW skipped)
+[03:48:47]   – Voovo (SOW exists, skipping)
+[03:48:48]   ✓ Matched Nataliz → Close (no AI summary yet, SOW skipped)
+[03:48:48]   – Rounds Student Engagement Made Simple (SOW exists, skipping)
+[03:48:48]   – Ascendeon (SOW exists, skipping)
+[03:48:48] Track C done — 0 SOWs generated
+[03:48:48] Done. synced=109, enriched=0, errors=1
+/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+[04:48:50] Sync started at 2026-06-01T04:48:50Z
+[04:48:52] Building Pylon user cache...
+[04:48:53]   30 users
+[04:48:53] === TRACK A: Pylon sync ===
+[04:48:57]   109 accounts found
+[04:48:57]   ✓ Win Win Parenting
+[04:48:59]   ✓ GroundOps
+[04:48:59]   ✓ Quantum Pension Solutions, Inc.
+[04:49:00]   ✓ Proactive Waste Solutions LLC
+[04:49:00]   ✓ ORCA Killer Warehouse
+[04:49:01]   ✓ dcny
+[04:49:01]   ✓ Stratigroup
+[04:49:01]   ✓ EnKounters Inc.
+[04:49:02]   ✓ Ibik
+[04:49:02]   ✓ Gaffa
+[04:49:03]   ✓ Slate Street Capital
+[04:49:03]   ✓ Inventive Foundation Inc.
+[04:49:04]   ✓ Modal Group
+[04:49:04]   ✓ Startup Assist UK
+[04:49:04]   ✓ GENCapital
+[04:49:05]   ✓ XO Agency
+[04:49:05]   ✓ QeRetail
+[04:49:06]   ✓ Voovo
+[04:49:06]   ✓ Pansori Creative
+[04:49:06]   ✓ ALTO SIX
+[04:49:07]   ✓ Income Protection USA
+[04:49:07]   ✓ Zero To One
+[04:49:08]   ✓ Field Agent Canada
+[04:49:08]   ✓ Synderys
+[04:49:09]   ✓ Restoration 1 of NWA
+[04:49:09]   ✓ Poweral
+[04:49:10]   ✓ InnoDraw
+[04:49:10]   ✓ Asia Investment Fund
+[04:49:10]   ✓ Bling Bling Packaging and Display
+[04:49:11]   ✓ Abivo
+[04:49:11]   ✓ Marathon Accountants
+[04:49:12]   ✓ Promus Energy
+[04:49:12]   ✓ Folio3 AI
+[04:49:12]   ✓ Exactus Pay
+[04:49:13]   ✓ Complete Background Screening
+[04:49:13]   ✓ Verifiable Results
+[04:49:14]   ✓ UniversalLab
+[04:49:14]   ✓ Victory Built USA
+[04:49:14]   ✓ Retail Smart Guys
+[04:49:15]   ✓ AI Topia
+[04:49:15]   ✓ First Flight Non-Executive Directors
+[04:49:16]   ✓ Olivia's Tanghulu
+[04:49:16]   ✓ Corporate Finances
+[04:49:17]   ✓ Illumify Media
+[04:49:17]   ✓ Epc Recruiting
+[04:49:17]   ✓ OSA DigiTeam
+[04:49:18]   ✓ Rounds Student Engagement Made Simple
+[04:49:18]   ✓ MJN Insurance Services, Inc.
+[04:49:19]   ✓ Digital Transformation Institute
+[04:49:19]   ✓ Crew Electrical Services
+[04:49:19]   ✓ Statera Capital Zebs
+[04:49:20]   ✓ Fsa Valuation Service
+[04:49:20]   ✓ Strategic Insurance A
+[04:49:21]   ✓ Success Mgt Corp
+[04:49:21]   ✓ Nouswise
+[04:49:21]   ✓ Openfunds Investment 
+[04:49:22]   ✓ Motocoders Com
+[04:49:22]   ✓ Beacon Search Group
+[04:49:23]   ✓ Millenium Capital
+[04:49:23]   ✓ Repicci’s Real Italian Ice & Gelato
+[04:49:24]   ✓ Oncueai
+[04:49:24]   ✓ Ai Healthcare Marketing
+[04:49:24]   ✓ Purple Brains
+[04:49:25]   ✓ Wake Logistics
+[04:49:25]   ✓ MCL Architecture
+[04:49:26]   ✓ New New Solutions
+[04:49:26]   ✓ Biotrax Testing Laboratory
+[04:49:26]   ✓ Arctos Industries
+[04:49:27]   ✓ VARA Salon Suites
+[04:49:27]   ✓ Certatude Solutions
+[04:49:28]   ✓ US Polymers Accurez
+[04:49:28]   ✓ QStimate
+[04:49:29]   ✓ multithread-agency
+[04:49:29]   ✓ Nataliz
+[04:49:29]   ✓ The Bee Conservatory
+[04:49:30]   ✓ Trade Edge 360
+[04:49:30]   ✓ Integrity Services
+[04:49:31]   ✓ Batin Studio
+[04:49:31]   ✓ Spek Creative
+[04:49:32]   ✓ Musgrave Insurance Services
+[04:49:32]   ✓ IndigoStone Advisors
+[04:49:33]   ✓ Welcome2guests
+[04:49:33]   ✓ Impact Outsourcing
+[04:49:35]   ✓ KABMS
+[04:49:35]   ✓ Ark Academy
+[04:49:35]   ✓ Anima Films
+[04:49:36]   ✓ Zenyth
+[04:49:36]   ✓ Ascendeon
+[04:49:37]   ✓ Montana Fly Fishing Lodge
+[04:49:37]   ✓ RevGrow
+[04:49:37]   ✓ Dorron Marketing
+[04:49:38]   ✓ Outcome
+[04:49:38]   ✓ Lochburn Capital
+[04:49:39]   ✓ Heinzroth
+[04:49:39]   ✓ AH A
+[04:49:39]   ✓ Pacific Lending Priority
+[04:49:40]   ✓ Workscape Designs
+[04:49:40]   ✓ Cypress Data Defense
+[04:49:41]   ✓ MaisonQR
+[04:49:41]   ✓ Altera Staffing
+[04:49:41]   ✓ Apptage LLC
+[04:49:42]   ✓ Moonshot Consulting
+[04:49:42]   ✓ SpringWell360 LLC
+[04:49:43]   ✓ Tothenew
+[04:49:43]   ✓ interGen, Inc.
+[04:49:44]   ✓ Sifi Tech Solutions
+[04:49:44]   ✓ Whitepeak
+[04:49:44]   ✓ Innovative Health Insurance Advisors
+[04:49:45]   ✓ Marked Communications
+[04:49:45]   Accounts done — 109/109 upserted
+[04:49:45]   Syncing contacts globally...
+[04:49:48]   149 contacts fetched globally
+[04:49:48]   2 contacts skipped (unknown account)
+[04:49:49]   ✓ 147 contacts upserted
+[04:49:49]   Syncing issues globally...
+[04:50:05]   349 issues fetched globally
+[04:50:06]   ✓ 349 issues upserted
+[04:50:06] Track A done — 109/109 accounts, contacts + issues synced globally
+[04:50:06] Building Fathom lookup caches...
+[04:50:07]   email_cache=167, domain_cache=138
+[04:50:07] === TRACK B: Fathom meetings ===
+[04:50:07]   245 meetings already in Supabase
+[04:50:14]   Caught up — no new meetings in this page, stopping
+[04:50:14] Track B done — 0 new meetings synced
+[04:50:14] Tagging meeting types...
+[04:50:16]   Meeting types — kickoff=0, standup=0, cs_call=0, unchanged=245
+[04:50:16] Building Close leads cache...
+[04:51:27]   14958 Close leads loaded
+[04:51:27] === TRACK C: Close matching + SOW generation ===
+[04:51:28]   128 accounts total, 79 already have SOWs
+[04:51:28]   – GENCapital (SOW exists, skipping)
+[04:51:29]   ~ No Close match: GroundOps
+[04:51:29]   – Integrity Services (SOW exists, skipping)
+[04:51:31]   ✓ Matched Proactive Waste Solutions LLC → Close (no AI summary yet, SOW skipped)
+[04:51:31]   – Crew Electrical Services (SOW exists, skipping)
+[04:51:31]   – ORCA Killer Warehouse (SOW exists, skipping)
+[04:51:31]   – Inventive Foundation Inc. (SOW exists, skipping)
+[04:51:31]   ✓ Matched Olivia's Tanghulu → Close (no AI summary yet, SOW skipped)
+[04:51:31]   – Retail Smart Guys (SOW exists, skipping)
+[04:51:31]   – Ai Healthcare Marketing (SOW exists, skipping)
+[04:51:31]   – Stratigroup (SOW exists, skipping)
+[04:51:31]   – Slate Street Capital (SOW exists, skipping)
+[04:51:31]   – Impact Outsourcing (SOW exists, skipping)
+[04:51:31]   – Pacific Lending Priority (SOW exists, skipping)
+[04:51:31]   – Motocoders Com (SOW exists, skipping)
+[04:51:31]   – Biotrax Testing Laboratory (SOW exists, skipping)
+[04:51:31]   – Gaffa (SOW exists, skipping)
+[04:51:31]   – Oncueai (SOW exists, skipping)
+[04:51:32]   ✓ Matched Quantum Pension Solutions, Inc. → Close (no AI summary yet, SOW skipped)
+[04:51:32]   – Asia Investment Fund (SOW exists, skipping)
+[04:51:33]   ✓ Matched Musgrave Insurance Services → Close (no AI summary yet, SOW skipped)
+[04:51:33]   – Lochburn Capital (SOW exists, skipping)
+[04:51:34]   ✓ Matched Miraa → Close (no AI summary yet, SOW skipped)
+[04:51:34]   – Cypress Data Defense (SOW exists, skipping)
+[04:51:34]   – The Bee Conservatory (SOW exists, skipping)
+[04:51:34]   ✓ Matched nimblechapps → Close (no AI summary yet, SOW skipped)
+[04:51:34]   – multithread-agency (SOW exists, skipping)
+[04:51:34]   – Dorron Marketing (SOW exists, skipping)
+[04:51:35]   ✓ Matched Walking on Air Shoes → Close (no AI summary yet, SOW skipped)
+[04:51:36]   ✓ Matched Stamina 22 → Close (no AI summary yet, SOW skipped)
+[04:51:37]   ✓ Matched Income Protection USA → Close (no AI summary yet, SOW skipped)
+[04:51:37]   ✓ Matched KABMS → Close (no AI summary yet, SOW skipped)
+[04:51:37]   – InvestWell Solutions (SOW exists, skipping)
+[04:51:37]   – ParadiseAI (SOW exists, skipping)
+[04:51:38]   ✓ Matched EN Enterprises Inc. → Close (no AI summary yet, SOW skipped)
+[04:51:39]   ~ No Close match: ALTO SIX
+[04:51:39]   – Devello (SOW exists, skipping)
+[04:51:40]   ~ No Close match: PeopleScape.AI
+[04:51:40]   ~ No Close match: TripleHelixCorp
+[04:51:40]   – Promus Energy (SOW exists, skipping)
+[04:51:40]   – Folio3 AI (SOW exists, skipping)
+[04:51:41]   ✓ Matched Synderys → Close (no AI summary yet, SOW skipped)
+[04:51:42]   ✓ Matched Victory Built USA → Close (no AI summary yet, SOW skipped)
+[04:51:42]   – OSA DigiTeam (SOW exists, skipping)
+[04:51:42]   – Purple Brains (SOW exists, skipping)
+[04:51:42]   – Welcome2guests (SOW exists, skipping)
+[04:51:43]   ✓ Matched zob → Close (no AI summary yet, SOW skipped)
+[04:51:43]   – Btsb (SOW exists, skipping)
+[04:51:43]   – Outcome (SOW exists, skipping)
+[04:51:43]   – Openfunds Investment  (SOW exists, skipping)
+[04:51:43]   – Tothenew (SOW exists, skipping)
+[04:51:44]   ✓ Matched Moonshot Consulting → Close (no AI summary yet, SOW skipped)
+[04:51:44]   – Montana Fly Fishing Lodge (SOW exists, skipping)
+[04:51:44]   – Marked Communications (SOW exists, skipping)
+[04:51:45]   ✓ Matched TALLY RETAIL SOLUTIONS → Close (no AI summary yet, SOW skipped)
+[04:51:45]   – Startup Assist UK (SOW exists, skipping)
+[04:51:45]   ~ No Close match: testing testingg
+[04:51:45]   – Heinzroth (SOW exists, skipping)
+[04:51:45]   – Apptage LLC (SOW exists, skipping)
+[04:51:46]   ✓ Matched MaisonQR → Close (no AI summary yet, SOW skipped)
+[04:51:46]   – Altera Staffing (SOW exists, skipping)
+[04:51:46]   – Batin Studio (SOW exists, skipping)
+[04:51:47]   ✓ Matched VARA Salon Suites → Close (no AI summary yet, SOW skipped)
+[04:51:47]   – Beacon Search Group (SOW exists, skipping)
+[04:51:47]   ✓ Matched MCL Architecture → Close (no AI summary yet, SOW skipped)
+[04:51:48]   ✓ Matched Win Win Parenting → Close (no AI summary yet, SOW skipped)
+[04:51:48]   – Workscape Designs (SOW exists, skipping)
+[04:51:48]   – interGen, Inc. (SOW exists, skipping)
+[04:51:49]   ✓ Matched RevGrow → Close (no AI summary yet, SOW skipped)
+[04:51:49]   – QStimate (SOW exists, skipping)
+[04:51:50]   ✓ Zero To One matched (conf=95%) — 5295 chars — generating SOW...
+/Users/rehaankothari/stamina/sync.py:883: DeprecationWarning: The model 'claude-3-5-haiku-20241022' is deprecated and will reach end-of-life on February 19th, 2026.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  resp = claude.messages.create(
+[04:51:50]   ✗ Zero To One: "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+[04:51:50]   – Trade Edge 360 (SOW exists, skipping)
+[04:51:50]   – dcny (SOW exists, skipping)
+[04:51:50]   – Sifi Tech Solutions (SOW exists, skipping)
+[04:51:51]   ✓ Matched Whitepeak → Close (no AI summary yet, SOW skipped)
+[04:51:51]   ✓ Matched Ibik → Close (no AI summary yet, SOW skipped)
+[04:51:52]   ~ No Close match: Modal Group
+[04:51:53]   ✓ Matched Abivo → Close (no AI summary yet, SOW skipped)
+[04:51:53]   – Verifiable Results (SOW exists, skipping)
+[04:51:54]   ~ No Close match: EnKounters Inc.
+[04:51:54]   – XO Agency (SOW exists, skipping)
+[04:51:54]   – QeRetail (SOW exists, skipping)
+[04:51:54]   – Success Mgt Corp (SOW exists, skipping)
+[04:51:54]   – Anima Films (SOW exists, skipping)
+[04:51:54]   – Spek Creative (SOW exists, skipping)
+[04:51:54]   ~ No Close match: Repicci’s Real Italian Ice & Gelato
+[04:51:54]   – SpringWell360 LLC (SOW exists, skipping)
+[04:51:54]   – AH A (SOW exists, skipping)
+[04:51:54]   – Innovative Health Insurance Advisors (SOW exists, skipping)
+[04:51:55]   ~ No Close match: Exactus Pay
+[04:51:55]   – AI Topia (SOW exists, skipping)
+[04:51:55]   – Certatude Solutions (SOW exists, skipping)
+[04:51:55]   – Digital Transformation Institute (SOW exists, skipping)
+[04:51:55]   – Wake Logistics (SOW exists, skipping)
+[04:51:56]   ~ No Close match: Corporate Finances
+[04:51:56]   – Strategic Insurance A (SOW exists, skipping)
+[04:51:56]   – Epc Recruiting (SOW exists, skipping)
+[04:51:56]   ✓ Matched Nouswise → Close (no AI summary yet, SOW skipped)
+[04:51:56]   – Zenyth (SOW exists, skipping)
+[04:51:57]   ~ No Close match: Prescribery Pharm
+[04:51:57]   – Bling Bling Packaging and Display (SOW exists, skipping)
+[04:51:58]   ~ No Close match: New New Solutions
+[04:51:58]   – Marathon Accountants (SOW exists, skipping)
+[04:51:58]   – Ark Academy (SOW exists, skipping)
+[04:51:58]   ✓ Matched IndigoStone Advisors → Close (no AI summary yet, SOW skipped)
+[04:51:58]   – FounderMove (SOW exists, skipping)
+[04:51:59]   ✓ Matched Supper CLub LLC → Close (no AI summary yet, SOW skipped)
+[04:52:00]   ✓ Matched Fsa Valuation Service → Close (no AI summary yet, SOW skipped)
+[04:52:00]   – Poweral (SOW exists, skipping)
+[04:52:01]   ✓ Matched Arctos Industries → Close (no AI summary yet, SOW skipped)
+[04:52:02]   ✓ Matched Illumify Media → Close (no AI summary yet, SOW skipped)
+[04:52:02]   ✓ Matched brand1 → Close (no AI summary yet, SOW skipped)
+[04:52:02]   – Field Agent Canada (SOW exists, skipping)
+[04:52:03]   ~ No Close match: testing testingg
+[04:52:04]   ✓ Matched Complete Background Screening → Close (no AI summary yet, SOW skipped)
+[04:52:04]   – Restoration 1 of NWA (SOW exists, skipping)
+[04:52:04]   – First Flight Non-Executive Directors (SOW exists, skipping)
+[04:52:04]   – InnoDraw (SOW exists, skipping)
+[04:52:04]   – Statera Capital Zebs (SOW exists, skipping)
+[04:52:04]   – UniversalLab (SOW exists, skipping)
+[04:52:04]   – MJN Insurance Services, Inc. (SOW exists, skipping)
+[04:52:05]   ✓ Matched US Polymers Accurez → Close (no AI summary yet, SOW skipped)
+[04:52:05]   – Millenium Capital (SOW exists, skipping)
+[04:52:05]   – Voovo (SOW exists, skipping)
+[04:52:05]   ✓ Matched Pansori Creative → Close (no AI summary yet, SOW skipped)
+[04:52:05]   – Rounds Student Engagement Made Simple (SOW exists, skipping)
+[04:52:07]   ✓ Matched Nataliz → Close (no AI summary yet, SOW skipped)
+[04:52:07]   – Ascendeon (SOW exists, skipping)
+[04:52:07] Track C done — 0 SOWs generated
+[04:52:07] Done. synced=109, enriched=0, errors=1
+/Users/rehaankothari/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+[05:52:08] Sync started at 2026-06-01T05:52:08Z
+[05:52:09] Building Pylon user cache...
+[05:52:10]   30 users
+[05:52:10] === TRACK A: Pylon sync ===
+[05:52:12]   109 accounts found
+[05:52:12]   ✓ Win Win Parenting
+[05:52:13]   ✓ GroundOps
+[05:52:13]   ✓ Quantum Pension Solutions, Inc.
+[05:52:13]   ✓ Proactive Waste Solutions LLC
+[05:52:14]   ✓ ORCA Killer Warehouse
+[05:52:14]   ✓ dcny
+[05:52:14]   ✓ Stratigroup
+[05:52:15]   ✓ EnKounters Inc.
+[05:52:15]   ✓ Ibik
+[05:52:15]   ✓ Gaffa
+[05:52:16]   ✓ Slate Street Capital
+[05:52:16]   ✓ Inventive Foundation Inc.
+[05:52:16]   ✓ Modal Group
+[05:52:17]   ✓ Startup Assist UK
+[05:52:17]   ✓ GENCapital
+[05:52:17]   ✓ XO Agency
+[05:52:18]   ✓ QeRetail
+[05:52:18]   ✓ Voovo
+[05:52:18]   ✓ Pansori Creative
+[05:52:18]   ✓ ALTO SIX
+[05:52:19]   ✓ Income Protection USA
+[05:52:19]   ✓ Zero To One
+[05:52:19]   ✓ Field Agent Canada
+[05:52:20]   ✓ Synderys
+[05:52:20]   ✓ Restoration 1 of NWA
+[05:52:20]   ✓ Poweral
+[05:52:21]   ✓ InnoDraw
+[05:52:21]   ✓ Asia Investment Fund
+[05:52:21]   ✓ Bling Bling Packaging and Display
+[05:52:22]   ✓ Abivo
+[05:52:22]   ✓ Marathon Accountants
+[05:52:22]   ✓ Promus Energy
+[05:52:22]   ✓ Folio3 AI
+[05:52:23]   ✓ Exactus Pay
+[05:52:23]   ✓ Complete Background Screening
+[05:52:23]   ✓ Verifiable Results
+[05:52:24]   ✓ UniversalLab
+[05:52:24]   ✓ Victory Built USA
+[05:52:24]   ✓ Retail Smart Guys
+[05:52:25]   ✓ AI Topia
+[05:52:25]   ✓ First Flight Non-Executive Directors
+[05:52:25]   ✓ Olivia's Tanghulu
+[05:52:26]   ✓ Corporate Finances
+[05:52:26]   ✓ Illumify Media
+[05:52:26]   ✓ Epc Recruiting
+[05:52:27]   ✓ OSA DigiTeam
+[05:52:27]   ✓ Rounds Student Engagement Made Simple
+[05:52:27]   ✓ MJN Insurance Services, Inc.
+[05:52:27]   ✓ Digital Transformation Institute
+[05:52:28]   ✓ Crew Electrical Services
+[05:52:28]   ✓ Statera Capital Zebs
+[05:52:28]   ✓ Fsa Valuation Service
+[05:52:29]   ✓ Strategic Insurance A
+[05:52:29]   ✓ Success Mgt Corp
+[05:52:29]   ✓ Nouswise
+[05:52:30]   ✓ Openfunds Investment 
+[05:52:30]   ✓ Motocoders Com
+[05:52:30]   ✓ Beacon Search Group
+[05:52:30]   ✓ Millenium Capital
+[05:52:31]   ✓ Repicci’s Real Italian Ice & Gelato
+[05:52:31]   ✓ Oncueai
+[05:52:31]   ✓ Ai Healthcare Marketing
+[05:52:32]   ✓ Purple Brains
+[05:52:32]   ✓ Wake Logistics
+[05:52:32]   ✓ MCL Architecture
+[05:52:33]   ✓ New New Solutions
+[05:52:33]   ✓ Biotrax Testing Laboratory
+[05:52:33]   ✓ Arctos Industries
+[05:52:34]   ✓ VARA Salon Suites
+[05:52:34]   ✓ Certatude Solutions
+[05:52:34]   ✓ US Polymers Accurez
+[05:52:35]   ✓ QStimate
+[05:52:35]   ✓ multithread-agency
+[05:52:35]   ✓ Nataliz
+[05:52:36]   ✓ The Bee Conservatory
+[05:52:36]   ✓ Trade Edge 360
+[05:52:36]   ✓ Integrity Services
+[05:52:37]   ✓ Batin Studio
+[05:52:37]   ✓ Spek Creative
+[05:52:37]   ✓ Musgrave Insurance Services
+[05:52:38]   ✓ IndigoStone Advisors
+[05:52:38]   ✓ Welcome2guests
+[05:52:38]   ✓ Impact Outsourcing
+[05:52:38]   ✓ KABMS
+[05:52:39]   ✓ Ark Academy
+[05:52:39]   ✓ Anima Films
+[05:52:39]   ✓ Zenyth
+[05:52:40]   ✓ Ascendeon
+[05:52:40]   ✓ Montana Fly Fishing Lodge
+[05:52:40]   ✓ RevGrow
+[05:52:41]   ✓ Dorron Marketing
+[05:52:41]   ✓ Outcome
+[05:52:41]   ✓ Lochburn Capital
+[05:52:42]   ✓ Heinzroth
+[05:52:42]   ✓ AH A
+[05:52:42]   ✓ Pacific Lending Priority
+[05:52:42]   ✓ Workscape Designs
+[05:52:43]   ✓ Cypress Data Defense
+[05:52:43]   ✓ MaisonQR
+[05:52:43]   ✓ Altera Staffing
+[05:52:44]   ✓ Apptage LLC
+[05:52:44]   ✓ Moonshot Consulting
+[05:52:44]   ✓ SpringWell360 LLC
+[05:52:45]   ✓ Tothenew
+[05:52:45]   ✓ interGen, Inc.
+[05:52:45]   ✓ Sifi Tech Solutions
+[05:52:46]   ✓ Whitepeak
+[05:52:46]   ✓ Innovative Health Insurance Advisors
+[05:52:46]   ✓ Marked Communications
+[05:52:46]   Accounts done — 109/109 upserted
+[05:52:46]   Syncing contacts globally...
+[05:52:47]   150 contacts fetched globally
+[05:52:47]   2 contacts skipped (unknown account)
+[05:52:47]   ✓ 148 contacts upserted
+[05:52:47]   Syncing issues globally...
+[05:52:59]   349 issues fetched globally
+[05:52:59]   ✓ 349 issues upserted
+[05:52:59] Track A done — 109/109 accounts, contacts + issues synced globally
+[05:52:59] Building Fathom lookup caches...
+[05:52:59]   email_cache=168, domain_cache=138
+[05:52:59] === TRACK B: Fathom meetings ===
+[05:53:00]   245 meetings already in Supabase
+[05:53:02]   Caught up — no new meetings in this page, stopping
+[05:53:02] Track B done — 0 new meetings synced
+[05:53:02] Tagging meeting types...
+[05:53:03]   Meeting types — kickoff=0, standup=0, cs_call=0, unchanged=245
+[05:53:03] Building Close leads cache...
+[05:54:10]   14958 Close leads loaded
+[05:54:10] === TRACK C: Close matching + SOW generation ===
+[05:54:12]   128 accounts total, 79 already have SOWs
+[05:54:12]   – Crew Electrical Services (SOW exists, skipping)
+[05:54:13]   ✓ Matched Proactive Waste Solutions LLC → Close (no AI summary yet, SOW skipped)
+[05:54:14]   ~ No Close match: GroundOps
+[05:54:14]   – Integrity Services (SOW exists, skipping)
+[05:54:14]   – GENCapital (SOW exists, skipping)
+[05:54:14]   – Inventive Foundation Inc. (SOW exists, skipping)
+[05:54:14]   – Retail Smart Guys (SOW exists, skipping)
+[05:54:14]   – Ai Healthcare Marketing (SOW exists, skipping)
+[05:54:14]   – ORCA Killer Warehouse (SOW exists, skipping)
+[05:54:15]   ✓ Matched Olivia's Tanghulu → Close (no AI summary yet, SOW skipped)
+[05:54:15]   – Pacific Lending Priority (SOW exists, skipping)
+[05:54:15]   – Stratigroup (SOW exists, skipping)
+[05:54:15]   – Slate Street Capital (SOW exists, skipping)
+[05:54:15]   – Oncueai (SOW exists, skipping)
+[05:54:15]   – Gaffa (SOW exists, skipping)
+[05:54:15]   – Motocoders Com (SOW exists, skipping)
+[05:54:15]   – Biotrax Testing Laboratory (SOW exists, skipping)
+[05:54:16]   ✓ Matched Quantum Pension Solutions, Inc. → Close (no AI summary yet, SOW skipped)
+[05:54:16]   ✓ Matched Musgrave Insurance Services → Close (no AI summary yet, SOW skipped)
+[05:54:17]   ✓ Matched Miraa → Close (no AI summary yet, SOW skipped)
+[05:54:17]   – Cypress Data Defense (SOW exists, skipping)
+[05:54:17]   – Asia Investment Fund (SOW exists, skipping)
+[05:54:17]   – Purple Brains (SOW exists, skipping)
+[05:54:17]   – The Bee Conservatory (SOW exists, skipping)
+[05:54:18]   ✓ Matched Stamina 22 → Close (no AI summary yet, SOW skipped)
+[05:54:18]   – Dorron Marketing (SOW exists, skipping)
+[05:54:18]   – multithread-agency (SOW exists, skipping)
+[05:54:19]   ✓ Matched nimblechapps → Close (no AI summary yet, SOW skipped)
+[05:54:19]   ✓ Matched Walking on Air Shoes → Close (no AI summary yet, SOW skipped)
+[05:54:19]   – Impact Outsourcing (SOW exists, skipping)
+[05:54:20]   ✓ Matched Income Protection USA → Close (no AI summary yet, SOW skipped)
+[05:54:21]   ✓ Matched KABMS → Close (no AI summary yet, SOW skipped)
+[05:54:21]   – Lochburn Capital (SOW exists, skipping)
+[05:54:21]   – InvestWell Solutions (SOW exists, skipping)
+[05:54:21]   – ParadiseAI (SOW exists, skipping)
+[05:54:22]   ✓ Matched EN Enterprises Inc. → Close (no AI summary yet, SOW skipped)
+[05:54:22]   – Devello (SOW exists, skipping)
+[05:54:22]   ~ No Close match: PeopleScape.AI
+[05:54:23]   ~ No Close match: TripleHelixCorp
+[05:54:24]   ~ No Close match: ALTO SIX
+[05:54:24]   – Folio3 AI (SOW exists, skipping)
+[05:54:24]   ✓ Matched Victory Built USA → Close (no AI summary yet, SOW skipped)
+[05:54:24]   – OSA DigiTeam (SOW exists, skipping)
+[05:54:24]   – Promus Energy (SOW exists, skipping)
+[05:54:25]   ✓ Matched Synderys → Close (no AI summary yet, SOW skipped)
+[05:54:25]   – Welcome2guests (SOW exists, skipping)
+[05:54:26]   ✓ Matched zob → Close (no AI summary yet, SOW skipped)
+[05:54:26]   – Btsb (SOW exists, skipping)
+[05:54:27]   ✓ Matched Moonshot Consulting → Close (no AI summary yet, SOW skipped)
+[05:54:27]   – Outcome (SOW exists, skipping)
+[05:54:27]   – Tothenew (SOW exists, skipping)
+[05:54:27]   – Openfunds Investment  (SOW exists, skipping)
+[05:54:27]   – Montana Fly Fishing Lodge (SOW exists, skipping)
+[05:54:27]   – Marked Communications (SOW exists, skipping)
+[05:54:28]   ✓ Matched TALLY RETAIL SOLUTIONS → Close (no AI summary yet, SOW skipped)
+[05:54:28]   – Startup Assist UK (SOW exists, skipping)
+[05:54:28]   ~ No Close match: testing testingg
+[05:54:29]   ✓ Matched MaisonQR → Close (no AI summary yet, SOW skipped)
+[05:54:29]   – Heinzroth (SOW exists, skipping)
+[05:54:29]   – Altera Staffing (SOW exists, skipping)
+[05:54:29]   – Apptage LLC (SOW exists, skipping)
+[05:54:30]   ✓ Matched VARA Salon Suites → Close (no AI summary yet, SOW skipped)
+[05:54:31]   ✓ Matched MCL Architecture → Close (no AI summary yet, SOW skipped)
+[05:54:31]   – Batin Studio (SOW exists, skipping)
+[05:54:31]   – Beacon Search Group (SOW exists, skipping)
+[05:54:31]   ✓ Matched Win Win Parenting → Close (no AI summary yet, SOW skipped)
+[05:54:31]   – interGen, Inc. (SOW exists, skipping)
+[05:54:31]   – QStimate (SOW exists, skipping)
+[05:54:32]   ✓ Matched RevGrow → Close (no AI summary yet, SOW skipped)
+[05:54:32]   – Workscape Designs (SOW exists, skipping)
+[05:54:33]   ✓ Zero To One matched (conf=95%) — 5295 chars — generating SOW...
+/Users/rehaankothari/stamina/sync.py:883: DeprecationWarning: The model 'claude-3-5-haiku-20241022' is deprecated and will reach end-of-life on February 19th, 2026.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  resp = claude.messages.create(
+[05:54:33]   ✗ Zero To One: "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+[05:54:33]   – Trade Edge 360 (SOW exists, skipping)
+[05:54:33]   – dcny (SOW exists, skipping)
+[05:54:34]   ✓ Matched Whitepeak → Close (no AI summary yet, SOW skipped)
+[05:54:34]   – Sifi Tech Solutions (SOW exists, skipping)
+[05:54:35]   ✓ Matched Ibik → Close (no AI summary yet, SOW skipped)
+[05:54:35]   ✓ Matched Abivo → Close (no AI summary yet, SOW skipped)
+[05:54:36]   ~ No Close match: Modal Group
+[05:54:36]   – Verifiable Results (SOW exists, skipping)
+[05:54:37]   ~ No Close match: EnKounters Inc.
+[05:54:37]   – XO Agency (SOW exists, skipping)
+[05:54:37]   – QeRetail (SOW exists, skipping)
+[05:54:37]   – Success Mgt Corp (SOW exists, skipping)
+[05:54:37]   – Anima Films (SOW exists, skipping)
+[05:54:37]   – Spek Creative (SOW exists, skipping)
+[05:54:37]   ~ No Close match: Repicci’s Real Italian Ice & Gelato
+[05:54:37]   – SpringWell360 LLC (SOW exists, skipping)
+[05:54:37]   – Innovative Health Insurance Advisors (SOW exists, skipping)
+[05:54:37]   – AH A (SOW exists, skipping)
+[05:54:38]   ~ No Close match: Exactus Pay
+[05:54:38]   – AI Topia (SOW exists, skipping)
+[05:54:38]   – Certatude Solutions (SOW exists, skipping)
+[05:54:38]   – Digital Transformation Institute (SOW exists, skipping)
+[05:54:38]   – Wake Logistics (SOW exists, skipping)
+[05:54:38]   – Epc Recruiting (SOW exists, skipping)
+[05:54:39]   ✓ Matched Nouswise → Close (no AI summary yet, SOW skipped)
+[05:54:40]   ~ No Close match: Corporate Finances
+[05:54:40]   – Strategic Insurance A (SOW exists, skipping)
+[05:54:40]   – Zenyth (SOW exists, skipping)
+[05:54:40]   ~ No Close match: Prescribery Pharm
+[05:54:41]   ~ No Close match: New New Solutions
+[05:54:41]   – Bling Bling Packaging and Display (SOW exists, skipping)
+[05:54:41]   – Ark Academy (SOW exists, skipping)
+[05:54:41]   – Marathon Accountants (SOW exists, skipping)
+[05:54:41]   – FounderMove (SOW exists, skipping)
+[05:54:42]   ✓ Matched Supper CLub LLC → Close (no AI summary yet, SOW skipped)
+[05:54:43]   ✓ Matched IndigoStone Advisors → Close (no AI summary yet, SOW skipped)
+[05:54:44]   ✓ Matched Arctos Industries → Close (no AI summary yet, SOW skipped)
+[05:54:44]   ✓ Matched Illumify Media → Close (no AI summary yet, SOW skipped)
+[05:54:44]   – Poweral (SOW exists, skipping)
+[05:54:45]   ✓ Matched Fsa Valuation Service → Close (no AI summary yet, SOW skipped)
+[05:54:46]   ✓ Matched brand1 → Close (no AI summary yet, SOW skipped)
+[05:54:46]   ~ No Close match: testing testingg
+[05:54:46]   – Field Agent Canada (SOW exists, skipping)
+[05:54:46]   – First Flight Non-Executive Directors (SOW exists, skipping)
+[05:54:46]   – InnoDraw (SOW exists, skipping)
+[05:54:47]   ✓ Matched Complete Background Screening → Close (no AI summary yet, SOW skipped)
+[05:54:47]   – Restoration 1 of NWA (SOW exists, skipping)
+[05:54:48]   ✓ Matched US Polymers Accurez → Close (no AI summary yet, SOW skipped)
+[05:54:48]   – MJN Insurance Services, Inc. (SOW exists, skipping)
+[05:54:48]   – UniversalLab (SOW exists, skipping)
+[05:54:48]   – Statera Capital Zebs (SOW exists, skipping)
+[05:54:48]   – Millenium Capital (SOW exists, skipping)
+[05:54:49]   ✓ Matched Pansori Creative → Close (no AI summary yet, SOW skipped)
+[05:54:49]   – Voovo (SOW exists, skipping)
+[05:54:50]   ✓ Matched Nataliz → Close (no AI summary yet, SOW skipped)
+[05:54:50]   – Rounds Student Engagement Made Simple (SOW exists, skipping)
+[05:54:50]   – Ascendeon (SOW exists, skipping)
+[05:54:50] Track C done — 0 SOWs generated
+[05:54:50] Done. synced=109, enriched=0, errors=1

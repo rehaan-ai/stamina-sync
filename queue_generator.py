@@ -839,7 +839,7 @@ Return ONLY a valid JSON array of ticket objects.
 """
 
     response = claude.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-5-20250929",
         system=QUEUE_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_prompt}],
         temperature=1,

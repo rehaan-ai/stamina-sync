@@ -881,7 +881,7 @@ def generate_sow(meeting: dict, company_name: str, ae_name: str) -> str:
         transcript=meeting_summary,
     )
     resp = claude.messages.create(
-        model="claude-3-5-haiku-20241022",
+        model="claude-haiku-4-5-20251001",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=4096,
     )

@@ -302,7 +302,7 @@ def generate_pass1_content(customer: dict, closing_call: dict, contacts: list, w
     user_prompt = build_user_prompt(customer, closing_call, contacts, website)
 
     response = claude.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-5-20250929",
         system=PASS1_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_prompt}],
         temperature=1,

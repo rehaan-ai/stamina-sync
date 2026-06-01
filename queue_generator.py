@@ -54,7 +54,7 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
 RESEND_FROM   = "Stamina <stamina@reports.stamina.io>"
 AMARTYA_EMAIL = "amartya@stamina.io"
-BCC_EMAILS    = ["arjun@stamina.io"]
+BCC_EMAILS    = ["arjun@stamina.io", "rehaan@stamina.io"]
 TEST_EMAIL    = os.environ.get("TEST_EMAIL")
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)

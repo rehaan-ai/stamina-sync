@@ -54,6 +54,7 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
 RESEND_FROM   = "Stamina <stamina@reports.stamina.io>"
 AMARTYA_EMAIL = "amartya@stamina.io"
+BCC_EMAILS    = ["arjun@stamina.io"]
 TEST_EMAIL    = os.environ.get("TEST_EMAIL")
 
 sb     = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -1134,10 +1135,12 @@ def send_queue_email(pair: dict, pdf_bytes: bytes):
     if TEST_EMAIL:
         to_emails = [TEST_EMAIL]
         cc_list   = []
+        bcc_list  = []
         reply_to  = TEST_EMAIL
         log(f"  [TEST MODE] Sending to {TEST_EMAIL} only")
     else:
         cc_list  = [AMARTYA_EMAIL]
+        bcc_list = BCC_EMAILS
         reply_to = AMARTYA_EMAIL
 
     payload = {
@@ -1150,6 +1153,8 @@ def send_queue_email(pair: dict, pdf_bytes: bytes):
     }
     if cc_list:
         payload["cc"] = cc_list
+    if bcc_list:
+        payload["bcc"] = bcc_list
 
     resp = requests.post(
         "https://api.resend.com/emails",

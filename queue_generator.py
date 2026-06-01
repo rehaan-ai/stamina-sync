@@ -1200,6 +1200,17 @@ def main():
         if not accounts_signals:
             continue
 
+        # Deduplication — skip if already sent today
+        already_sent = (sb.table("report_sends")
+                        .select("id")
+                        .eq("pair_name", pair_name)
+                        .eq("report_type", "daily_queue")
+                        .eq("send_date", today_str)
+                        .execute().data)
+        if already_sent:
+            log(f"  ✓ Queue already sent to {pair_name} today — skipping")
+            continue
+
         # Carry-forward open tickets
         open_tickets   = get_open_tickets(pair_name)
         closed_yest    = get_closed_yesterday_tickets(pair_name)
@@ -1233,6 +1244,15 @@ def main():
         try:
             pdf = render_queue_pdf(all_open, closed_yest, pair_name)
             send_queue_email(pair, pdf)
+            # Record as sent to prevent duplicates
+            try:
+                sb.table("report_sends").insert({
+                    "pair_name": pair_name,
+                    "report_type": "daily_queue",
+                    "send_date": today_str
+                }).execute()
+            except Exception:
+                pass  # unique constraint — already recorded
             log(f"  ✓ Queue PDF emailed to {pair.get('report_email')}")
         except Exception as e:
             log(f"  ERROR rendering/sending PDF: {e}")

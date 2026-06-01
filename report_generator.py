@@ -1627,10 +1627,34 @@ def run_reports(period: str):
         if not accounts_data:
             continue
 
+        # ── Deduplication helpers ─────────────────────────────────────────────
+        today_date = now.strftime("%Y-%m-%d")
+
+        def already_sent(report_type: str) -> bool:
+            rows = (sb.table("report_sends")
+                    .select("id")
+                    .eq("pair_name", pair_name)
+                    .eq("report_type", report_type)
+                    .eq("send_date", today_date)
+                    .execute().data)
+            return len(rows) > 0
+
+        def mark_sent(report_type: str):
+            try:
+                sb.table("report_sends").insert({
+                    "pair_name": pair_name,
+                    "report_type": report_type,
+                    "send_date": today_date
+                }).execute()
+            except Exception:
+                pass  # unique constraint — already recorded
+
         # ── Internal report (one per pair) ────────────────────────────────────
         if not EXTERNAL_ONLY:
-            log(f"  Generating internal {period} report...")
-            if not DRY_RUN:
+            internal_type = f"{period}_internal"
+            if already_sent(internal_type):
+                log(f"  ✓ Internal {period} report already sent today — skipping")
+            elif not DRY_RUN:
                 try:
                     internal_md  = with_retry(
                         lambda: generate_internal_report(pair, accounts_data, period, start_str, end_str),
@@ -1644,6 +1668,7 @@ def run_reports(period: str):
                     )
                     filename = f"{pair_name.replace(' ', '_')}_{period}_{start_str}_internal.pdf"
                     send_internal_email(pair, internal_pdf, period, label, filename)
+                    mark_sent(internal_type)
                     log(f"  ✓ Internal report sent")
                 except Exception as e:
                     log(f"  ERROR internal report: {e}")
@@ -1655,6 +1680,8 @@ def run_reports(period: str):
             log(f"  Skipping external reports (--internal-only)")
         elif period == "weekly":
             log(f"  Skipping external reports — external reports are monthly only (1st of month)")
+        elif already_sent("monthly_external"):
+            log(f"  ✓ Monthly external reports already uploaded today — skipping")
         else:
             # Apply account filter if set
             external_data = accounts_data
@@ -1703,6 +1730,7 @@ def run_reports(period: str):
                         log(f"    ✗ {name}: {result}")
                     else:
                         log(f"    ✓ {name}: uploaded" if result != "dry-run" else f"    [DRY RUN] {name}")
+            mark_sent("monthly_external")
 
         # Rate limit buffer between pairs
         log(f"  Waiting 90s before next pair to respect Anthropic rate limits...")

@@ -1693,7 +1693,7 @@ def run_reports(period: str):
                 except Exception as e:
                     return name, f"ERROR: {e}"
 
-            with ThreadPoolExecutor(max_workers=10) as executor:
+            with ThreadPoolExecutor(max_workers=3) as executor:  # reduced from 10 to respect rate limits
                 futures = {executor.submit(process_external, d): d for d in external_data}
                 for future in as_completed(futures):
                     name, result = future.result()
@@ -1701,6 +1701,10 @@ def run_reports(period: str):
                         log(f"    ✗ {name}: {result}")
                     else:
                         log(f"    ✓ {name}: uploaded" if result != "dry-run" else f"    [DRY RUN] {name}")
+
+        # Rate limit buffer between pairs
+        log(f"  Waiting 90s before next pair to respect Anthropic rate limits...")
+        time.sleep(90)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

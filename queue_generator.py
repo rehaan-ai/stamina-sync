@@ -847,9 +847,17 @@ Return ONLY a valid JSON array of ticket objects.
     )
 
     text = response.content[0].text
-    # Extract JSON — Claude may wrap in markdown code blocks
-    json_match = re.search(r'\{.*\}', text, re.DOTALL)
-    raw = json.loads(json_match.group() if json_match else text)
+    # Extract JSON — Claude may wrap in markdown code blocks or return partial JSON
+    try:
+        json_match = re.search(r'\{.*\}', text, re.DOTALL)
+        raw = json.loads(json_match.group() if json_match else text)
+    except json.JSONDecodeError:
+        # Try extracting just the tickets array if full object fails
+        arr_match = re.search(r'\[.*\]', text, re.DOTALL)
+        if arr_match:
+            return json.loads(arr_match.group())
+        log(f"  Warning: could not parse JSON response, returning empty")
+        return []
     # Model returns {"tickets": [...]} — extract the array
     if isinstance(raw, list):
         return raw
@@ -868,17 +876,13 @@ Return ONLY a valid JSON array of ticket objects.
 # ── Ticket persistence ────────────────────────────────────────────────────────
 
 def upsert_tickets(new_tickets: list, pair_name: str, account_map: dict):
-    """Store new tickets, skip duplicates by ticket_id."""
-    existing_ids = {
-        t["ticket_id"] for t in
-        sb.table("tickets").select("ticket_id").eq("pair_name", pair_name).execute().data
-    }
-
+    """Store new tickets with globally unique IDs."""
     inserted = 0
     for t in new_tickets:
-        tid = t.get("ticket_id") or f"TKT-{uuid.uuid4().hex[:6].upper()}"
-        if tid in existing_ids:
-            continue
+        # Always generate a globally unique ID — never rely on model's suggestion
+        # which can clash across pairs (model reuses e.g. TKT-MC-0001)
+        pair_prefix = "".join(w[0] for w in pair_name.split()[:2]).upper()
+        tid = f"TKT-{pair_prefix}-{uuid.uuid4().hex[:8].upper()}"
 
         # Resolve customer_id from name
         cust_id = account_map.get(t.get("customer_name", ""))
@@ -1227,6 +1231,10 @@ def main():
             log(f"  ✓ Queue PDF emailed to {pair.get('report_email')}")
         except Exception as e:
             log(f"  ERROR rendering/sending PDF: {e}")
+
+        # Rate limit buffer between pairs — Anthropic has 30K input tokens/min limit
+        log(f"  Waiting 60s before next pair to respect rate limits...")
+        time.sleep(60)
 
     log("\nQueue generator complete.")
 

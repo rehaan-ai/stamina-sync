@@ -1,0 +1,79 @@
+name: Catch-up Run
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # ── Step 1: Weekly internal for remaining pairs (Dan + Vijetha already sent) ──
+  weekly-internal-remaining:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11', cache: 'pip' }
+      - run: pip install -r requirements.txt
+      - run: sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf2.0-0
+      - name: Weekly internal — Bala & Raswant
+        run: python report_generator.py --weekly --pair "Bala & Raswant" --internal-only
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          PYLON_KEY: ${{ secrets.PYLON_KEY }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      - name: Weekly internal — Nishkarsh
+        run: python report_generator.py --weekly --pair "Nishkarsh" --internal-only
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          PYLON_KEY: ${{ secrets.PYLON_KEY }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      - name: Weekly internal — Sahil
+        run: python report_generator.py --weekly --pair "Sahil" --internal-only
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          PYLON_KEY: ${{ secrets.PYLON_KEY }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+
+  # ── Step 2: Monthly internal for ALL pairs ────────────────────────────────────
+  monthly-internal-all:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    needs: weekly-internal-remaining
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11', cache: 'pip' }
+      - run: pip install -r requirements.txt
+      - run: sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf2.0-0
+      - name: Monthly internal — all pairs
+        run: python report_generator.py --monthly --internal-only
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          PYLON_KEY: ${{ secrets.PYLON_KEY }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+
+  # ── Step 3: Daily queue for ALL pairs ─────────────────────────────────────────
+  daily-queue-all:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: monthly-internal-all
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11', cache: 'pip' }
+      - run: pip install -r requirements.txt
+      - run: sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf2.0-0
+      - name: Daily queue — all pairs
+        run: python queue_generator.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

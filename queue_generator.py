@@ -591,7 +591,7 @@ def format_signals_for_prompt(data: dict) -> str:
     CAMP_MIN_SENT = 800  # minimum emails sent to consider a campaign/variant statistically
     campaigns = sorted(data["campaigns"], key=lambda x: x.get("positive_reply_rate") or 0, reverse=True)
     camp_lines = []
-    for camp in campaigns[:15]:
+    for camp in campaigns[:8]:  # top 8 only to keep prompt size manageable
         rr   = round(float(camp.get("reply_rate") or 0), 2)
         prr  = round(float(camp.get("positive_reply_rate") or 0), 2)
         br   = round(float(camp.get("bounce_rate") or 0), 2)
@@ -633,25 +633,25 @@ def format_signals_for_prompt(data: dict) -> str:
         )
     camp_text = "\n".join(camp_lines) or "  None"
 
-    # Last 24h Slack (with full text for customer messages)
+    # Last 24h Slack — customer messages only, trimmed
     slack_text = "\n".join(
         f"  [{s['message_date'][:16]}] {'CSM' if s['is_internal'] else 'CUSTOMER'}: "
-        f"{s['text'][:400]}"
-        for s in data["slack"]
+        f"{s['text'][:150]}"
+        for s in data["slack"][:8]
     ) or "  No messages in last 24h"
 
-    # Recent meetings (last 48h) — separated by type
-    standups   = [m for m in data["recent_calls"] if m.get("meeting_type") == "standup"]
-    cs_calls   = [m for m in data["recent_calls"] if m.get("meeting_type") == "cs_call"]
-    kickoffs   = [m for m in data["recent_calls"] if m.get("meeting_type") == "kickoff"]
+    # Recent meetings (last 48h) — separated by type, trimmed summaries
+    standups = [m for m in data["recent_calls"] if m.get("meeting_type") == "standup"]
+    cs_calls = [m for m in data["recent_calls"] if m.get("meeting_type") == "cs_call"]
+    kickoffs = [m for m in data["recent_calls"] if m.get("meeting_type") == "kickoff"]
 
     def fmt_meeting(m):
-        return (f"  [{m['meeting_date'][:10]}] {m['title']}\n"
-                f"  Summary: {(m.get('summary_text') or 'No summary')[:1200]}")
+        return (f"  [{m['meeting_date'][:10]}] {m['title']}: "
+                f"{(m.get('summary_text') or 'No summary')[:300]}")
 
-    standup_text = "\n".join(fmt_meeting(m) for m in standups) or "  None in last 48h"
-    cs_call_text = "\n".join(fmt_meeting(m) for m in cs_calls) or "  None in last 48h"
-    kickoff_text = "\n".join(fmt_meeting(m) for m in kickoffs) or "  None"
+    standup_text = "\n".join(fmt_meeting(m) for m in standups[:2]) or "  None in last 48h"
+    cs_call_text = "\n".join(fmt_meeting(m) for m in cs_calls[:2]) or "  None in last 48h"
+    kickoff_text = "\n".join(fmt_meeting(m) for m in kickoffs[:1]) or "  None"
 
     # Positive lead SLA flags — no response OR response took > 2 hours
     unreplied_lines = []
@@ -820,18 +820,31 @@ def get_closed_yesterday_tickets(pair_name: str) -> list:
     )
 
 
-# ── GPT-4o ticket generation ──────────────────────────────────────────────────
+# ── Claude ticket generation — batched to respect rate limits ─────────────────
+
+BATCH_SIZE = 10  # accounts per Claude call — keeps prompt under 25K tokens
 
 def generate_new_tickets(pair: dict, accounts_signals: list) -> list:
-    """Call GPT-4o to classify all signals and generate new tickets."""
-    signals_block = "\n".join(
-        format_signals_for_prompt(s) for s in accounts_signals
-    )
+    """
+    Process accounts in batches of BATCH_SIZE to stay under Anthropic rate limits.
+    All batches are merged into one ticket list → one PDF → one email.
+    """
+    all_tickets = []
+    batches = [accounts_signals[i:i+BATCH_SIZE]
+               for i in range(0, len(accounts_signals), BATCH_SIZE)]
 
-    user_prompt = f"""Generate the daily ticket queue for {pair['pair_name']}.
+    for batch_num, batch in enumerate(batches, 1):
+        if len(batches) > 1:
+            log(f"    Batch {batch_num}/{len(batches)} ({len(batch)} accounts)...")
+            if batch_num > 1:
+                time.sleep(30)  # brief pause between batches
+
+        signals_block = "\n".join(format_signals_for_prompt(s) for s in batch)
+
+        user_prompt = f"""Generate the daily ticket queue for {pair['pair_name']}.
 Date: {today_str}
 Pair: {pair['pair_name']} ({', '.join(pair['csm_emails'])})
-Accounts: {len(accounts_signals)}
+Accounts in this batch: {len(batch)} of {len(accounts_signals)} total
 
 Analyse every signal below and generate tickets. Classify each signal correctly.
 Return ONLY a valid JSON array of ticket objects.
@@ -839,39 +852,43 @@ Return ONLY a valid JSON array of ticket objects.
 {signals_block}
 """
 
-    response = claude.messages.create(
-        model="claude-sonnet-4-5-20250929",
-        system=QUEUE_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_prompt}],
-        temperature=1,
-        max_tokens=6000,
-    )
+        try:
+            response = claude.messages.create(
+                model="claude-sonnet-4-5-20250929",
+                system=QUEUE_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": user_prompt}],
+                temperature=1,
+                max_tokens=4000,
+            )
+            text = response.content[0].text
+            try:
+                json_match = re.search(r'\{.*\}', text, re.DOTALL)
+                raw = json.loads(json_match.group() if json_match else text)
+            except json.JSONDecodeError:
+                arr_match = re.search(r'\[.*\]', text, re.DOTALL)
+                if arr_match:
+                    raw = json.loads(arr_match.group())
+                else:
+                    log(f"    Warning: batch {batch_num} JSON parse failed — skipping")
+                    continue
 
-    text = response.content[0].text
-    # Extract JSON — Claude may wrap in markdown code blocks or return partial JSON
-    try:
-        json_match = re.search(r'\{.*\}', text, re.DOTALL)
-        raw = json.loads(json_match.group() if json_match else text)
-    except json.JSONDecodeError:
-        # Try extracting just the tickets array if full object fails
-        arr_match = re.search(r'\[.*\]', text, re.DOTALL)
-        if arr_match:
-            return json.loads(arr_match.group())
-        log(f"  Warning: could not parse JSON response, returning empty")
-        return []
-    # Model returns {"tickets": [...]} — extract the array
-    if isinstance(raw, list):
-        return raw
-    if "tickets" in raw:
-        return raw["tickets"]
-    # Fallback: if model returned a single ticket object, wrap it
-    if "ticket_id" in raw:
-        return [raw]
-    # Last resort: look for any list value
-    for v in raw.values():
-        if isinstance(v, list):
-            return v
-    return []
+            # Extract ticket list from response
+            if isinstance(raw, list):
+                batch_tickets = raw
+            elif "tickets" in raw:
+                batch_tickets = raw["tickets"]
+            elif "ticket_id" in raw:
+                batch_tickets = [raw]
+            else:
+                batch_tickets = next((v for v in raw.values() if isinstance(v, list)), [])
+
+            all_tickets.extend(batch_tickets)
+
+        except Exception as e:
+            log(f"    Warning: batch {batch_num} failed: {e}")
+            continue
+
+    return all_tickets
 
 
 # ── Ticket persistence ────────────────────────────────────────────────────────

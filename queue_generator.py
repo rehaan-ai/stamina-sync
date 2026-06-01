@@ -857,18 +857,27 @@ Return ONLY a valid JSON array of ticket objects.
                 model="claude-sonnet-4-5-20250929",
                 system=QUEUE_SYSTEM_PROMPT,
                 messages=[{"role": "user", "content": user_prompt}],
-                temperature=1,
+                temperature=0,  # deterministic — reduces malformed JSON
                 max_tokens=4000,
             )
             text = response.content[0].text
             try:
+                from json_repair import repair_json
+                # json-repair fixes unterminated strings, missing commas, etc.
                 json_match = re.search(r'\{.*\}', text, re.DOTALL)
-                raw = json.loads(json_match.group() if json_match else text)
-            except json.JSONDecodeError:
-                arr_match = re.search(r'\[.*\]', text, re.DOTALL)
-                if arr_match:
-                    raw = json.loads(arr_match.group())
-                else:
+                candidate = json_match.group() if json_match else text
+                raw = json.loads(repair_json(candidate))
+            except Exception:
+                # Final fallback: try array match with repair
+                try:
+                    from json_repair import repair_json
+                    arr_match = re.search(r'\[.*\]', text, re.DOTALL)
+                    if arr_match:
+                        raw = json.loads(repair_json(arr_match.group()))
+                    else:
+                        log(f"    Warning: batch {batch_num} JSON parse failed — skipping")
+                        continue
+                except Exception:
                     log(f"    Warning: batch {batch_num} JSON parse failed — skipping")
                     continue
 

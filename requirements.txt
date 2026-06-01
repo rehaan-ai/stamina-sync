@@ -3,3 +3,4 @@ anthropic
 rapidfuzz
 supabase
 weasyprint
+json-repair

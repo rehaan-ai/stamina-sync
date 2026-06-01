@@ -1717,10 +1717,13 @@ def main():
         log("Not Monday and not 1st of month — nothing to do.")
         return
 
-    if is_weekly:
+    # When Monday and 1st of month coincide, monthly takes priority — skip weekly
+    if is_monthly and is_weekly:
+        log("1st of month falls on Monday — running monthly only (monthly supersedes weekly)")
+        run_reports("monthly")
+    elif is_weekly:
         run_reports("weekly")
-
-    if is_monthly:
+    elif is_monthly:
         run_reports("monthly")
 
     log("\nAll reports complete.")
